@@ -1,0 +1,11 @@
+{
+  "apilo_base_url": "https://api.apilo.com",
+  "apilo_orders_endpoint": "/orders",
+  "apilo_order_details_endpoint": "/orders/{order_id}",
+  "apilo_token": "WSTAW_SWÓJ_BEARER_TOKEN",
+  "output_root": "C:\\Users\\MASTER\\Desktop\\Do pana paczesnego\\2026\\WERHE_PDFy",
+  "playwright_headless": true,
+  "tracking_timeout_ms": 45000,
+  "screenshot_full_page_fallback": true,
+  "pdf_company_name": "WERHE / WERKON Polska"
+}
