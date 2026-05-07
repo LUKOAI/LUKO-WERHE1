@@ -8,17 +8,6 @@ EU_COUNTRIES = {
     "SI", "ES", "SE",
 }
 
-# Waluty krajow UE (do heurystyki gdy brak country)
-EU_CURRENCIES = {
-    "PLN", "EUR", "CZK", "HUF", "RON", "BGN", "SEK", "DKK", "HRK",
-}
-
-# Waluty jednoznacznie poza UE
-NON_EU_CURRENCIES = {
-    "USD", "GBP", "CHF", "NOK", "JPY", "CAD", "AUD", "NZD", "TRY", "ILS",
-    "BRL", "MXN", "KRW", "TWD", "SGD", "HKD", "INR", "ZAR", "AED", "SAR",
-}
-
 
 def is_non_eu(country_code: str) -> bool:
     if not country_code:
@@ -31,29 +20,31 @@ def has_pl_invoice(order: OrderRecord) -> bool:
     return invoice_ref.endswith(".pl") or ".pl/" in invoice_ref
 
 
-def _currency_suggests_non_eu(currency: str) -> bool:
-    """Gdy brak kraju, waluta moze wskazywac na zamowienie poza UE."""
-    if not currency:
-        return False
-    return currency.upper() in NON_EU_CURRENCIES
-
-
 def prefilter_non_eu(order: OrderRecord) -> bool:
-    """Wstepny filtr — kraj lub waluta wskazuje na poza UE."""
+    """Wstepny filtr na danych z listy (bez szczegolów).
+
+    Logika:
+    - Znany kraj EU → odrzuc
+    - Znany kraj poza EU → przepusc
+    - Brak kraju + PLN → odrzuc (prawdopodobnie krajowe)
+    - Brak kraju + inna waluta → przepusc (trzeba sprawdzic szczegoly)
+    """
     if order.country_code:
         return is_non_eu(order.country_code)
-    # Brak kraju — sprawdzamy walute
-    return _currency_suggests_non_eu(order.currency)
+    # Brak kraju — PLN prawie na pewno krajowe
+    if order.currency.upper() == "PLN":
+        return False
+    # Inna waluta (EUR, GBP, USD...) — moze byc poza UE, trzeba sprawdzic
+    return True
 
 
 def qualifies_for_tax_bundle(order: OrderRecord) -> bool:
     """Pelny filtr po wzbogaceniu danymi ze szczegolów."""
-    # Jesli znamy kraj — sprawdzamy
     if order.country_code:
         if not is_non_eu(order.country_code):
             return False
-    elif not _currency_suggests_non_eu(order.currency):
-        # Brak kraju i waluta EU — odrzucamy
+    else:
+        # Nadal brak kraju po pobraniu szczegolów — nie mozemy potwierdzic
         return False
 
     if order.invoice_number and not has_pl_invoice(order):
