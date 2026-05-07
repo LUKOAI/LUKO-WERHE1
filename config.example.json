@@ -1,0 +1,14 @@
+{
+  "apilo_base_url": "https://api.apilo.com",
+  "apilo_client_id": "WSTAW_CLIENT_ID_Z_PANELU_APILO",
+  "apilo_client_secret": "WSTAW_CLIENT_SECRET_Z_PANELU_APILO",
+  "apilo_auth_code": "WSTAW_KOD_AUTORYZACJI_Z_PANELU_APILO",
+  "apilo_access_token": "",
+  "apilo_refresh_token": "",
+  "apilo_token_expires_at": "",
+  "output_root": "C:\\Users\\MASTER\\Desktop\\Do pana paczesnego\\2026\\WERHE_PDFy",
+  "playwright_headless": true,
+  "tracking_timeout_ms": 45000,
+  "screenshot_full_page_fallback": true,
+  "pdf_company_name": "WERHE / WERKON Polska"
+}
