@@ -165,13 +165,16 @@ class DocumentPipeline:
                 shot = None
                 if order.tracking_url and order.tracking_url.startswith("http"):
                     log(f"[{idx}/{total}] Screenshot trackingu: {order.tracking_url[:60]}...")
-                    shot = capture_tracking_screenshot(
-                        tracking_url=order.tracking_url,
-                        output_path=shots_dir / f"{order.order_number}_tracking.png",
-                        config=self.config,
-                        carrier=order.courier,
-                    )
-                    result.screenshot_path = shot
+                    try:
+                        shot = capture_tracking_screenshot(
+                            tracking_url=order.tracking_url,
+                            output_path=shots_dir / f"{order.order_number}_tracking.png",
+                            config=self.config,
+                            carrier=order.courier,
+                        )
+                        result.screenshot_path = shot
+                    except Exception as shot_exc:
+                        log(f"[{idx}/{total}] Screenshot nie powiodl sie: {shot_exc}")
                 elif order.tracking_number:
                     log(f"[{idx}/{total}] Brak URL trackingu, numer: {order.tracking_number}")
                 else:
