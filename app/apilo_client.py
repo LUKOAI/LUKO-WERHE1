@@ -224,11 +224,17 @@ class ApiloClient:
                 invoice.get("url") or invoice.get("invoiceUrl")
                 or src.get("invoice_url") or ""
             ),
-            warehouse_type=str(
-                src.get("warehouse_type") or src.get("warehouseType")
-                or src.get("fulfillment") or src.get("fulfillmentType") or "own"
-            ).lower(),
+            warehouse_type=self._detect_fulfillment(src),
             currency=str(src.get("originalCurrency") or src.get("currency") or "PLN"),
             total_gross=float(total),
             raw=src,
         )
+
+    @staticmethod
+    def _detect_fulfillment(src: dict[str, Any]) -> str:
+        """FBA gdy brak carrierId i carrierAccount (Amazon realizuje wysylke)."""
+        carrier_id = src.get("carrierId")
+        carrier_account = src.get("carrierAccount")
+        if carrier_id is None and carrier_account is None:
+            return "fba"
+        return "own"
