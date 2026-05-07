@@ -60,13 +60,34 @@ class DocumentPipeline:
         raw_orders = self.client.fetch_orders(date_from.isoformat(), date_to.isoformat())
         log(f"Pobrano rekordów: {len(raw_orders)}")
 
+        # Krok 1: Wstępne parsowanie bez pobierania szczegółów
+        log("Wstepne filtrowanie (poza UE + faktura .pl)...")
+        preliminary: list[tuple[dict, OrderRecord]] = []
+        for i, raw in enumerate(raw_orders, 1):
+            record = self.client.to_order_record(raw)
+            if qualifies_for_tax_bundle(record):
+                preliminary.append((raw, record))
+            if i % 200 == 0:
+                log(f"  Przeanalizowano {i}/{len(raw_orders)}...")
+
+        log(f"Po wstepnym filtrze: {len(preliminary)} z {len(raw_orders)}")
+
+        # Krok 2: Pobieranie szczegółów TYLKO dla kwalifikujących się zamówień
         records: list[OrderRecord] = []
-        for raw in raw_orders:
-            oid = str(raw.get("id") or raw.get("order_id") or "")
-            details = self.client.fetch_order_details(oid) if oid else {}
-            record = self.client.to_order_record(raw, details)
+        for i, (raw, _) in enumerate(preliminary, 1):
+            oid = str(raw.get("id") or raw.get("order_id") or raw.get("orderId") or "")
+            if oid:
+                log(f"  Pobieranie szczegółów {i}/{len(preliminary)}: {oid}")
+                try:
+                    details = self.client.fetch_order_details(oid)
+                    record = self.client.to_order_record(raw, details)
+                except Exception:
+                    record = self.client.to_order_record(raw)
+            else:
+                record = self.client.to_order_record(raw)
             records.append(record)
 
+        # Krok 3: Ponowne filtrowanie po wzbogaceniu danymi
         filtered = [r for r in records if qualifies_for_tax_bundle(r)]
         log(f"Po filtrach (poza UE + faktura .pl + tracking): {len(filtered)}")
 
