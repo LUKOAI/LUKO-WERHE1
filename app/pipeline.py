@@ -27,11 +27,30 @@ class PipelineOutput:
     summary_xlsx: Path
 
 
+TRACKING_URLS = {
+    "UPS": "https://www.ups.com/track?loc=en_PL&tracknum={tn}",
+    "DPD": "https://tracktrace.dpd.com.pl/parcelDetails?typ=1&p1={tn}",
+    "DHL": "https://www.dhl.com/pl-en/home/tracking.html?tracking-id={tn}",
+    "FEDEX": "https://www.fedex.com/fedextrack/?trknbr={tn}",
+    "GLS": "https://gls-group.com/PL/pl/sledzenie-paczek?match={tn}",
+    "INPOST": "https://inpost.pl/sledzenie-przesylek?number={tn}",
+    "POCZTA": "https://emonitoring.poczta-polska.pl/?numer={tn}",
+}
+
+
 class DocumentPipeline:
     def __init__(self, config: AppConfig, logger) -> None:
         self.config = ensure_valid_token(config)
         self.logger = logger
         self.client = ApiloClient(self.config)
+
+    @staticmethod
+    def _build_tracking_url(courier: str, tracking_number: str) -> str:
+        courier_upper = courier.upper().split()[0]
+        for key, tmpl in TRACKING_URLS.items():
+            if key in courier_upper:
+                return tmpl.format(tn=tracking_number)
+        return ""
 
     def run(
         self,
@@ -90,6 +109,20 @@ class DocumentPipeline:
         # Krok 3: Ponowne filtrowanie po wzbogaceniu danymi
         filtered = [r for r in records if qualifies_for_tax_bundle(r)]
         log(f"Po filtrach (poza UE + faktura .pl + tracking): {len(filtered)}")
+
+        # Krok 4: Wyszukanie numerów tracking w shipmentach Apilo
+        own_orders_ids = {r.order_id for r in filtered if r.warehouse_type != "fba"}
+        if own_orders_ids:
+            log(f"Szukanie trackingu dla {len(own_orders_ids)} zamowien (magazyn wlasny)...")
+            tracking_map = self.client.fetch_tracking_for_orders(own_orders_ids, log_cb=log)
+            for r in filtered:
+                if r.order_id in tracking_map:
+                    t = tracking_map[r.order_id]
+                    r.tracking_number = t.get("tracking_number", "")
+                    courier = r.courier.upper() if r.courier != "UNKNOWN" else ""
+                    if r.tracking_number and courier:
+                        r.tracking_url = self._build_tracking_url(courier, r.tracking_number)
+            log(f"Znaleziono tracking dla {len(tracking_map)}/{len(own_orders_ids)} zamowien")
 
         apilo_query = {v.strip().lower() for v in (selected_apilo_numbers or set()) if v.strip()}
         amazon_query = {v.strip().lower() for v in (selected_amazon_numbers or set()) if v.strip()}

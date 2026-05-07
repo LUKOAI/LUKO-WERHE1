@@ -126,6 +126,66 @@ class ApiloClient:
         payload = self._request("GET", endpoint)
         return payload.get("order") or payload.get("data") or payload
 
+    def fetch_tracking_for_orders(self, order_ids: set[str],
+                                  log_cb=None) -> dict[str, dict[str, str]]:
+        """Szuka numerów przesyłek dla podanych zamówień w endpoincie shipping.
+
+        Zwraca dict: orderId -> {"tracking_number": "...", "carrier_broker_id": "..."}
+        """
+        TRACKING_ENDPOINT = "/rest/api/shipping/shipment/tracking/"
+        SHIPMENT_DETAIL = "/rest/api/shipping/shipment/{sid}/"
+
+        def log(msg):
+            if log_cb:
+                log_cb(msg)
+            logger.info(msg)
+
+        # Pobierz łączną liczbę shipmentów
+        first = self._request("GET", TRACKING_ENDPOINT, params={"offset": 0, "limit": 1})
+        total = first.get("totalCount", 0)
+        if total == 0:
+            return {}
+
+        # Szukaj od końca (najnowsze), max 2000 shipmentów
+        search_count = min(total, 2000)
+        start_offset = max(0, total - search_count)
+        result: dict[str, dict[str, str]] = {}
+        remaining = set(order_ids)
+
+        log(f"Szukanie trackingu w {search_count} najnowszych przesylkach...")
+
+        offset = start_offset
+        while offset < total and remaining:
+            batch_size = min(512, total - offset)
+            tracking_data = self._request("GET", TRACKING_ENDPOINT,
+                                          params={"offset": offset, "limit": batch_size})
+            shipments = tracking_data.get("shipments", [])
+
+            for s in shipments:
+                sid = s.get("id")
+                if not sid:
+                    continue
+                try:
+                    detail = self._request("GET", SHIPMENT_DETAIL.format(sid=sid))
+                    oid = detail.get("orderId", "")
+                    if oid in remaining:
+                        tracking_num = detail.get("externalId") or s.get("externalId") or ""
+                        result[oid] = {
+                            "tracking_number": tracking_num,
+                            "status": s.get("statusDescription") or "",
+                            "received_date": s.get("receivedDate") or "",
+                        }
+                        remaining.discard(oid)
+                        log(f"  Tracking {oid}: {tracking_num}")
+                except Exception:
+                    continue
+
+            offset += batch_size
+            log(f"  Przeszukano {min(offset - start_offset, search_count)}/{search_count}, "
+                f"znaleziono {len(result)}/{len(order_ids)}")
+
+        return result
+
     def get_status_map(self) -> dict[str, str]:
         try:
             payload = self._request("GET", STATUS_MAP_ENDPOINT)
