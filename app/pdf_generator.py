@@ -12,7 +12,7 @@ from app.models import OrderRecord
 
 
 
-def generate_order_pdf(order: OrderRecord, screenshot_path: Path, output_path: Path, company_name: str) -> Path:
+def generate_order_pdf(order: OrderRecord, screenshot_path: Path | None, output_path: Path, company_name: str) -> Path:
     output_path.parent.mkdir(parents=True, exist_ok=True)
     c = canvas.Canvas(str(output_path), pagesize=A4)
     width, height = A4
@@ -52,16 +52,21 @@ def generate_order_pdf(order: OrderRecord, screenshot_path: Path, output_path: P
     image_width = width - 40 * mm
     image_height = 130 * mm
 
-    image = ImageReader(str(screenshot_path))
-    iw, ih = image.getSize()
-    scale = min(image_width / iw, image_height / ih)
-    draw_w, draw_h = iw * scale, ih * scale
-
-    c.rect(image_left, image_top - draw_h, image_width, image_height, stroke=1, fill=0)
-    c.drawImage(image, image_left + (image_width - draw_w) / 2, image_top - draw_h, draw_w, draw_h)
+    if screenshot_path and screenshot_path.exists():
+        image = ImageReader(str(screenshot_path))
+        iw, ih = image.getSize()
+        scale = min(image_width / iw, image_height / ih)
+        draw_w, draw_h = iw * scale, ih * scale
+        c.rect(image_left, image_top - draw_h, image_width, image_height, stroke=1, fill=0)
+        c.drawImage(image, image_left + (image_width - draw_w) / 2, image_top - draw_h, draw_w, draw_h)
+    else:
+        c.setFont("Helvetica", 10)
+        c.drawString(20 * mm, y - 12 * mm, "Brak screenshota trackingu - tracking URL niedostepny w danych API.")
+        if order.tracking_number:
+            c.drawString(20 * mm, y - 18 * mm, f"Numer przesylki: {order.tracking_number}")
 
     c.setFont("Helvetica-Oblique", 8)
-    c.drawString(20 * mm, 10 * mm, "Wygenerowano automatycznie przez narzędzie WERHE/WERKON.")
+    c.drawString(20 * mm, 10 * mm, "Wygenerowano automatycznie przez narzedzie WERHE/WERKON.")
     c.save()
 
     return output_path

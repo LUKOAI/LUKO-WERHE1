@@ -129,13 +129,20 @@ class DocumentPipeline:
                 progress_cb(idx, total)
             result = ProcessingResult(order=order, status="processing")
             try:
-                shot = capture_tracking_screenshot(
-                    tracking_url=order.tracking_url,
-                    output_path=shots_dir / f"{order.order_number}_tracking.png",
-                    config=self.config,
-                    carrier=order.courier,
-                )
-                result.screenshot_path = shot
+                shot = None
+                if order.tracking_url and order.tracking_url.startswith("http"):
+                    log(f"[{idx}/{total}] Screenshot trackingu: {order.tracking_url[:60]}...")
+                    shot = capture_tracking_screenshot(
+                        tracking_url=order.tracking_url,
+                        output_path=shots_dir / f"{order.order_number}_tracking.png",
+                        config=self.config,
+                        carrier=order.courier,
+                    )
+                    result.screenshot_path = shot
+                elif order.tracking_number:
+                    log(f"[{idx}/{total}] Brak URL trackingu, numer: {order.tracking_number}")
+                else:
+                    log(f"[{idx}/{total}] Brak danych trackingowych")
 
                 pdf = generate_order_pdf(
                     order=order,
@@ -147,10 +154,10 @@ class DocumentPipeline:
                 result.status = "ok"
                 result.message = "OK"
                 log(f"[{idx}/{total}] OK {order.order_number}")
-            except Exception as exc:  # noqa: BLE001 - chcemy nie zatrzymywać pipeline
+            except Exception as exc:
                 result.status = "error"
                 result.message = str(exc)
-                log(f"[{idx}/{total}] BŁĄD {order.order_number}: {exc}")
+                log(f"[{idx}/{total}] BLAD {order.order_number}: {exc}")
             processed.append(result)
 
         ok_orders = [r.order for r in processed if r.status == "ok"]
