@@ -179,6 +179,16 @@ class ApiloClient:
         else:
             full_street = street
 
+        # Kurier: z orderItems type=2 (pozycja wysylkowa) lub carrierId
+        courier_name = ""
+        if src.get("orderItems"):
+            for item in src["orderItems"]:
+                if item.get("type") == 2:
+                    name = item.get("originalName") or ""
+                    if name and name not in ("Shipping", "Wysyłka"):
+                        courier_name = name.split(" ")[0].upper()
+                    break
+
         # Kwota: sumuj z orderItems jeśli brak total
         total = src.get("total_gross") or src.get("totalGross") or src.get("total") or 0.0
         if not total and src.get("orderItems"):
@@ -204,9 +214,10 @@ class ApiloClient:
             address_line_2=address.get("department") or address.get("line2") or "",
             city=address.get("city") or "",
             postal_code=address.get("zipCode") or address.get("postal_code") or address.get("zip") or "",
-            courier=str(
-                tracking.get("carrier") or tracking.get("carrierName")
-                or tracking.get("courier") or src.get("carrierId") or "UNKNOWN"
+            courier=(
+                courier_name
+                or tracking.get("carrier") or tracking.get("carrierName")
+                or tracking.get("courier") or str(src.get("carrierId") or "UNKNOWN")
             ),
             tracking_number=str(
                 tracking.get("number") or tracking.get("trackingNumber")
