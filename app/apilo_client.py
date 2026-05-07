@@ -148,14 +148,16 @@ class ApiloClient:
     def to_order_record(self, raw: dict[str, Any], details: dict[str, Any] | None = None) -> OrderRecord:
         src = {**raw, **(details or {})}
 
+        # Apilo: addressCustomer (fakturowy), addressDelivery (dostawy)
         address = (
-            src.get("shipping_address")
+            src.get("addressDelivery")
+            or src.get("addressCustomer")
+            or src.get("shipping_address")
             or src.get("delivery_address")
-            or src.get("deliveryAddress")
-            or src.get("address")
             or {}
         )
 
+        # Tracking z shipments lub bezpośrednio
         tracking = src.get("tracking") or {}
         shipments = src.get("shipments") or src.get("shipment") or []
         if isinstance(shipments, list) and shipments:
@@ -163,47 +165,48 @@ class ApiloClient:
         elif isinstance(shipments, dict):
             tracking = {**tracking, **shipments}
 
+        # Faktura z documents/invoices
         invoice = src.get("invoice") or {}
         documents = src.get("documents") or src.get("invoices") or []
         if isinstance(documents, list) and documents:
             invoice = {**invoice, **documents[0]}
 
+        # Adres: Apilo używa streetName + streetNumber
+        street = address.get("streetName") or address.get("street") or address.get("line1") or address.get("address1") or ""
+        street_nr = address.get("streetNumber") or ""
+        if street and street_nr:
+            full_street = f"{street} {street_nr}"
+        else:
+            full_street = street
+
+        # Kwota: sumuj z orderItems jeśli brak total
+        total = src.get("total_gross") or src.get("totalGross") or src.get("total") or 0.0
+        if not total and src.get("orderItems"):
+            try:
+                total = sum(
+                    float(item.get("originalPriceWithTax") or 0) * int(item.get("quantity") or 1)
+                    for item in src["orderItems"]
+                    if item.get("type") == 1
+                )
+            except (ValueError, TypeError):
+                total = 0.0
+
         return OrderRecord(
-            order_id=str(src.get("id") or src.get("order_id") or src.get("orderId") or ""),
-            order_number=str(
-                src.get("order_number") or src.get("orderNumber")
-                or src.get("number") or src.get("id") or "BRAK"
-            ),
-            amazon_order_number=str(
-                src.get("amazon_order_number")
-                or src.get("amazonOrderNumber")
-                or src.get("amazon_order_id")
-                or src.get("marketplace_order_id")
-                or src.get("marketplaceOrderId")
-                or src.get("channel_order_id")
-                or src.get("externalId")
-                or src.get("id_external")
-                or ""
-            ),
-            order_date=self._parse_date(
-                src.get("created_at") or src.get("createdAt")
-                or src.get("order_date") or src.get("orderDate")
-            ),
+            order_id=str(src.get("id") or src.get("order_id") or ""),
+            order_number=str(src.get("id") or src.get("order_number") or src.get("number") or "BRAK"),
+            amazon_order_number=str(src.get("idExternal") or src.get("id_external") or ""),
+            order_date=self._parse_date(src.get("createdAt") or src.get("created_at")),
             country_code=(
-                address.get("country_code") or address.get("countryCode")
-                or address.get("country") or src.get("country_code") or ""
+                address.get("country") or address.get("country_code") or address.get("countryCode") or ""
             ).upper(),
-            customer_name=(
-                address.get("name") or address.get("fullName")
-                or src.get("customer_name") or src.get("customerName") or ""
-            ),
-            address_line_1=address.get("line1") or address.get("street") or address.get("address1") or "",
-            address_line_2=address.get("line2") or address.get("address2") or "",
+            customer_name=address.get("name") or address.get("fullName") or "",
+            address_line_1=full_street,
+            address_line_2=address.get("department") or address.get("line2") or "",
             city=address.get("city") or "",
-            postal_code=address.get("postal_code") or address.get("postalCode") or address.get("zip") or "",
+            postal_code=address.get("zipCode") or address.get("postal_code") or address.get("zip") or "",
             courier=str(
                 tracking.get("carrier") or tracking.get("carrierName")
-                or tracking.get("courier") or src.get("courier") or "UNKNOWN"
+                or tracking.get("courier") or src.get("carrierId") or "UNKNOWN"
             ),
             tracking_number=str(
                 tracking.get("number") or tracking.get("trackingNumber")
@@ -225,7 +228,7 @@ class ApiloClient:
                 src.get("warehouse_type") or src.get("warehouseType")
                 or src.get("fulfillment") or src.get("fulfillmentType") or "own"
             ).lower(),
-            currency=str(src.get("currency") or "PLN"),
-            total_gross=float(src.get("total_gross") or src.get("totalGross") or src.get("total") or 0.0),
+            currency=str(src.get("originalCurrency") or src.get("currency") or "PLN"),
+            total_gross=float(total),
             raw=src,
         )

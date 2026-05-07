@@ -8,7 +8,7 @@ from typing import Callable
 from app.apilo_client import ApiloClient
 from app.apilo_auth import ensure_valid_token
 from app.config import AppConfig
-from app.filtering import qualifies_for_tax_bundle
+from app.filtering import prefilter_non_eu, qualifies_for_tax_bundle
 from app.models import OrderRecord, ProcessingResult
 from app.pdf_generator import generate_order_pdf, generate_summary_pdf
 from app.summary_export import export_summary_xlsx
@@ -60,12 +60,12 @@ class DocumentPipeline:
         raw_orders = self.client.fetch_orders(date_from.isoformat(), date_to.isoformat())
         log(f"Pobrano rekordów: {len(raw_orders)}")
 
-        # Krok 1: Wstępne parsowanie bez pobierania szczegółów
-        log("Wstepne filtrowanie (poza UE + faktura .pl)...")
+        # Krok 1: Wstępne filtrowanie po kraju (poza UE)
+        log("Wstepne filtrowanie po kraju (poza UE)...")
         preliminary: list[tuple[dict, OrderRecord]] = []
         for i, raw in enumerate(raw_orders, 1):
             record = self.client.to_order_record(raw)
-            if qualifies_for_tax_bundle(record):
+            if prefilter_non_eu(record):
                 preliminary.append((raw, record))
             if i % 200 == 0:
                 log(f"  Przeanalizowano {i}/{len(raw_orders)}...")
