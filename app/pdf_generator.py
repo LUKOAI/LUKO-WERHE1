@@ -13,30 +13,29 @@ from reportlab.pdfgen import canvas
 from app.models import OrderRecord
 
 
-def _register_polish_font() -> str:
-    """Rejestruje czcionke z polskimi znakami. Zwraca nazwe czcionki."""
+def _register_polish_font() -> tuple[str, str]:
+    """Rejestruje czcionke z polskimi znakami. Zwraca (font, font_bold)."""
     candidates = [
-        ("DejaVuSans", "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"),
-        ("DejaVuSans", "C:/Windows/Fonts/DejaVuSans.ttf"),
-        ("Arial", "C:/Windows/Fonts/arial.ttf"),
-        ("Calibri", "C:/Windows/Fonts/calibri.ttf"),
-        ("Segoe", "C:/Windows/Fonts/segoeui.ttf"),
+        ("Arial", "C:/Windows/Fonts/arial.ttf", "C:/Windows/Fonts/arialbd.ttf"),
+        ("Calibri", "C:/Windows/Fonts/calibri.ttf", "C:/Windows/Fonts/calibrib.ttf"),
+        ("Segoe", "C:/Windows/Fonts/segoeui.ttf", "C:/Windows/Fonts/segoeuib.ttf"),
+        ("DejaVuSans", "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+         "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"),
     ]
-    for name, path in candidates:
+    for name, regular, bold in candidates:
         try:
-            if Path(path).exists():
-                pdfmetrics.registerFont(TTFont(name, path))
-                bold_path = path.replace(".ttf", "bd.ttf").replace("Sans.", "Sans-Bold.")
-                if Path(bold_path).exists():
-                    pdfmetrics.registerFont(TTFont(name + "-Bold", bold_path))
-                return name
+            if Path(regular).exists():
+                pdfmetrics.registerFont(TTFont(name, regular))
+                if Path(bold).exists():
+                    pdfmetrics.registerFont(TTFont(name + "-Bold", bold))
+                    return name, name + "-Bold"
+                return name, name
         except Exception:
             continue
-    return "Helvetica"
+    return "Helvetica", "Helvetica-Bold"
 
 
-FONT = _register_polish_font()
-FONT_BOLD = FONT + "-Bold" if FONT != "Helvetica" else "Helvetica-Bold"
+FONT, FONT_BOLD = _register_polish_font()
 
 
 def generate_order_pdf(order: OrderRecord, screenshot_path: Path | None, output_path: Path, company_name: str) -> Path:
