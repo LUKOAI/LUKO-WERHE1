@@ -44,6 +44,7 @@ def capture_tracking_screenshot(
             headless=config.playwright_headless,
             args=[
                 "--disable-blink-features=AutomationControlled",
+                "--disable-http2",
                 "--disable-dev-shm-usage",
                 "--no-sandbox",
             ],
