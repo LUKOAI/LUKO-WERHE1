@@ -55,10 +55,10 @@ def capture_tracking_screenshot(
                     box = locator.first.bounding_box()
                     if box:
                         clip = {
-                            "x": max(box["x"] - 20, 0),
-                            "y": max(box["y"] - 160, 0),
-                            "width": min(box["width"] + 600, 1400),
-                            "height": min(box["height"] + 600, 1200),
+                            "x": 0,
+                            "y": max(box["y"] - 180, 0),
+                            "width": 1400,
+                            "height": min(box["height"] + 700, 1400),
                         }
                         page.screenshot(path=str(output_path), clip=clip)
                         found = True
