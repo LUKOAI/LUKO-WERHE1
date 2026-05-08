@@ -119,6 +119,7 @@ class DocumentPipeline:
                 if r.order_id in tracking_map:
                     t = tracking_map[r.order_id]
                     r.tracking_number = t.get("tracking_number", "")
+                    r.raw["_delivery_date"] = (t.get("received_date") or "")[:10]
                     courier = r.courier.upper() if r.courier != "UNKNOWN" else ""
                     if r.tracking_number and courier:
                         r.tracking_url = self._build_tracking_url(courier, r.tracking_number)

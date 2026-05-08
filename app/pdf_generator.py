@@ -44,14 +44,8 @@ def generate_order_pdf(order: OrderRecord, screenshot_path: Path | None, output_
 
     c.setTitle(f"{order.amazon_order_number or order.order_number}")
 
-    c.setFont(FONT_BOLD, 14)
-    c.drawString(20 * mm, height - 20 * mm, f"{company_name} - Dokument podatkowy")
-
-    c.setStrokeColor(colors.black)
-    c.line(20 * mm, height - 22 * mm, width - 20 * mm, height - 22 * mm)
-
     c.setFont(FONT, 10)
-    y = height - 30 * mm
+    y = height - 20 * mm
     lines = [
         f"Numer Amazon: {order.amazon_order_number or '-'}",
         f"Data zamówienia: {order.order_date.strftime('%Y-%m-%d %H:%M')}",
@@ -120,24 +114,22 @@ def generate_summary_pdf(
         y_pos -= 6 * mm
 
         c.setFont(FONT_BOLD, 8)
-        c.drawString(20 * mm, y_pos, "Nr Amazon")
-        c.drawString(60 * mm, y_pos, "Data")
-        c.drawString(85 * mm, y_pos, "Kraj")
-        c.drawString(100 * mm, y_pos, "Kurier")
-        c.drawString(125 * mm, y_pos, "Nr przesyłki")
-        c.drawString(170 * mm, y_pos, "Typ")
+        c.drawString(20 * mm, y_pos, "Klient")
+        c.drawString(65 * mm, y_pos, "Adres")
+        c.drawString(135 * mm, y_pos, "Data wysyłki")
+        c.drawString(165 * mm, y_pos, "Data doręczenia")
         y_pos -= 4 * mm
         c.line(20 * mm, y_pos, width - 20 * mm, y_pos)
         y_pos -= 4 * mm
 
         c.setFont(FONT, 7)
         for order in orders:
-            c.drawString(20 * mm, y_pos, (order.amazon_order_number or "-")[:24])
-            c.drawString(60 * mm, y_pos, order.order_date.strftime("%Y-%m-%d"))
-            c.drawString(85 * mm, y_pos, order.country_code)
-            c.drawString(100 * mm, y_pos, order.courier[:18])
-            c.drawString(125 * mm, y_pos, (order.tracking_number or "-")[:24])
-            c.drawString(170 * mm, y_pos, order.warehouse_type.upper())
+            addr = f"{order.address_line_1}, {order.postal_code} {order.city}"
+            send_date = (order.raw.get("sendDateMin") or "")[:10]
+            c.drawString(20 * mm, y_pos, order.customer_name[:28])
+            c.drawString(65 * mm, y_pos, addr[:42])
+            c.drawString(135 * mm, y_pos, send_date)
+            c.drawString(165 * mm, y_pos, "")
             y_pos -= 4 * mm
             if y_pos < 20 * mm:
                 c.showPage()
