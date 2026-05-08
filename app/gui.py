@@ -6,6 +6,7 @@ from datetime import date
 from pathlib import Path
 
 import customtkinter as ctk
+from tkcalendar import DateEntry
 
 from app.apilo_auth import authenticate, ApiloAuthError
 from app.config import AppConfig, ConfigError, bootstrap_config, load_config, save_config, safe_config_preview
@@ -76,7 +77,7 @@ class App(ctk.CTk):
         self.cfg_preview.pack(anchor="w", padx=8, pady=(2, 8))
 
         # === Zakres dat ===
-        date_label = ctk.CTkLabel(frame, text="Zakres dat (YYYY-MM-DD)", font=("Arial", 16, "bold"))
+        date_label = ctk.CTkLabel(frame, text="Zakres dat", font=("Arial", 16, "bold"))
         date_label.pack(anchor="w", padx=8)
 
         date_frame = ctk.CTkFrame(frame, fg_color="transparent")
@@ -86,14 +87,16 @@ class App(ctk.CTk):
         month_start = today.replace(day=1)
 
         ctk.CTkLabel(date_frame, text="Od:").pack(side="left", padx=4)
-        self.from_entry = ctk.CTkEntry(date_frame, width=140)
-        self.from_entry.pack(side="left", padx=4)
-        self.from_entry.insert(0, month_start.isoformat())
+        self.from_cal = DateEntry(date_frame, width=14, date_pattern="yyyy-mm-dd",
+                                   year=month_start.year, month=month_start.month, day=month_start.day,
+                                   font=("Arial", 11))
+        self.from_cal.pack(side="left", padx=4)
 
-        ctk.CTkLabel(date_frame, text="Do:").pack(side="left", padx=4)
-        self.to_entry = ctk.CTkEntry(date_frame, width=140)
-        self.to_entry.pack(side="left", padx=4)
-        self.to_entry.insert(0, today.isoformat())
+        ctk.CTkLabel(date_frame, text="Do:").pack(side="left", padx=(16, 4))
+        self.to_cal = DateEntry(date_frame, width=14, date_pattern="yyyy-mm-dd",
+                                 year=today.year, month=today.month, day=today.day,
+                                 font=("Arial", 11))
+        self.to_cal.pack(side="left", padx=4)
 
         # === Ręczny wybór zamówień ===
         select_label = ctk.CTkLabel(
@@ -198,12 +201,8 @@ class App(ctk.CTk):
             mbox.showerror("Blad", "Najpierw kliknij 'Polacz z Apilo' zeby uzyskac token.")
             return
 
-        try:
-            d_from = date.fromisoformat(self.from_entry.get().strip())
-            d_to = date.fromisoformat(self.to_entry.get().strip())
-        except ValueError:
-            mbox.showerror("Blad", "Data musi miec format YYYY-MM-DD")
-            return
+        d_from = self.from_cal.get_date()
+        d_to = self.to_cal.get_date()
 
         self.config_obj.playwright_headless = self.headless_var.get()
 

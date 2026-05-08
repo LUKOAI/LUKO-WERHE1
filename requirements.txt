@@ -5,4 +5,5 @@ playwright>=1.40.0
 reportlab==4.2.2
 Pillow>=10.4.0
 openpyxl>=3.1.5
+tkcalendar>=1.6.1
 pyinstaller==6.10.0
