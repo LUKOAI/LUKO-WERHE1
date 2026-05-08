@@ -17,7 +17,7 @@ from app.pipeline import DocumentPipeline
 class App(ctk.CTk):
     def __init__(self) -> None:
         super().__init__()
-        self.title("WERHE/WERKON - Generator PDF dla urzędu")
+        self.title("Auto_Potwierdzenia")
         self.geometry("1020x780")
 
         ctk.set_appearance_mode("light")

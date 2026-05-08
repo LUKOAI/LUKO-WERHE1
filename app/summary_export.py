@@ -16,25 +16,31 @@ def export_summary_xlsx(orders: list[OrderRecord], output_path: Path) -> Path:
 
     ws.append(
         [
-            "customer_name",
-            "Data wysyłki",
-            "Data doręczenia",
-            "Ulica, kod pocztowy, miasto, stan",
+            "Nr. Fv",
+            "Imie Nazwisko",
+            "Adres",
+            "Data wywozu",
+            "Data odbioru",
+            "Godzina",
         ]
     )
 
     for o in orders:
         send_date = (o.raw.get("sendDateMin") or o.raw.get("orderedAt") or "")[:10]
-        delivery_date = (o.raw.get("_delivery_date") or "")[:10]
+        delivery_raw = o.raw.get("_delivery_date") or ""
+        delivery_date = delivery_raw[:10] if delivery_raw else ""
+        delivery_time = delivery_raw[11:16] if len(delivery_raw) > 11 else ""
         parts = [o.address_line_1, o.postal_code, o.city, o.address_line_2]
         full_address = ", ".join(p for p in parts if p)
 
         ws.append(
             [
+                o.invoice_number or "",
                 o.customer_name,
+                full_address,
                 send_date,
                 delivery_date,
-                full_address,
+                delivery_time,
             ]
         )
 
