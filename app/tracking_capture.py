@@ -58,12 +58,16 @@ def capture_tracking_screenshot(
 
         try:
             # Dismissal cookie consent
-            page.goto(tracking_url, wait_until="domcontentloaded",
-                      timeout=config.tracking_timeout_ms)
-            page.wait_for_timeout(2000)
+            try:
+                page.goto(tracking_url, wait_until="domcontentloaded",
+                          timeout=config.tracking_timeout_ms)
+            except Exception:
+                page.goto(tracking_url, wait_until="commit",
+                          timeout=config.tracking_timeout_ms)
+            page.wait_for_timeout(3000)
 
             _dismiss_cookies(page)
-            page.wait_for_timeout(1500)
+            page.wait_for_timeout(2000)
 
             found = False
             for keyword in DELIVERED_KEYWORDS:
