@@ -9,22 +9,9 @@ from app.config import AppConfig
 
 
 DELIVERED_KEYWORDS = [
-    "doręcz", "delivered", "delivered at", "delivered on",
-    "shipment delivered", "proof of delivery", "zugestellt",
+    "delivered", "delivered at", "delivered on", "shipment delivered",
+    "proof of delivery", "zugestellt", "doręcz", "dostarczona",
 ]
-
-USER_AGENT = (
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-    "AppleWebKit/537.36 (KHTML, like Gecko) "
-    "Chrome/125.0.0.0 Safari/537.36"
-)
-
-STEALTH_SCRIPT = """
-Object.defineProperty(navigator, 'webdriver', {get: () => false});
-Object.defineProperty(navigator, 'plugins', {get: () => [1, 2, 3]});
-Object.defineProperty(navigator, 'languages', {get: () => ['pl-PL', 'pl', 'en-US', 'en']});
-window.chrome = {runtime: {}};
-"""
 
 
 class TrackingCaptureError(Exception):
@@ -40,35 +27,25 @@ def capture_tracking_screenshot(
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(
-            headless=config.playwright_headless,
-            args=[
-                "--disable-blink-features=AutomationControlled",
-                "--disable-http2",
-                "--disable-dev-shm-usage",
-                "--no-sandbox",
-            ],
-        )
+        # Firefox jest mniej blokowany niz Chromium (np. UPS)
+        browser = p.firefox.launch(headless=config.playwright_headless)
         context = browser.new_context(
-            viewport={"width": 1600, "height": 2000},
-            user_agent=USER_AGENT,
-            locale="pl-PL",
+            viewport={"width": 1400, "height": 1800},
+            locale="en-US",
         )
         page = context.new_page()
-        page.add_init_script(STEALTH_SCRIPT)
 
         try:
-            # Dismissal cookie consent
             try:
                 page.goto(tracking_url, wait_until="domcontentloaded",
                           timeout=config.tracking_timeout_ms)
             except Exception:
                 page.goto(tracking_url, wait_until="commit",
                           timeout=config.tracking_timeout_ms)
-            page.wait_for_timeout(3000)
 
+            page.wait_for_timeout(4000)
             _dismiss_cookies(page)
-            page.wait_for_timeout(2000)
+            page.wait_for_timeout(3000)
 
             found = False
             for keyword in DELIVERED_KEYWORDS:
@@ -79,9 +56,9 @@ def capture_tracking_screenshot(
                     if box:
                         clip = {
                             "x": max(box["x"] - 20, 0),
-                            "y": max(box["y"] - 140, 0),
-                            "width": min(box["width"] + 500, 1500),
-                            "height": min(box["height"] + 500, 1100),
+                            "y": max(box["y"] - 160, 0),
+                            "width": min(box["width"] + 600, 1400),
+                            "height": min(box["height"] + 600, 1200),
                         }
                         page.screenshot(path=str(output_path), clip=clip)
                         found = True
@@ -94,7 +71,7 @@ def capture_tracking_screenshot(
                     page.screenshot(path=str(output_path), full_page=True)
                 else:
                     raise TrackingCaptureError(
-                        f"Nie znaleziono potwierdzenia doreczenia dla {carrier}: {tracking_url}"
+                        f"Nie znaleziono potwierdzenia doreczenia: {tracking_url}"
                     )
 
             return output_path
@@ -109,9 +86,10 @@ def _dismiss_cookies(page) -> None:
         "button[id*='accept']",
         "button[class*='accept']",
         "button:has-text('Accept')",
-        "button:has-text('Akceptuj')",
         "button:has-text('Accept All')",
         "button:has-text('Agree')",
+        "button:has-text('Akceptuj')",
+        "button:has-text('I Agree')",
     ]
     for sel in selectors:
         try:

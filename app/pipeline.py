@@ -28,7 +28,7 @@ class PipelineOutput:
 
 
 TRACKING_URLS = {
-    "UPS": "https://wwwapps.ups.com/WebTracking/track?track=yes&trackNums={tn}",
+    "UPS": "https://www.ups.com/track?tracknum={tn}",
     "DPD": "https://tracktrace.dpd.com.pl/parcelDetails?typ=1&p1={tn}",
     "DHL": "https://www.dhl.com/pl-en/home/tracking.html?tracking-id={tn}",
     "FEDEX": "https://www.fedex.com/fedextrack/?trknbr={tn}",
