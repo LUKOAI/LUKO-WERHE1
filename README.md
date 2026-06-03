@@ -114,3 +114,35 @@ Po buildzie plik `.exe` bedzie w `dist/`.
 3. `accessToken` jest uzywany jako Bearer token do wszystkich wywolan API.
 4. Gdy token wygasa, aplikacja automatycznie go odswiezy uzywajac `refreshToken`.
 5. Tokeny sa zapisywane w `config.json` (nie wysylaj tego pliku nikomu!).
+
+## 11) Screenshoty Amazon Seller Central + panel Apilo + faktury PL
+
+### Logowanie raz (sesja trwala)
+- Kliknij **"Zaloguj do Amazon"** — otworzy sie przegladarka. Zaloguj sie recznie
+  (z kodem 2FA), a potem ZAMKNIJ okno. Sesja zapisze sie w `browser_profiles/amazon/`.
+- To samo dla **"Zaloguj do panelu Apilo"** (wymaga ustawienia `apilo_panel_url`).
+- Status sesji widoczny obok przyciskow: `Amazon ✓  Apilo ✓`.
+
+### Co robi narzedzie podczas generowania
+- **Zamowienia FBA poza UE** (Amazon wysyla, VAT=0): screenshot strony zamowienia
+  z Amazon Seller Central (`amazon.png`).
+- **Zamowienia bez znalezionego numeru przesylki**: screenshot strony zamowienia
+  z panelu Apilo (`apilo.png`).
+- **Faktury z prefiksem PL**: pobierane z Apilo jako `faktura_{numer}.pdf` przy zamowieniu.
+
+### Struktura wynikow (per zamowienie)
+```
+PDFy_RRRR_MM/zamowienia/{nr_zamowienia}/
+  ├─ dokument.pdf          (dokument zbiorczy + screenshot)
+  ├─ tracking.png          (kurier — jesli OWN z trackingiem)
+  ├─ amazon.png            (jesli FBA poza UE)
+  ├─ apilo.png             (jesli brak trackingu)
+  └─ faktura_PL...pdf      (jesli faktura PL)
+```
+
+### Wazne uwagi
+- Automatyzacja Amazon Seller Central jest niezgodna z regulaminem Amazona.
+  Przy niskim wolumenie i realnej sesji zwykle dziala, ale czasem Amazon
+  poprosi o ponowne zalogowanie.
+- Screenshoty Amazon/Apilo robione sa w trybie WIDOCZNYM (okno przegladarki).
+- Folder `browser_profiles/` zawiera dane logowania — NIE wysylaj go nikomu.

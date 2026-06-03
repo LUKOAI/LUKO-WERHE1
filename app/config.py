@@ -24,6 +24,13 @@ class AppConfig:
     tracking_timeout_ms: int = 45000
     screenshot_full_page_fallback: bool = True
     pdf_company_name: str = "WERHE / WERKON Polska"
+    # Amazon Seller Central + panel Apilo (screenshoty)
+    amazon_seller_domain: str = "sellercentral-europe.amazon.com"
+    apilo_panel_url: str = ""
+    browser_profiles_dir: str = "browser_profiles"
+    capture_amazon: bool = True
+    capture_apilo_panel: bool = True
+    download_pl_invoices: bool = True
 
 
 class ConfigError(Exception):

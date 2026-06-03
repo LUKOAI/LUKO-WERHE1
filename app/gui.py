@@ -9,6 +9,7 @@ import customtkinter as ctk
 from tkcalendar import DateEntry
 
 from app.apilo_auth import authenticate, ApiloAuthError
+from app.browser_session import open_login, has_session
 from app.config import AppConfig, ConfigError, bootstrap_config, load_config, save_config, safe_config_preview
 from app.logging_setup import setup_logging
 from app.pipeline import DocumentPipeline
@@ -123,7 +124,28 @@ class App(ctk.CTk):
         opt_frame.pack(fill="x", padx=8, pady=6)
 
         self.headless_var = ctk.BooleanVar(value=self.config_obj.playwright_headless)
-        ctk.CTkCheckBox(opt_frame, text="Headless (bez okna przegladarki)", variable=self.headless_var).pack(side="left", padx=8)
+        ctk.CTkCheckBox(opt_frame, text="Headless (tracking)", variable=self.headless_var).pack(side="left", padx=8)
+
+        self.amazon_var = ctk.BooleanVar(value=self.config_obj.capture_amazon)
+        ctk.CTkCheckBox(opt_frame, text="Screenshoty Amazon (FBA poza UE)", variable=self.amazon_var).pack(side="left", padx=8)
+
+        self.apilo_panel_var = ctk.BooleanVar(value=self.config_obj.capture_apilo_panel)
+        ctk.CTkCheckBox(opt_frame, text="Screenshoty Apilo (brak trackingu)", variable=self.apilo_panel_var).pack(side="left", padx=8)
+
+        self.invoices_var = ctk.BooleanVar(value=self.config_obj.download_pl_invoices)
+        ctk.CTkCheckBox(opt_frame, text="Pobierz faktury PL", variable=self.invoices_var).pack(side="left", padx=8)
+
+        # === Logowanie do serwisow (raz, recznie) ===
+        login_frame = ctk.CTkFrame(frame, fg_color="transparent")
+        login_frame.pack(fill="x", padx=8, pady=2)
+
+        ctk.CTkButton(login_frame, text="Zaloguj do Amazon", command=lambda: self._open_login("amazon"),
+                      fg_color="#FF9900", hover_color="#CC7A00", text_color="black").pack(side="left", padx=4)
+        ctk.CTkButton(login_frame, text="Zaloguj do panelu Apilo", command=lambda: self._open_login("apilo"),
+                      fg_color="#2196F3", hover_color="#1976D2").pack(side="left", padx=4)
+        self.login_status = ctk.CTkLabel(login_frame, text="", font=("Consolas", 10))
+        self.login_status.pack(side="left", padx=8)
+        self._refresh_login_status()
 
         # === Akcje ===
         btn_frame = ctk.CTkFrame(frame, fg_color="transparent")
@@ -157,6 +179,27 @@ class App(ctk.CTk):
         self.log_box.insert("end", msg + "\n")
         self.log_box.see("end")
         self.update_idletasks()
+
+    def _refresh_login_status(self) -> None:
+        a = "✓" if has_session(self.config_obj, "amazon") else "✗"
+        p = "✓" if has_session(self.config_obj, "apilo") else "✗"
+        self.login_status.configure(text=f"Sesje: Amazon {a}  Apilo {p}")
+
+    def _open_login(self, site: str) -> None:
+        if site == "apilo" and not self.config_obj.apilo_panel_url:
+            mbox.showerror("Blad", "Najpierw ustaw adres panelu Apilo (apilo_panel_url) w config.json.")
+            return
+        self._append_log(f"Otwieram logowanie: {site}. Zaloguj sie i ZAMKNIJ okno przegladarki.")
+
+        def runner() -> None:
+            try:
+                open_login(site, self.config_obj, log_cb=self._append_log)
+            except Exception as exc:
+                self._append_log(f"Logowanie {site} nie powiodlo sie: {exc}")
+            finally:
+                self._refresh_login_status()
+
+        threading.Thread(target=runner, daemon=True).start()
 
     def _save_credentials(self) -> None:
         self.config_obj.apilo_client_id = self.client_id_entry.get().strip()
@@ -205,6 +248,9 @@ class App(ctk.CTk):
         d_to = self.to_cal.get_date()
 
         self.config_obj.playwright_headless = self.headless_var.get()
+        self.config_obj.capture_amazon = self.amazon_var.get()
+        self.config_obj.capture_apilo_panel = self.apilo_panel_var.get()
+        self.config_obj.download_pl_invoices = self.invoices_var.get()
 
         self._set_running(True)
         self.progress.set(0)

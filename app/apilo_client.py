@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 import time
 from datetime import datetime
+from pathlib import Path
 from typing import Any
 
 import requests
@@ -125,6 +126,61 @@ class ApiloClient:
         endpoint = ORDER_DETAIL_ENDPOINT.format(order_id=order_id)
         payload = self._request("GET", endpoint)
         return payload.get("order") or payload.get("data") or payload
+
+    def fetch_order_documents(self, order_id: str) -> list[dict[str, Any]]:
+        """Pobiera liste dokumentow (faktur) powiazanych z zamowieniem.
+
+        GET /rest/api/orders/{order_id}/documents/
+        Kazdy dokument ma m.in.: number, type, media (plik PDF).
+        """
+        endpoint = f"/rest/api/orders/{order_id}/documents/"
+        try:
+            payload = self._request("GET", endpoint)
+        except ApiloClientError:
+            return []
+        docs = (
+            payload.get("documents")
+            or payload.get("data")
+            or payload.get("items")
+            or []
+        )
+        if isinstance(payload, list):
+            docs = payload
+        return docs if isinstance(docs, list) else []
+
+    def download_document_file(self, document: dict[str, Any], output_path: Path) -> Path | None:
+        """Pobiera plik PDF faktury z pola 'media' dokumentu.
+
+        Apilo przechowuje pliki jako 'media' (UUID). Endpoint pobierania:
+          GET /rest/api/media/{mediaId}/   (do potwierdzenia na zywo)
+        Obslugujemy tez przypadek gdy 'media' jest pelnym URL-em.
+        """
+        media = document.get("media") or document.get("file") or document.get("url")
+        if not media:
+            return None
+
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+
+        # media moze byc: pelny URL, UUID, albo dict z polem url/id
+        if isinstance(media, dict):
+            media = media.get("url") or media.get("id") or media.get("uuid") or ""
+        media = str(media)
+        if not media:
+            return None
+
+        if media.startswith("http"):
+            url = media
+        else:
+            # zakladamy endpoint media po UUID
+            url = self.config.apilo_base_url.rstrip("/") + f"/rest/api/media/{media}/"
+
+        try:
+            resp = self.session.get(url, timeout=self.timeout)
+            resp.raise_for_status()
+            output_path.write_bytes(resp.content)
+            return output_path
+        except requests.RequestException:
+            return None
 
     def fetch_tracking_for_orders(self, order_ids: set[str],
                                   log_cb=None) -> dict[str, dict[str, str]]:

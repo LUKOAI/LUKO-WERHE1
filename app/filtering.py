@@ -23,7 +23,15 @@ def is_eu(country_code: str) -> bool:
 
 def has_pl_invoice(order: OrderRecord) -> bool:
     invoice_ref = (order.invoice_url or order.invoice_number or "").lower().strip()
-    return invoice_ref.endswith(".pl") or ".pl/" in invoice_ref
+    return invoice_ref.endswith(".pl") or ".pl/" in invoice_ref or is_pl_invoice_number(order.invoice_number)
+
+
+def is_pl_invoice_number(number: str) -> bool:
+    """Faktura PL: numer zaczyna sie od 'PL' lub konczy na '.pl'."""
+    if not number:
+        return False
+    n = number.strip().upper()
+    return n.startswith("PL") or n.endswith(".PL")
 
 
 def prefilter_non_eu(order: OrderRecord) -> bool:

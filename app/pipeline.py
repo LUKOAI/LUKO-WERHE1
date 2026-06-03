@@ -8,11 +8,14 @@ from typing import Callable
 from app.apilo_client import ApiloClient
 from app.apilo_auth import ensure_valid_token
 from app.config import AppConfig
-from app.filtering import prefilter_non_eu, qualifies_for_tax_bundle
+from app.filtering import prefilter_non_eu, qualifies_for_tax_bundle, is_non_eu, is_pl_invoice_number, has_pl_invoice
 from app.models import OrderRecord, ProcessingResult
 from app.pdf_generator import generate_order_pdf, generate_summary_pdf
 from app.summary_export import export_summary_xlsx
 from app.tracking_capture import capture_tracking_screenshot
+from app.browser_session import CaptureSession, has_session
+from app.amazon_capture import build_amazon_order_url
+from app.apilo_panel_capture import build_apilo_order_url
 
 
 ProgressCallback = Callable[[int, int], None]
@@ -51,6 +54,31 @@ class DocumentPipeline:
             if key in courier_upper:
                 return tmpl.format(tn=tracking_number)
         return ""
+
+    @staticmethod
+    def _safe_filename(name: str) -> str:
+        for ch in '/\\:*?"<>|':
+            name = name.replace(ch, "_")
+        return name.strip() or "faktura"
+
+    def _download_pl_invoice(self, order: OrderRecord, folder: Path,
+                             idx: int, total: int, log) -> None:
+        """Pobiera fakture(y) z prefiksem PL dla zamowienia do folderu."""
+        try:
+            docs = self.client.fetch_order_documents(order.order_id)
+        except Exception as exc:
+            log(f"[D {idx}/{total}] Nie pobrano listy faktur: {exc}")
+            return
+        for doc in docs:
+            number = str(doc.get("number") or "")
+            if not is_pl_invoice_number(number):
+                continue
+            fname = f"faktura_{self._safe_filename(number)}.pdf"
+            out = self.client.download_document_file(doc, folder / fname)
+            if out:
+                log(f"[D {idx}/{total}] Pobrano fakture PL: {number}")
+            else:
+                log(f"[D {idx}/{total}] Faktura PL {number} — brak pliku/media")
 
     def run(
         self,
@@ -155,46 +183,103 @@ class DocumentPipeline:
             filtered = filtered[:5]
             log("Tryb testowy aktywny: przetwarzam tylko 5 pierwszych zamówień.")
 
-        processed: list[ProcessingResult] = []
         total = len(filtered)
+        # Folder per zamowienie + mapa sciezek screenshotow
+        order_folders: dict[str, Path] = {}
+        shot_paths: dict[str, Path] = {}  # order_id -> screenshot do PDF
+        for order in filtered:
+            folder = order_pdf_dir / order.order_number
+            folder.mkdir(parents=True, exist_ok=True)
+            order_folders[order.order_id] = folder
 
+        # === FAZA A: screenshoty trackingu kuriera (OWN z URL) ===
+        for idx, order in enumerate(filtered, start=1):
+            if order.tracking_url and order.tracking_url.startswith("http"):
+                log(f"[A {idx}/{total}] Tracking kuriera: {order.courier} {order.tracking_number}")
+                try:
+                    shot = capture_tracking_screenshot(
+                        tracking_url=order.tracking_url,
+                        output_path=order_folders[order.order_id] / "tracking.png",
+                        config=self.config,
+                        carrier=order.courier,
+                    )
+                    if shot:
+                        shot_paths[order.order_id] = shot
+                except Exception as exc:
+                    log(f"[A {idx}/{total}] Tracking nie powiodl sie: {exc}")
+
+        # === FAZA B: screenshoty Amazon Seller Central (FBA poza UE) ===
+        amazon_orders = [
+            o for o in filtered
+            if o.warehouse_type == "fba" and is_non_eu(o.country_code) and o.amazon_order_number
+        ]
+        if self.config.capture_amazon and amazon_orders:
+            if has_session(self.config, "amazon"):
+                log(f"Screenshoty Amazon: {len(amazon_orders)} zamowien FBA poza UE...")
+                try:
+                    with CaptureSession("amazon", self.config, headless=False) as sess:
+                        for i, order in enumerate(amazon_orders, 1):
+                            url = build_amazon_order_url(order.amazon_order_number, self.config)
+                            log(f"[Amazon {i}/{len(amazon_orders)}] {order.amazon_order_number}")
+                            out = sess.capture(url, order_folders[order.order_id] / "amazon.png",
+                                               wait_ms=6000, clip_keyword="Delivered")
+                            if out and order.order_id not in shot_paths:
+                                shot_paths[order.order_id] = out
+                except Exception as exc:
+                    log(f"Sesja Amazon nie powiodla sie: {exc}")
+            else:
+                log("UWAGA: brak sesji Amazon — kliknij 'Zaloguj do Amazon'. Pomijam screenshoty FBA.")
+
+        # === FAZA C: screenshoty panelu Apilo (OWN bez trackingu) ===
+        apilo_orders = [
+            o for o in filtered
+            if o.warehouse_type != "fba" and not o.tracking_number
+        ]
+        if self.config.capture_apilo_panel and apilo_orders:
+            if self.config.apilo_panel_url and has_session(self.config, "apilo"):
+                log(f"Screenshoty panelu Apilo: {len(apilo_orders)} zamowien bez trackingu...")
+                try:
+                    with CaptureSession("apilo", self.config, headless=False) as sess:
+                        for i, order in enumerate(apilo_orders, 1):
+                            url = build_apilo_order_url(order.order_id, self.config)
+                            log(f"[Apilo {i}/{len(apilo_orders)}] {order.order_id}")
+                            out = sess.capture(url, order_folders[order.order_id] / "apilo.png",
+                                               wait_ms=5000)
+                            if out and order.order_id not in shot_paths:
+                                shot_paths[order.order_id] = out
+                except Exception as exc:
+                    log(f"Sesja Apilo nie powiodla sie: {exc}")
+            else:
+                log("UWAGA: brak sesji/URL panelu Apilo — pomijam screenshoty panelu.")
+
+        # === FAZA D: faktury PL + generowanie PDF per zamowienie ===
+        processed: list[ProcessingResult] = []
         for idx, order in enumerate(filtered, start=1):
             if progress_cb:
                 progress_cb(idx, total)
             result = ProcessingResult(order=order, status="processing")
+            folder = order_folders[order.order_id]
             try:
-                shot = None
-                if order.tracking_url and order.tracking_url.startswith("http"):
-                    log(f"[{idx}/{total}] Screenshot trackingu: {order.tracking_url[:60]}...")
-                    try:
-                        shot = capture_tracking_screenshot(
-                            tracking_url=order.tracking_url,
-                            output_path=shots_dir / f"{order.order_number}_tracking.png",
-                            config=self.config,
-                            carrier=order.courier,
-                        )
-                        result.screenshot_path = shot
-                    except Exception as shot_exc:
-                        log(f"[{idx}/{total}] Screenshot nie powiodl sie: {shot_exc}")
-                elif order.tracking_number:
-                    log(f"[{idx}/{total}] Brak URL trackingu, numer: {order.tracking_number}")
-                else:
-                    log(f"[{idx}/{total}] Brak danych trackingowych")
+                # Pobranie faktury PL
+                if self.config.download_pl_invoices:
+                    self._download_pl_invoice(order, folder, idx, total, log)
 
+                shot = shot_paths.get(order.order_id)
                 pdf = generate_order_pdf(
                     order=order,
                     screenshot_path=shot,
-                    output_path=order_pdf_dir / f"{order.order_number}.pdf",
+                    output_path=folder / "dokument.pdf",
                     company_name=self.config.pdf_company_name,
                 )
                 result.pdf_path = pdf
+                result.screenshot_path = shot
                 result.status = "ok"
                 result.message = "OK"
-                log(f"[{idx}/{total}] OK {order.order_number}")
+                log(f"[D {idx}/{total}] OK {order.order_number}")
             except Exception as exc:
                 result.status = "error"
                 result.message = str(exc)
-                log(f"[{idx}/{total}] BLAD {order.order_number}: {exc}")
+                log(f"[D {idx}/{total}] BLAD {order.order_number}: {exc}")
             processed.append(result)
 
         ok_orders = [r.order for r in processed if r.status == "ok"]
