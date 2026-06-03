@@ -222,7 +222,9 @@ class DocumentPipeline:
                             url = build_amazon_order_url(order.amazon_order_number, self.config)
                             log(f"[Amazon {i}/{len(amazon_orders)}] {order.amazon_order_number}")
                             out = sess.capture(url, order_folders[order.order_id] / "amazon.png",
-                                               wait_ms=6000, clip_keyword="Delivered", log_cb=log)
+                                               wait_ms=4000,
+                                               wait_for_text=order.amazon_order_number,
+                                               log_cb=log)
                             if out and order.order_id not in shot_paths:
                                 shot_paths[order.order_id] = out
                 except Exception as exc:

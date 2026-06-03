@@ -126,11 +126,15 @@ class CaptureSession:
 
     def capture(self, url: str, output_path: Path, wait_ms: int = 5000,
                 clip_keyword: str | None = None,
+                wait_for_text: str | None = None,
                 log_cb: Callable[[str], None] | None = None) -> Path | None:
         """Otwiera URL i robi screenshot. Zwraca sciezke lub None przy bledzie.
 
         Jesli Amazon/Apilo wyswietli ekran logowania lub kod 2FA (takze w trakcie
         pracy), wykrywa to i CZEKA az uzytkownik wpisze dane w widocznym oknie.
+
+        wait_for_text: jesli podany, czeka az ten tekst pojawi sie na stronie
+        (np. numer zamowienia) — gwarantuje ze SPA sie zaladowal.
         """
         def log(m: str) -> None:
             if log_cb:
@@ -143,10 +147,24 @@ class CaptureSession:
                 page.goto(url, wait_until="domcontentloaded", timeout=45000)
             except Exception:
                 page.goto(url, wait_until="commit", timeout=45000)
-            page.wait_for_timeout(wait_ms)
+            page.wait_for_timeout(2000)
 
             # Wykrycie ekranu logowania / 2FA (kod autoryzacji)
             self._wait_if_login(page, url, log)
+
+            # Czekanie az tresc strony sie zaladuje (np. numer zamowienia)
+            if wait_for_text:
+                try:
+                    page.get_by_text(wait_for_text, exact=False).first.wait_for(timeout=35000)
+                except Exception:
+                    log("Nie wykryto tresci zamowienia w 35s — robie screenshot mimo to.")
+            else:
+                try:
+                    page.wait_for_load_state("networkidle", timeout=15000)
+                except Exception:
+                    pass
+
+            page.wait_for_timeout(wait_ms)
 
             if clip_keyword:
                 try:
