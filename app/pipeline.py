@@ -72,7 +72,8 @@ class DocumentPipeline:
         downloaded: list[Path] = []
         for doc in docs:
             number = str(doc.get("number") or "")
-            if not is_pl_invoice_number(number):
+            # Faktura PL z Apilo = dokument typu 2 (faktura VAT, numer typu "7/04/2026/0")
+            if doc.get("type") != 2 and not is_pl_invoice_number(number):
                 continue
             fname = f"faktura_{self._safe_filename(number)}.pdf"
             out = self.client.download_document_file(doc, folder / fname)
