@@ -11,7 +11,7 @@
   "tracking_timeout_ms": 45000,
   "screenshot_full_page_fallback": true,
   "pdf_company_name": "WERHE / WERKON Polska",
-  "amazon_seller_domain": "sellercentral-europe.amazon.com",
+  "amazon_seller_domain": "sellercentral.amazon.de",
   "apilo_panel_url": "https://werhe.apilo.com",
   "browser_profiles_dir": "browser_profiles",
   "capture_amazon": true,

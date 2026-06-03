@@ -222,7 +222,7 @@ class DocumentPipeline:
                             url = build_amazon_order_url(order.amazon_order_number, self.config)
                             log(f"[Amazon {i}/{len(amazon_orders)}] {order.amazon_order_number}")
                             out = sess.capture(url, order_folders[order.order_id] / "amazon.png",
-                                               wait_ms=6000, clip_keyword="Delivered")
+                                               wait_ms=6000, clip_keyword="Delivered", log_cb=log)
                             if out and order.order_id not in shot_paths:
                                 shot_paths[order.order_id] = out
                 except Exception as exc:
@@ -244,7 +244,7 @@ class DocumentPipeline:
                             url = build_apilo_order_url(order.order_id, self.config)
                             log(f"[Apilo {i}/{len(apilo_orders)}] {order.order_id}")
                             out = sess.capture(url, order_folders[order.order_id] / "apilo.png",
-                                               wait_ms=5000)
+                                               wait_ms=5000, log_cb=log)
                             if out and order.order_id not in shot_paths:
                                 shot_paths[order.order_id] = out
                 except Exception as exc:

@@ -125,8 +125,17 @@ class CaptureSession:
         return self
 
     def capture(self, url: str, output_path: Path, wait_ms: int = 5000,
-                clip_keyword: str | None = None) -> Path | None:
-        """Otwiera URL i robi screenshot. Zwraca sciezke lub None przy bledzie."""
+                clip_keyword: str | None = None,
+                log_cb: Callable[[str], None] | None = None) -> Path | None:
+        """Otwiera URL i robi screenshot. Zwraca sciezke lub None przy bledzie.
+
+        Jesli Amazon/Apilo wyswietli ekran logowania lub kod 2FA (takze w trakcie
+        pracy), wykrywa to i CZEKA az uzytkownik wpisze dane w widocznym oknie.
+        """
+        def log(m: str) -> None:
+            if log_cb:
+                log_cb(m)
+
         output_path.parent.mkdir(parents=True, exist_ok=True)
         page = self._context.new_page()
         try:
@@ -135,6 +144,9 @@ class CaptureSession:
             except Exception:
                 page.goto(url, wait_until="commit", timeout=45000)
             page.wait_for_timeout(wait_ms)
+
+            # Wykrycie ekranu logowania / 2FA (kod autoryzacji)
+            self._wait_if_login(page, url, log)
 
             if clip_keyword:
                 try:
@@ -162,6 +174,38 @@ class CaptureSession:
                 page.close()
             except Exception:
                 pass
+
+    # Markery URL-a wskazujace na ekran logowania / kodu 2FA Amazon
+    _LOGIN_MARKERS = ("signin", "/ap/", "mfa", "two-step", "transition", "/login", "cvf")
+
+    def _wait_if_login(self, page, target_url: str,
+                       log: Callable[[str], None]) -> None:
+        """Jesli strona to logowanie/2FA — czeka az uzytkownik je przejdzie (do 5 min)."""
+        def looks_like_login() -> bool:
+            try:
+                u = (page.url or "").lower()
+            except Exception:
+                return False
+            return any(m in u for m in self._LOGIN_MARKERS)
+
+        if not looks_like_login():
+            return
+
+        log("UWAGA: serwis prosi o logowanie/kod 2FA. Wpisz dane w OTWARTYM oknie przegladarki...")
+        # Czekamy do 5 minut (150 x 2s) az uzytkownik przejdzie logowanie
+        for _ in range(150):
+            page.wait_for_timeout(2000)
+            if not looks_like_login():
+                log("Logowanie zakonczone — kontynuuje.")
+                # Wroc na strone zamowienia jesli nas przekierowalo
+                try:
+                    if target_url.split("?")[0] not in (page.url or ""):
+                        page.goto(target_url, wait_until="domcontentloaded", timeout=45000)
+                        page.wait_for_timeout(3000)
+                except Exception:
+                    pass
+                return
+        log("Limit czasu logowania (5 min) — pomijam to zamowienie.")
 
     def __exit__(self, *exc) -> None:
         try:
