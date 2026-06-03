@@ -193,6 +193,93 @@ class CaptureSession:
             except Exception:
                 pass
 
+    def capture_cropped(self, url: str, output_path: Path,
+                        bottom_text: str, top_text: str | None = None,
+                        wait_for_text: str | None = None, wait_ms: int = 4000,
+                        log_cb: Callable[[str], None] | None = None) -> Path | None:
+        """Robi screenshot strony przyciety od gory (top_text) do tekstu bottom_text.
+
+        Uzywane dla panelu Apilo: przycina karte zamowienia w dol do
+        'Wiadomosci i zalaczniki', odcinajac menu boczne (left z top_text).
+        """
+        def log(m: str) -> None:
+            if log_cb:
+                log_cb(m)
+
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        page = self._context.new_page()
+        try:
+            try:
+                page.goto(url, wait_until="domcontentloaded", timeout=45000)
+            except Exception:
+                page.goto(url, wait_until="commit", timeout=45000)
+            page.wait_for_timeout(2000)
+            self._wait_if_login(page, url, log)
+
+            if wait_for_text:
+                try:
+                    page.get_by_text(wait_for_text, exact=False).first.wait_for(timeout=35000)
+                except Exception:
+                    log("Apilo: nie wykryto tresci zamowienia w 35s.")
+            page.wait_for_timeout(wait_ms)
+
+            # przewin do dolnego punktu aby sie wyrenderowal
+            try:
+                anchor = page.get_by_text(bottom_text, exact=False).first
+                anchor.scroll_into_view_if_needed(timeout=5000)
+                page.wait_for_timeout(1500)
+            except Exception:
+                log(f"Apilo: nie znaleziono '{bottom_text}' — pelny screenshot.")
+
+            tmp = output_path.with_name(output_path.stem + "_full.png")
+            page.screenshot(path=str(tmp), full_page=True)
+
+            def abs_rect(text: str):
+                try:
+                    el = page.get_by_text(text, exact=False).first
+                    return el.evaluate(
+                        "e=>{const r=e.getBoundingClientRect();"
+                        "return {top:r.top+window.scrollY,bottom:r.bottom+window.scrollY,"
+                        "left:r.left+window.scrollX,right:r.right+window.scrollX};}"
+                    )
+                except Exception:
+                    return None
+
+            try:
+                from PIL import Image
+                img = Image.open(tmp)
+                W, H = img.size
+                top, left, bottom = 0, 0, H
+                br = abs_rect(bottom_text)
+                if br:
+                    bottom = min(H, int(br["bottom"]) + 25)
+                if top_text:
+                    tr = abs_rect(top_text)
+                    if tr:
+                        top = max(0, int(tr["top"]) - 30)
+                        left = max(0, int(tr["left"]) - 30)
+                cropped = img.crop((left, top, W, bottom))
+                cropped.save(output_path)
+                try:
+                    tmp.unlink()
+                except Exception:
+                    pass
+                return output_path
+            except Exception as exc:
+                log(f"Apilo: przycinanie nie powiodlo sie ({exc}) — pelny screenshot.")
+                try:
+                    tmp.replace(output_path)
+                except Exception:
+                    pass
+                return output_path if output_path.exists() else None
+        except Exception:
+            return None
+        finally:
+            try:
+                page.close()
+            except Exception:
+                pass
+
     # Markery URL-a wskazujace na ekran logowania / kodu 2FA Amazon
     _LOGIN_MARKERS = ("signin", "/ap/", "mfa", "two-step", "transition", "/login", "cvf")
 
