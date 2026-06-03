@@ -10,7 +10,7 @@ from app.apilo_auth import ensure_valid_token
 from app.config import AppConfig
 from app.filtering import prefilter_non_eu, qualifies_for_tax_bundle, is_non_eu, is_pl_invoice_number, has_pl_invoice
 from app.models import OrderRecord, ProcessingResult
-from app.pdf_generator import generate_order_pdf, generate_summary_pdf
+from app.pdf_generator import generate_order_pdf, generate_summary_pdf, merge_pdfs
 from app.summary_export import export_summary_xlsx
 from app.tracking_capture import capture_tracking_screenshot
 from app.browser_session import CaptureSession, has_session
@@ -62,13 +62,14 @@ class DocumentPipeline:
         return name.strip() or "faktura"
 
     def _download_pl_invoice(self, order: OrderRecord, folder: Path,
-                             idx: int, total: int, log) -> None:
-        """Pobiera fakture(y) z prefiksem PL dla zamowienia do folderu."""
+                             idx: int, total: int, log) -> Path | None:
+        """Pobiera fakture(y) z prefiksem PL. Zwraca sciezke do (polaczonego) PDF faktur."""
         try:
             docs = self.client.fetch_order_documents(order.order_id)
         except Exception as exc:
             log(f"[D {idx}/{total}] Nie pobrano listy faktur: {exc}")
-            return
+            return None
+        downloaded: list[Path] = []
         for doc in docs:
             number = str(doc.get("number") or "")
             if not is_pl_invoice_number(number):
@@ -77,8 +78,26 @@ class DocumentPipeline:
             out = self.client.download_document_file(doc, folder / fname)
             if out:
                 log(f"[D {idx}/{total}] Pobrano fakture PL: {number}")
+                downloaded.append(out)
             else:
                 log(f"[D {idx}/{total}] Faktura PL {number} — brak pliku/media")
+        if not downloaded:
+            return None
+        if len(downloaded) == 1:
+            return downloaded[0]
+        # kilka faktur — polacz w jedna
+        try:
+            from pypdf import PdfReader, PdfWriter
+            writer = PdfWriter()
+            for f in downloaded:
+                for page in PdfReader(str(f)).pages:
+                    writer.add_page(page)
+            combined = folder / "faktury_PL.pdf"
+            with open(combined, "wb") as fh:
+                writer.write(fh)
+            return combined
+        except Exception:
+            return downloaded[0]
 
     def run(
         self,
@@ -232,29 +251,37 @@ class DocumentPipeline:
             else:
                 log("UWAGA: brak sesji Amazon — kliknij 'Zaloguj do Amazon'. Pomijam screenshoty FBA.")
 
-        # === FAZA C: screenshoty panelu Apilo (OWN bez trackingu) ===
+        # === FAZA C: screenshoty panelu Apilo ===
+        # Apilo robimy dla: zamowien FBA (karta zamowienia razem z Amazonem)
+        # oraz zamowien wlasnych BEZ znalezionego trackingu.
+        apilo_shot_paths: dict[str, Path] = {}
         apilo_orders = [
             o for o in filtered
-            if o.warehouse_type != "fba" and not o.tracking_number
+            if (o.warehouse_type == "fba" and is_non_eu(o.country_code))
+            or (o.warehouse_type != "fba" and not o.tracking_number)
         ]
         if self.config.capture_apilo_panel and apilo_orders:
             if self.config.apilo_panel_url and has_session(self.config, "apilo"):
-                log(f"Screenshoty panelu Apilo: {len(apilo_orders)} zamowien bez trackingu...")
+                log(f"Screenshoty panelu Apilo: {len(apilo_orders)} zamowien...")
                 try:
                     with CaptureSession("apilo", self.config, headless=False) as sess:
                         for i, order in enumerate(apilo_orders, 1):
                             url = build_apilo_order_url(order.order_id, self.config)
                             log(f"[Apilo {i}/{len(apilo_orders)}] {order.order_id}")
-                            out = sess.capture(url, order_folders[order.order_id] / "apilo.png",
-                                               wait_ms=5000, log_cb=log)
-                            if out and order.order_id not in shot_paths:
-                                shot_paths[order.order_id] = out
+                            out = sess.capture_cropped(
+                                url, order_folders[order.order_id] / "apilo.png",
+                                bottom_text="Wiadomości i załączniki",
+                                top_text=order.order_id,
+                                wait_for_text=order.order_id,
+                                wait_ms=4000, log_cb=log)
+                            if out:
+                                apilo_shot_paths[order.order_id] = out
                 except Exception as exc:
                     log(f"Sesja Apilo nie powiodla sie: {exc}")
             else:
                 log("UWAGA: brak sesji/URL panelu Apilo — pomijam screenshoty panelu.")
 
-        # === FAZA D: faktury PL + generowanie PDF per zamowienie ===
+        # === FAZA D: faktury PL + skladanie PDF per zamowienie ===
         processed: list[ProcessingResult] = []
         for idx, order in enumerate(filtered, start=1):
             if progress_cb:
@@ -262,19 +289,34 @@ class DocumentPipeline:
             result = ProcessingResult(order=order, status="processing")
             folder = order_folders[order.order_id]
             try:
-                # Pobranie faktury PL
-                if self.config.download_pl_invoices:
-                    self._download_pl_invoice(order, folder, idx, total, log)
+                # Lista screenshotow: Amazon + Apilo (FBA) albo tracking, albo Apilo
+                shots: list[Path] = []
+                if order.order_id in shot_paths and order.warehouse_type == "fba":
+                    shots.append(shot_paths[order.order_id])  # amazon.png
+                if order.order_id in apilo_shot_paths:
+                    shots.append(apilo_shot_paths[order.order_id])  # apilo.png
+                if not shots and order.order_id in shot_paths:
+                    shots.append(shot_paths[order.order_id])  # tracking.png
 
-                shot = shot_paths.get(order.order_id)
-                pdf = generate_order_pdf(
+                # Pobranie faktury PL do pliku tymczasowego
+                invoice_pdf = None
+                if self.config.download_pl_invoices:
+                    invoice_pdf = self._download_pl_invoice(order, folder, idx, total, log)
+
+                cover = generate_order_pdf(
                     order=order,
-                    screenshot_path=shot,
-                    output_path=folder / "dokument.pdf",
+                    screenshots=shots,
+                    output_path=folder / "_cover.pdf",
                     company_name=self.config.pdf_company_name,
                 )
+                pdf = merge_pdfs(cover, invoice_pdf, folder / "dokument.pdf")
+                try:
+                    Path(folder / "_cover.pdf").unlink()
+                except Exception:
+                    pass
+
                 result.pdf_path = pdf
-                result.screenshot_path = shot
+                result.screenshot_path = shots[0] if shots else None
                 result.status = "ok"
                 result.message = "OK"
                 log(f"[D {idx}/{total}] OK {order.order_number}")
