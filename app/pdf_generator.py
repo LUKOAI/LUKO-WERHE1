@@ -51,12 +51,15 @@ def _draw_image_fit(c, img_path: Path, x: float, y_top: float, max_w: float, max
 
 def generate_order_pdf(order: OrderRecord, screenshots, output_path: Path,
                        company_name: str) -> Path:
-    """Tworzy strone(y) ze screenshotami.
+    """Tworzy strone(y) ze screenshotami — kazdy na pelna szerokosc, bez pomniejszania.
 
-    screenshots: lista sciezek do PNG (np. [amazon, apilo] albo [tracking]).
-    - 2 obrazy → jedna strona A4, ulozone jeden pod drugim (Amazon gora, Apilo dol).
-    - 1 obraz → jedna strona A4 z naglowkiem danych zamowienia.
+    Wysoki screenshot (np. karta Apilo) jest dzielony na kolejne strony A4
+    w skali natywnej (zamiast sciskac do polowy strony).
+    screenshots: lista sciezek (kolejnosc: amazon, apilo, tracking).
     """
+    from PIL import Image
+    import math
+
     if isinstance(screenshots, (str, Path)):
         screenshots = [screenshots]
     shots = [Path(s) for s in (screenshots or []) if s and Path(s).exists()]
@@ -66,40 +69,13 @@ def generate_order_pdf(order: OrderRecord, screenshots, output_path: Path,
     width, height = A4
     c.setTitle(f"{order.amazon_order_number or order.order_number}")
 
-    if len(shots) >= 2:
-        # Dwa obrazy na jednej A4 (Amazon + Apilo)
-        margin = 12 * mm
-        gap = 6 * mm
-        usable_w = width - 2 * margin
-        half_h = (height - 2 * margin - gap) / 2
-        top1 = height - margin
-        bottom1 = _draw_image_fit(c, shots[0], margin, top1, usable_w, half_h)
-        top2 = bottom1 - gap
-        # gdyby pierwszy zajal mniej, drugi i tak w dolnej polowie
-        top2 = min(top2, margin + half_h)
-        _draw_image_fit(c, shots[1], margin, top2, usable_w, half_h)
-    elif len(shots) == 1:
-        # Jeden obraz + krotki naglowek danych
-        c.setFont(FONT, 10)
-        y = height - 20 * mm
-        lines = [
-            f"Numer Amazon: {order.amazon_order_number or '-'}",
-            f"Data zamówienia: {order.order_date.strftime('%Y-%m-%d %H:%M')}",
-            f"Kurier: {order.courier}",
-            f"Numer przesyłki: {order.tracking_number or 'brak danych'}",
-            f"Kraj dostawy: {order.country_code}",
-            f"Adres: {order.customer_name}, {order.address_line_1} {order.address_line_2}, {order.postal_code} {order.city}",
-        ]
-        for line in lines:
-            c.drawString(20 * mm, y, line)
-            y -= 5 * mm
-        y -= 3 * mm
-        c.setFont(FONT_BOLD, 11)
-        c.drawString(20 * mm, y, "Potwierdzenie doręczenia:")
-        y -= 8 * mm
-        _draw_image_fit(c, shots[0], 20 * mm, y, width - 40 * mm, y - 20 * mm)
-    else:
-        # Brak screenshota — same dane
+    margin = 8 * mm
+    avail_w = width - 2 * margin
+    avail_h = height - 2 * margin
+    temp_files: list[Path] = []
+    first_page = True
+
+    if not shots:
         c.setFont(FONT, 10)
         y = height - 20 * mm
         for line in [
@@ -112,12 +88,48 @@ def generate_order_pdf(order: OrderRecord, screenshots, output_path: Path,
         ]:
             c.drawString(20 * mm, y, line)
             y -= 5 * mm
-        c.setFont(FONT, 10)
         c.drawString(20 * mm, y - 6 * mm, "Brak screenshota potwierdzenia dostawy.")
+        c.save()
+        return output_path
 
-    c.setFont(FONT, 8)
-    c.drawString(20 * mm, 8 * mm, "Wygenerowano automatycznie przez narzędzie WERHE/WERKON.")
+    for shot in shots:
+        try:
+            img = Image.open(shot)
+            iw, ih = img.size
+        except Exception:
+            continue
+        scale = avail_w / iw
+        scaled_h = ih * scale
+        if scaled_h <= avail_h:
+            # miesci sie na jednej stronie — pelna szerokosc
+            if not first_page:
+                c.showPage()
+            first_page = False
+            draw_h = scaled_h
+            c.drawImage(str(shot), margin, height - margin - draw_h, avail_w, draw_h)
+        else:
+            # wysoki obraz — dziel na kolejne strony A4 w skali natywnej
+            slice_src_h = int(iw * avail_h / avail_w)  # px zrodla na jedna pelna strone
+            n = math.ceil(ih / slice_src_h)
+            for i in range(n):
+                if not first_page:
+                    c.showPage()
+                first_page = False
+                top = i * slice_src_h
+                bottom = min(ih, top + slice_src_h)
+                crop = img.crop((0, top, iw, bottom))
+                tmp = shot.with_name(f"{shot.stem}_p{i}.png")
+                crop.save(tmp)
+                temp_files.append(tmp)
+                ch = (bottom - top) * scale
+                c.drawImage(str(tmp), margin, height - margin - ch, avail_w, ch)
+
     c.save()
+    for t in temp_files:
+        try:
+            t.unlink()
+        except Exception:
+            pass
     return output_path
 
 

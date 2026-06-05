@@ -204,38 +204,56 @@ class DocumentPipeline:
             log("Tryb testowy aktywny: przetwarzam tylko 5 pierwszych zamówień.")
 
         total = len(filtered)
-        # Folder per zamowienie + mapa sciezek screenshotow
+        # Folder per zamowienie
         order_folders: dict[str, Path] = {}
-        shot_paths: dict[str, Path] = {}  # order_id -> screenshot do PDF
         for order in filtered:
             folder = order_pdf_dir / order.order_number
             folder.mkdir(parents=True, exist_ok=True)
             order_folders[order.order_id] = folder
 
-        # === FAZA A: screenshoty trackingu kuriera (OWN z URL) ===
-        for idx, order in enumerate(filtered, start=1):
-            if order.tracking_url and order.tracking_url.startswith("http"):
-                log(f"[A {idx}/{total}] Tracking kuriera: {order.courier} {order.tracking_number}")
-                try:
-                    shot = capture_tracking_screenshot(
-                        tracking_url=order.tracking_url,
-                        output_path=order_folders[order.order_id] / "tracking.png",
-                        config=self.config,
-                        carrier=order.courier,
-                    )
-                    if shot:
-                        shot_paths[order.order_id] = shot
-                except Exception as exc:
-                    log(f"[A {idx}/{total}] Tracking nie powiodl sie: {exc}")
+        # Plan dowodu per zamowienie:
+        #  - OWN z potwierdzona dostawa (received_date) -> screenshot trackingu
+        #  - OWN bez potwierdzonej dostawy -> Amazon + Apilo
+        #  - FBA -> Amazon + Apilo
+        def _delivered(o: OrderRecord) -> bool:
+            return bool(o.raw.get("_delivery_date"))
 
-        # === FAZA B: screenshoty Amazon Seller Central (FBA poza UE) ===
-        amazon_orders = [
-            o for o in filtered
-            if o.warehouse_type == "fba" and is_non_eu(o.country_code) and o.amazon_order_number
-        ]
+        plan: dict[str, dict[str, bool]] = {}
+        for o in filtered:
+            fba = o.warehouse_type == "fba"
+            deliv = _delivered(o)
+            has_track_url = bool(o.tracking_url and o.tracking_url.startswith("http"))
+            plan[o.order_id] = {
+                "tracking": (not fba) and deliv and has_track_url,
+                "amazon": (fba or (not fba and not deliv)) and bool(o.amazon_order_number),
+                "apilo": fba or (not fba and not deliv),
+            }
+
+        tracking_shot_paths: dict[str, Path] = {}
+        amazon_shot_paths: dict[str, Path] = {}
+        apilo_shot_paths: dict[str, Path] = {}
+
+        # === FAZA A: screenshoty trackingu kuriera (OWN z potwierdzona dostawa) ===
+        track_orders = [o for o in filtered if plan[o.order_id]["tracking"]]
+        for idx, order in enumerate(track_orders, start=1):
+            log(f"[A {idx}/{len(track_orders)}] Tracking kuriera: {order.courier} {order.tracking_number}")
+            try:
+                shot = capture_tracking_screenshot(
+                    tracking_url=order.tracking_url,
+                    output_path=order_folders[order.order_id] / "tracking.png",
+                    config=self.config,
+                    carrier=order.courier,
+                )
+                if shot:
+                    tracking_shot_paths[order.order_id] = shot
+            except Exception as exc:
+                log(f"[A {idx}] Tracking nie powiodl sie: {exc}")
+
+        # === FAZA B: screenshoty Amazon Seller Central ===
+        amazon_orders = [o for o in filtered if plan[o.order_id]["amazon"]]
         if self.config.capture_amazon and amazon_orders:
             if has_session(self.config, "amazon"):
-                log(f"Screenshoty Amazon: {len(amazon_orders)} zamowien FBA poza UE...")
+                log(f"Screenshoty Amazon: {len(amazon_orders)} zamowien...")
                 try:
                     with CaptureSession("amazon", self.config, headless=False) as sess:
                         for i, order in enumerate(amazon_orders, 1):
@@ -245,22 +263,15 @@ class DocumentPipeline:
                                                wait_ms=4000,
                                                wait_for_text=order.amazon_order_number,
                                                log_cb=log)
-                            if out and order.order_id not in shot_paths:
-                                shot_paths[order.order_id] = out
+                            if out:
+                                amazon_shot_paths[order.order_id] = out
                 except Exception as exc:
                     log(f"Sesja Amazon nie powiodla sie: {exc}")
             else:
-                log("UWAGA: brak sesji Amazon — kliknij 'Zaloguj do Amazon'. Pomijam screenshoty FBA.")
+                log("UWAGA: brak sesji Amazon — kliknij 'Zaloguj do Amazon'.")
 
-        # === FAZA C: screenshoty panelu Apilo ===
-        # Apilo robimy dla: zamowien FBA (karta zamowienia razem z Amazonem)
-        # oraz zamowien wlasnych BEZ znalezionego trackingu.
-        apilo_shot_paths: dict[str, Path] = {}
-        apilo_orders = [
-            o for o in filtered
-            if (o.warehouse_type == "fba" and is_non_eu(o.country_code))
-            or (o.warehouse_type != "fba" and not o.tracking_number)
-        ]
+        # === FAZA C: screenshoty panelu Apilo (karta zamowienia) ===
+        apilo_orders = [o for o in filtered if plan[o.order_id]["apilo"]]
         if self.config.capture_apilo_panel and apilo_orders:
             if self.config.apilo_panel_url and has_session(self.config, "apilo"):
                 log(f"Screenshoty panelu Apilo: {len(apilo_orders)} zamowien...")
@@ -290,14 +301,14 @@ class DocumentPipeline:
             result = ProcessingResult(order=order, status="processing")
             folder = order_folders[order.order_id]
             try:
-                # Lista screenshotow: Amazon + Apilo (FBA) albo tracking, albo Apilo
+                # Lista screenshotow (kolejnosc: Amazon, Apilo, tracking)
                 shots: list[Path] = []
-                if order.order_id in shot_paths and order.warehouse_type == "fba":
-                    shots.append(shot_paths[order.order_id])  # amazon.png
+                if order.order_id in amazon_shot_paths:
+                    shots.append(amazon_shot_paths[order.order_id])
                 if order.order_id in apilo_shot_paths:
-                    shots.append(apilo_shot_paths[order.order_id])  # apilo.png
-                if not shots and order.order_id in shot_paths:
-                    shots.append(shot_paths[order.order_id])  # tracking.png
+                    shots.append(apilo_shot_paths[order.order_id])
+                if order.order_id in tracking_shot_paths:
+                    shots.append(tracking_shot_paths[order.order_id])
 
                 # Pobranie faktury PL do pliku tymczasowego
                 invoice_pdf = None
