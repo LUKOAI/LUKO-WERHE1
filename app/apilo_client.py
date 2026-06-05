@@ -191,63 +191,111 @@ class ApiloClient:
         except requests.RequestException:
             return None
 
+    TRACKING_ENDPOINT = "/rest/api/shipping/shipment/tracking/"
+    SHIPMENT_DETAIL = "/rest/api/shipping/shipment/{sid}/"
+
+    def _shipment_postdate(self, offset: int) -> tuple[str, Any]:
+        """Zwraca (postDate 'YYYY-MM-DD', shipment_id) dla przesylki na danym offsecie."""
+        page = self._request("GET", self.TRACKING_ENDPOINT, params={"offset": offset, "limit": 1})
+        sh = page.get("shipments", [])
+        if not sh:
+            return "", None
+        sid = sh[0].get("id")
+        try:
+            det = self._request("GET", self.SHIPMENT_DETAIL.format(sid=sid))
+            pd = (det.get("postDate") or det.get("createdAt") or "")[:10]
+            return pd, sid
+        except Exception:
+            return "", sid
+
     def fetch_tracking_for_orders(self, order_ids: set[str],
+                                  date_from: str | None = None,
+                                  date_to: str | None = None,
                                   log_cb=None) -> dict[str, dict[str, str]]:
-        """Szuka numerów przesyłek dla podanych zamówień w endpoincie shipping.
+        """Numer przesylki + data dostawy dla zamowien — skan po ZAKRESIE DAT.
 
-        Zwraca dict: orderId -> {"tracking_number": "...", "carrier_broker_id": "..."}
+        Lista przesylek jest posortowana rosnaco po dacie. Binary search znajduje
+        poczatek miesiaca, potem skanujemy tylko ten zakres (i konczymy gdy znajdziemy
+        wszystkie szukane zamowienia). Zwraca orderId -> {tracking_number, received_date, status}.
         """
-        TRACKING_ENDPOINT = "/rest/api/shipping/shipment/tracking/"
-        SHIPMENT_DETAIL = "/rest/api/shipping/shipment/{sid}/"
-
         def log(msg):
             if log_cb:
                 log_cb(msg)
             logger.info(msg)
 
-        # Pobierz łączną liczbę shipmentów
-        first = self._request("GET", TRACKING_ENDPOINT, params={"offset": 0, "limit": 1})
+        first = self._request("GET", self.TRACKING_ENDPOINT, params={"offset": 0, "limit": 1})
         total = first.get("totalCount", 0)
         if total == 0:
             return {}
 
-        # Szukaj od końca (najnowsze), max 2000 shipmentów
-        search_count = min(total, 2000)
-        start_offset = max(0, total - search_count)
+        # Binary search: pierwszy offset gdzie postDate >= date_from
+        start_offset = 0
+        if date_from:
+            lo, hi = 0, total - 1
+            while lo <= hi:
+                mid = (lo + hi) // 2
+                pd, _ = self._shipment_postdate(mid)
+                if not pd:
+                    break
+                if pd < date_from:
+                    lo = mid + 1
+                else:
+                    start_offset = mid
+                    hi = mid - 1
+            # cofnij sie troche dla bezpieczenstwa (przesylka moze byc nadana pozniej niz zamowienie)
+            start_offset = max(0, start_offset - 512)
+
+        # gorna granica skanu = date_to + 14 dni (dostawa/nadanie po dacie zamowienia)
+        stop_boundary = date_to
+        if date_to:
+            try:
+                from datetime import datetime, timedelta
+                stop_boundary = (datetime.strptime(date_to, "%Y-%m-%d") + timedelta(days=14)).strftime("%Y-%m-%d")
+            except Exception:
+                stop_boundary = date_to
+
         result: dict[str, dict[str, str]] = {}
         remaining = set(order_ids)
-
-        log(f"Szukanie trackingu w {search_count} najnowszych przesylkach...")
+        log(f"Szukanie trackingu od pozycji {start_offset} (zakres {date_from} - {date_to})...")
 
         offset = start_offset
-        while offset < total and remaining:
-            batch_size = min(512, total - offset)
-            tracking_data = self._request("GET", TRACKING_ENDPOINT,
-                                          params={"offset": offset, "limit": batch_size})
-            shipments = tracking_data.get("shipments", [])
-
+        scanned = 0
+        MAX_SCAN = 6000  # bezpiecznik
+        while offset < total and remaining and scanned < MAX_SCAN:
+            batch = min(512, total - offset)
+            page = self._request("GET", self.TRACKING_ENDPOINT, params={"offset": offset, "limit": batch})
+            shipments = page.get("shipments", [])
+            if not shipments:
+                break
+            stop = False
             for s in shipments:
                 sid = s.get("id")
                 if not sid:
                     continue
                 try:
-                    detail = self._request("GET", SHIPMENT_DETAIL.format(sid=sid))
-                    oid = detail.get("orderId", "")
-                    if oid in remaining:
-                        tracking_num = detail.get("externalId") or s.get("externalId") or ""
-                        result[oid] = {
-                            "tracking_number": tracking_num,
-                            "status": s.get("statusDescription") or "",
-                            "received_date": s.get("receivedDate") or "",
-                        }
-                        remaining.discard(oid)
-                        log(f"  Tracking {oid}: {tracking_num}")
+                    det = self._request("GET", self.SHIPMENT_DETAIL.format(sid=sid))
                 except Exception:
                     continue
-
-            offset += batch_size
-            log(f"  Przeszukano {min(offset - start_offset, search_count)}/{search_count}, "
-                f"znaleziono {len(result)}/{len(order_ids)}")
+                scanned += 1
+                pd = (det.get("postDate") or det.get("createdAt") or "")[:10]
+                # przekroczylismy gorny zakres dat (+14 dni marginesu) -> stop
+                if stop_boundary and pd and pd > stop_boundary:
+                    stop = True
+                    break
+                oid = det.get("orderId", "")
+                if oid in remaining:
+                    result[oid] = {
+                        "tracking_number": det.get("externalId") or s.get("externalId") or "",
+                        "received_date": s.get("receivedDate") or "",
+                        "status": s.get("statusDescription") or "",
+                    }
+                    remaining.discard(oid)
+                    log(f"  Tracking {oid}: {result[oid]['tracking_number']} "
+                        f"(dostawa: {result[oid]['received_date'] or 'brak'})")
+            offset += len(shipments)
+            log(f"  Przeskanowano {scanned} przesylek, znaleziono {len(result)}/{len(order_ids)}")
+            if stop:
+                break
 
         return result
 

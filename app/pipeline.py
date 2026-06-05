@@ -158,21 +158,7 @@ class DocumentPipeline:
         filtered = [r for r in records if qualifies_for_tax_bundle(r)]
         log(f"Po filtrach (poza UE + faktura .pl + tracking): {len(filtered)}")
 
-        # Krok 4: Wyszukanie numerów tracking w shipmentach Apilo
-        own_orders_ids = {r.order_id for r in filtered if r.warehouse_type != "fba"}
-        if own_orders_ids:
-            log(f"Szukanie trackingu dla {len(own_orders_ids)} zamowien (magazyn wlasny)...")
-            tracking_map = self.client.fetch_tracking_for_orders(own_orders_ids, log_cb=log)
-            for r in filtered:
-                if r.order_id in tracking_map:
-                    t = tracking_map[r.order_id]
-                    r.tracking_number = t.get("tracking_number", "")
-                    r.raw["_delivery_date"] = t.get("received_date") or ""
-                    courier = r.courier.upper() if r.courier != "UNKNOWN" else ""
-                    if r.tracking_number and courier:
-                        r.tracking_url = self._build_tracking_url(courier, r.tracking_number)
-            log(f"Znaleziono tracking dla {len(tracking_map)}/{len(own_orders_ids)} zamowien")
-
+        # Krok 3b: Reczny wybor numerow (PRZED szukaniem trackingu — wtedy szybciej)
         apilo_query = {v.strip().lower() for v in (selected_apilo_numbers or set()) if v.strip()}
         amazon_query = {v.strip().lower() for v in (selected_amazon_numbers or set()) if v.strip()}
 
@@ -202,6 +188,23 @@ class DocumentPipeline:
         if test_mode:
             filtered = filtered[:5]
             log("Tryb testowy aktywny: przetwarzam tylko 5 pierwszych zamówień.")
+
+        # Krok 4: Wyszukanie numerow tracking + daty dostawy (tylko dla wybranych OWN)
+        own_orders_ids = {r.order_id for r in filtered if r.warehouse_type != "fba"}
+        if own_orders_ids:
+            log(f"Szukanie trackingu dla {len(own_orders_ids)} zamowien (magazyn wlasny)...")
+            tracking_map = self.client.fetch_tracking_for_orders(
+                own_orders_ids, date_from=date_from.isoformat(),
+                date_to=date_to.isoformat(), log_cb=log)
+            for r in filtered:
+                if r.order_id in tracking_map:
+                    t = tracking_map[r.order_id]
+                    r.tracking_number = t.get("tracking_number", "")
+                    r.raw["_delivery_date"] = t.get("received_date") or ""
+                    courier = r.courier.upper() if r.courier != "UNKNOWN" else ""
+                    if r.tracking_number and courier:
+                        r.tracking_url = self._build_tracking_url(courier, r.tracking_number)
+            log(f"Znaleziono tracking dla {len(tracking_map)}/{len(own_orders_ids)} zamowien")
 
         total = len(filtered)
         # Folder per zamowienie
