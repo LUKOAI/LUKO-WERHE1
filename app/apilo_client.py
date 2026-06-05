@@ -148,20 +148,30 @@ class ApiloClient:
             docs = payload
         return docs if isinstance(docs, list) else []
 
-    def download_document_file(self, document: dict[str, Any], output_path: Path) -> Path | None:
-        """Pobiera plik PDF faktury z pola 'media' dokumentu.
+    def fetch_document_detail(self, order_id: str, document_id) -> dict[str, Any]:
+        """Szczegoly dokumentu — zawieraja pole 'media' (UUID pliku PDF)."""
+        endpoint = f"/rest/api/orders/{order_id}/documents/{document_id}/"
+        try:
+            return self._request("GET", endpoint)
+        except ApiloClientError:
+            return {}
 
-        Apilo przechowuje pliki jako 'media' (UUID). Endpoint pobierania:
-          GET /rest/api/media/{mediaId}/   (do potwierdzenia na zywo)
-        Obslugujemy tez przypadek gdy 'media' jest pelnym URL-em.
+    def download_document_file(self, document: dict[str, Any], output_path: Path,
+                               order_id: str | None = None) -> Path | None:
+        """Pobiera plik PDF faktury.
+
+        Lista dokumentow nie zawiera 'media' — pobieramy je ze szczegolow dokumentu,
+        a nastepnie plik z GET /rest/api/media/{uuid}/ (potwierdzone na zywo).
         """
-        media = document.get("media") or document.get("file") or document.get("url")
+        media = document.get("media")
+        if not media and order_id and document.get("id"):
+            detail = self.fetch_document_detail(order_id, document.get("id"))
+            media = detail.get("media")
         if not media:
             return None
 
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
-        # media moze byc: pelny URL, UUID, albo dict z polem url/id
         if isinstance(media, dict):
             media = media.get("url") or media.get("id") or media.get("uuid") or ""
         media = str(media)
@@ -171,7 +181,6 @@ class ApiloClient:
         if media.startswith("http"):
             url = media
         else:
-            # zakladamy endpoint media po UUID
             url = self.config.apilo_base_url.rstrip("/") + f"/rest/api/media/{media}/"
 
         try:

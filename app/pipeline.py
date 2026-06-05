@@ -76,7 +76,7 @@ class DocumentPipeline:
             if doc.get("type") != 2 and not is_pl_invoice_number(number):
                 continue
             fname = f"faktura_{self._safe_filename(number)}.pdf"
-            out = self.client.download_document_file(doc, folder / fname)
+            out = self.client.download_document_file(doc, folder / fname, order_id=order.order_id)
             if out:
                 log(f"[D {idx}/{total}] Pobrano fakture PL: {number}")
                 downloaded.append(out)
