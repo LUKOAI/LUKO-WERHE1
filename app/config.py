@@ -26,6 +26,7 @@ class AppConfig:
     pdf_company_name: str = "WERHE / WERKON Polska"
     # Amazon Seller Central + panel Apilo (screenshoty)
     amazon_seller_domain: str = "sellercentral-europe.amazon.com"
+    amazon_seller_domain_na: str = "sellercentral.amazon.com"
     apilo_panel_url: str = ""
     browser_profiles_dir: str = "browser_profiles"
     capture_amazon: bool = True

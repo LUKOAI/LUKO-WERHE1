@@ -240,7 +240,7 @@ class DocumentPipeline:
             try:
                 shot = capture_tracking_screenshot(
                     tracking_url=order.tracking_url,
-                    output_path=order_folders[order.order_id] / "tracking.png",
+                    output_path=order_folders[order.order_id] / f"{order.order_number}_tracking.png",
                     config=self.config,
                     carrier=order.courier,
                 )
@@ -257,9 +257,10 @@ class DocumentPipeline:
                 try:
                     with CaptureSession("amazon", self.config, headless=False) as sess:
                         for i, order in enumerate(amazon_orders, 1):
-                            url = build_amazon_order_url(order.amazon_order_number, self.config)
-                            log(f"[Amazon {i}/{len(amazon_orders)}] {order.amazon_order_number}")
-                            out = sess.capture(url, order_folders[order.order_id] / "amazon.png",
+                            url = build_amazon_order_url(order.amazon_order_number, self.config,
+                                                         country_code=order.country_code)
+                            log(f"[Amazon {i}/{len(amazon_orders)}] {order.amazon_order_number} ({order.country_code})")
+                            out = sess.capture(url, order_folders[order.order_id] / f"{order.order_number}_amazon.png",
                                                wait_ms=4000,
                                                wait_for_text=order.amazon_order_number,
                                                log_cb=log)
@@ -281,7 +282,7 @@ class DocumentPipeline:
                             url = build_apilo_order_url(order.order_id, self.config)
                             log(f"[Apilo {i}/{len(apilo_orders)}] {order.order_id}")
                             out = sess.capture_cropped(
-                                url, order_folders[order.order_id] / "apilo.png",
+                                url, order_folders[order.order_id] / f"{order.order_number}_apilo.png",
                                 bottom_text="Wiadomości i załączniki",
                                 top_text=order.order_id,
                                 wait_for_text=order.order_id,
@@ -321,7 +322,8 @@ class DocumentPipeline:
                     output_path=folder / "_cover.pdf",
                     company_name=self.config.pdf_company_name,
                 )
-                pdf = merge_pdfs(cover, invoice_pdf, folder / "dokument.pdf")
+                final_name = f"{self._safe_filename(order.order_number)}.pdf"
+                pdf = merge_pdfs(cover, invoice_pdf, folder / final_name)
                 try:
                     Path(folder / "_cover.pdf").unlink()
                 except Exception:
