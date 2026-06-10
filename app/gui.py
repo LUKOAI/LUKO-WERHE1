@@ -139,7 +139,9 @@ class App(ctk.CTk):
         login_frame = ctk.CTkFrame(frame, fg_color="transparent")
         login_frame.pack(fill="x", padx=8, pady=2)
 
-        ctk.CTkButton(login_frame, text="Zaloguj do Amazon", command=lambda: self._open_login("amazon"),
+        ctk.CTkButton(login_frame, text="Zaloguj do Amazon EU", command=lambda: self._open_login("amazon"),
+                      fg_color="#FF9900", hover_color="#CC7A00", text_color="black").pack(side="left", padx=4)
+        ctk.CTkButton(login_frame, text="Zaloguj do Amazon USA", command=lambda: self._open_login("amazon_us"),
                       fg_color="#FF9900", hover_color="#CC7A00", text_color="black").pack(side="left", padx=4)
         ctk.CTkButton(login_frame, text="Zaloguj do panelu Apilo", command=lambda: self._open_login("apilo"),
                       fg_color="#2196F3", hover_color="#1976D2").pack(side="left", padx=4)

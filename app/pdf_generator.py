@@ -133,20 +133,26 @@ def generate_order_pdf(order: OrderRecord, screenshots, output_path: Path,
     return output_path
 
 
-def merge_pdfs(cover_pdf: Path, invoice_pdf: Path | None, output_path: Path) -> Path:
-    """Laczy strone(y) ze screenshotami z faktura (wielostronicowa) w jeden PDF.
+def merge_pdfs(cover_pdf: Path, invoice_pdfs, output_path: Path) -> Path:
+    """Laczy strone(y) ze screenshotami z faktura(mi) w jeden PDF.
 
-    Kolejnosc: najpierw screenshot(y), potem strony faktury.
-    Jesli brak faktury — zwraca sam cover.
+    Kolejnosc: najpierw screenshot(y), potem strony kolejnych faktur.
+    invoice_pdfs: pojedyncza sciezka, lista sciezek lub None.
     """
-    if not invoice_pdf or not Path(invoice_pdf).exists():
+    if invoice_pdfs is None:
+        invoice_pdfs = []
+    if isinstance(invoice_pdfs, (str, Path)):
+        invoice_pdfs = [invoice_pdfs]
+    invoices = [Path(p) for p in invoice_pdfs if p and Path(p).exists()]
+
+    if not invoices:
         if cover_pdf != output_path:
             Path(cover_pdf).replace(output_path)
         return output_path
     try:
         from pypdf import PdfReader, PdfWriter
         writer = PdfWriter()
-        for src in (cover_pdf, invoice_pdf):
+        for src in [cover_pdf, *invoices]:
             reader = PdfReader(str(src))
             for page in reader.pages:
                 writer.add_page(page)

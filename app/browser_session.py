@@ -26,9 +26,14 @@ class BrowserSessionError(Exception):
 
 
 def _profile_dir(config: AppConfig, site: str) -> Path:
-    """Katalog trwałego profilu przegladarki dla danego serwisu."""
+    """Katalog trwałego profilu przegladarki dla danego serwisu.
+
+    amazon_us wspoldzieli profil z amazon — jeden profil Firefox trzyma
+    cookies obu domen (sellercentral-europe i sellercentral.amazon.com).
+    """
     base = Path(config.browser_profiles_dir)
-    path = base / site
+    folder = "amazon" if site in ("amazon", "amazon_us") else site
+    path = base / folder
     path.mkdir(parents=True, exist_ok=True)
     return path
 
@@ -36,6 +41,8 @@ def _profile_dir(config: AppConfig, site: str) -> Path:
 def _login_url(config: AppConfig, site: str) -> str:
     if site == "amazon":
         return LOGIN_URLS["amazon"].format(domain=config.amazon_seller_domain)
+    if site == "amazon_us":
+        return LOGIN_URLS["amazon"].format(domain=config.amazon_seller_domain_na)
     if site == "apilo":
         if not config.apilo_panel_url:
             raise BrowserSessionError(
@@ -123,6 +130,15 @@ class CaptureSession:
             user_agent=USER_AGENT,
         )
         return self
+
+    def new_page(self):
+        """Nowa karta w sesji (do operacji niestandardowych, np. pobierania faktur)."""
+        return self._context.new_page()
+
+    def wait_if_login(self, page, target_url: str,
+                      log: Callable[[str], None]) -> None:
+        """Publiczny dostep do obslugi ekranu logowania/2FA."""
+        self._wait_if_login(page, target_url, log)
 
     def capture(self, url: str, output_path: Path, wait_ms: int = 5000,
                 clip_keyword: str | None = None,

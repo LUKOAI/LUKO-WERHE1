@@ -14,7 +14,7 @@ from app.pdf_generator import generate_order_pdf, generate_summary_pdf, merge_pd
 from app.summary_export import export_summary_xlsx
 from app.tracking_capture import capture_tracking_screenshot
 from app.browser_session import CaptureSession, has_session
-from app.amazon_capture import build_amazon_order_url
+from app.amazon_capture import build_amazon_order_url, download_amazon_pl_invoices
 from app.apilo_panel_capture import build_apilo_order_url
 
 
@@ -37,7 +37,7 @@ TRACKING_URLS = {
     "FEDEX": "https://www.fedex.com/fedextrack/?trknbr={tn}",
     "GLS": "https://gls-group.com/PL/pl/sledzenie-paczek?match={tn}",
     "INPOST": "https://inpost.pl/sledzenie-przesylek?number={tn}",
-    "POCZTA": "https://emonitoring.poczta-polska.pl/?numer={tn}",
+    "POCZT": "https://emonitoring.poczta-polska.pl/?numer={tn}",
 }
 
 
@@ -252,7 +252,9 @@ class DocumentPipeline:
             except Exception as exc:
                 log(f"[A {idx}] Tracking nie powiodl sie: {exc}")
 
-        # === FAZA B: screenshoty Amazon Seller Central ===
+        # === FAZA B: Amazon — screenshoty + faktury PL (Deemed supply) ===
+        amazon_invoice_paths: dict[str, list[Path]] = {}
+        amazon_pl_found: dict[str, bool] = {}
         amazon_orders = [o for o in filtered if plan[o.order_id]["amazon"]]
         if self.config.capture_amazon and amazon_orders:
             if has_session(self.config, "amazon"):
@@ -269,6 +271,16 @@ class DocumentPipeline:
                                                log_cb=log)
                             if out:
                                 amazon_shot_paths[order.order_id] = out
+                            # Faktury PL z Amazona — tylko FBA i tylko panel europejski
+                            # (USA: faktury sa w Apilo, brak VCS)
+                            if (order.warehouse_type == "fba"
+                                    and self.config.download_pl_invoices
+                                    and order.country_code.upper() not in ("US", "CA", "MX", "BR")):
+                                invs, has_pl = download_amazon_pl_invoices(
+                                    sess, url, order_folders[order.order_id],
+                                    order.amazon_order_number, log_cb=log)
+                                amazon_invoice_paths[order.order_id] = invs
+                                amazon_pl_found[order.order_id] = has_pl
                 except Exception as exc:
                     log(f"Sesja Amazon nie powiodla sie: {exc}")
             else:
@@ -305,6 +317,17 @@ class DocumentPipeline:
             result = ProcessingResult(order=order, status="processing")
             folder = order_folders[order.order_id]
             try:
+                # Filtr FBA: zamowienie kwalifikuje sie tylko z faktura PL w Amazon.
+                # Pomijamy TYLKO gdy faktycznie sprawdzilismy modal i PL nie bylo.
+                if (order.warehouse_type == "fba"
+                        and order.order_id in amazon_pl_found
+                        and not amazon_pl_found[order.order_id]):
+                    result.status = "pominieto"
+                    result.message = "Brak faktury PL w Amazon (Deemed supply)"
+                    log(f"[D {idx}/{total}] POMINIETO {order.order_number}: brak faktury PL w Amazon")
+                    processed.append(result)
+                    continue
+
                 # Lista screenshotow (kolejnosc: Amazon, Apilo, tracking)
                 shots: list[Path] = []
                 if order.order_id in amazon_shot_paths:
@@ -314,10 +337,13 @@ class DocumentPipeline:
                 if order.order_id in tracking_shot_paths:
                     shots.append(tracking_shot_paths[order.order_id])
 
-                # Pobranie faktury PL do pliku tymczasowego
-                invoice_pdf = None
+                # Faktury: Apilo (OWN) + Amazon (FBA)
+                invoice_pdfs: list[Path] = []
                 if self.config.download_pl_invoices:
-                    invoice_pdf = self._download_pl_invoice(order, folder, idx, total, log)
+                    apilo_inv = self._download_pl_invoice(order, folder, idx, total, log)
+                    if apilo_inv:
+                        invoice_pdfs.append(apilo_inv)
+                invoice_pdfs.extend(amazon_invoice_paths.get(order.order_id, []))
 
                 cover = generate_order_pdf(
                     order=order,
@@ -326,7 +352,7 @@ class DocumentPipeline:
                     company_name=self.config.pdf_company_name,
                 )
                 final_name = f"{self._safe_filename(order.order_number)}.pdf"
-                pdf = merge_pdfs(cover, invoice_pdf, folder / final_name)
+                pdf = merge_pdfs(cover, invoice_pdfs, folder / final_name)
                 try:
                     Path(folder / "_cover.pdf").unlink()
                 except Exception:

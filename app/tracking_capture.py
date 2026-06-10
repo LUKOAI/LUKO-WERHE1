@@ -13,9 +13,73 @@ DELIVERED_KEYWORDS = [
     "proof of delivery", "zugestellt", "doręcz", "dostarczona",
 ]
 
+# Kurierzy z dedykowanym przycinaniem miedzy stalymi kotwicami tekstowymi.
+# Poczta Polska (emonitoring): od "Dane przesyłki" do przycisku
+# "Instrukcja pobrania poświadczonego zgłoszenia celnego" (stale elementy strony).
+CARRIER_CROP_ANCHORS = {
+    "poczta-polska": {
+        "top": "Dane przesyłki",
+        "bottom": "Instrukcja pobrania poświadczonego zgłoszenia celnego",
+        "bottom_fallback": "Doręczona",
+    },
+}
+
 
 class TrackingCaptureError(Exception):
     pass
+
+
+def _anchors_for(tracking_url: str, carrier: str) -> dict | None:
+    u = (tracking_url or "").lower()
+    c = (carrier or "").upper()
+    if "poczta-polska" in u or "POCZT" in c:
+        return CARRIER_CROP_ANCHORS["poczta-polska"]
+    return None
+
+
+def _abs_rect(page, text: str):
+    try:
+        el = page.get_by_text(text, exact=False).first
+        el.wait_for(timeout=4000)
+        return el.evaluate(
+            "e=>{const r=e.getBoundingClientRect();"
+            "return {top:r.top+window.scrollY,bottom:r.bottom+window.scrollY};}"
+        )
+    except Exception:
+        return None
+
+
+def _crop_between(page, output_path: Path, anchors: dict) -> bool:
+    """Full-page screenshot przyciety od kotwicy gornej do dolnej (Pillow)."""
+    tmp = output_path.with_name(output_path.stem + "_full.png")
+    page.screenshot(path=str(tmp), full_page=True)
+    try:
+        from PIL import Image
+        img = Image.open(tmp)
+        W, H = img.size
+        top, bottom = 0, H
+        tr = _abs_rect(page, anchors["top"])
+        if tr:
+            top = max(0, int(tr["top"]) - 60)
+        br = _abs_rect(page, anchors["bottom"])
+        if not br and anchors.get("bottom_fallback"):
+            br = _abs_rect(page, anchors["bottom_fallback"])
+        if br:
+            bottom = min(H, int(br["bottom"]) + 30)
+        if bottom <= top:
+            top, bottom = 0, H
+        img.crop((0, top, W, bottom)).save(output_path)
+        try:
+            tmp.unlink()
+        except Exception:
+            pass
+        return True
+    except Exception:
+        try:
+            tmp.replace(output_path)
+        except Exception:
+            pass
+        return output_path.exists()
 
 
 def capture_tracking_screenshot(
@@ -46,6 +110,12 @@ def capture_tracking_screenshot(
             page.wait_for_timeout(4000)
             _dismiss_cookies(page)
             page.wait_for_timeout(3000)
+
+            # Kurier ze stalymi kotwicami (np. Poczta Polska) — przytnij dokladny zakres
+            anchors = _anchors_for(tracking_url, carrier)
+            if anchors:
+                if _crop_between(page, output_path, anchors):
+                    return output_path
 
             found = False
             for keyword in DELIVERED_KEYWORDS:
