@@ -211,6 +211,14 @@ class DocumentPipeline:
         order_folders: dict[str, Path] = {}
         for order in filtered:
             folder = order_pdf_dir / order.order_number
+            # wyczysc pozostalosci z poprzednich uruchomien (stare screenshoty/PDF-y)
+            if folder.exists():
+                for old in folder.iterdir():
+                    try:
+                        if old.is_file():
+                            old.unlink()
+                    except Exception:
+                        pass
             folder.mkdir(parents=True, exist_ok=True)
             order_folders[order.order_id] = folder
 
