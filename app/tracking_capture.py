@@ -21,6 +21,9 @@ CARRIER_CROP_ANCHORS = {
         "top": "Dane przesyłki",
         "bottom": "Instrukcja pobrania poświadczonego zgłoszenia celnego",
         "bottom_fallback": "Doręczona",
+        # naglowek kolumny tabeli statusow — closest('table') daje szerokosc tresci
+        # (odcina reklamy i teksty pomocy po prawej stronie)
+        "table_marker": "Jednostka obsługująca",
     },
 }
 
@@ -43,32 +46,55 @@ def _abs_rect(page, text: str):
         el.wait_for(timeout=4000)
         return el.evaluate(
             "e=>{const r=e.getBoundingClientRect();"
-            "return {top:r.top+window.scrollY,bottom:r.bottom+window.scrollY};}"
+            "return {top:r.top+window.scrollY,bottom:r.bottom+window.scrollY,"
+            "left:r.left+window.scrollX,right:r.right+window.scrollX};}"
+        )
+    except Exception:
+        return None
+
+
+def _abs_table_rect(page, text: str):
+    """Rect najblizszej tabeli zawierajacej dany tekst (szerokosc tresci)."""
+    try:
+        el = page.get_by_text(text, exact=False).first
+        el.wait_for(timeout=4000)
+        return el.evaluate(
+            "e=>{const t=e.closest('table'); if(!t) return null;"
+            "const r=t.getBoundingClientRect();"
+            "return {top:r.top+window.scrollY,bottom:r.bottom+window.scrollY,"
+            "left:r.left+window.scrollX,right:r.right+window.scrollX};}"
         )
     except Exception:
         return None
 
 
 def _crop_between(page, output_path: Path, anchors: dict) -> bool:
-    """Full-page screenshot przyciety od kotwicy gornej do dolnej (Pillow)."""
+    """Full-page screenshot przyciety pionowo (kotwice) i poziomo (tabela tresci)."""
     tmp = output_path.with_name(output_path.stem + "_full.png")
     page.screenshot(path=str(tmp), full_page=True)
     try:
         from PIL import Image
         img = Image.open(tmp)
         W, H = img.size
-        top, bottom = 0, H
+        top, bottom, left, right = 0, H, 0, W
         tr = _abs_rect(page, anchors["top"])
         if tr:
             top = max(0, int(tr["top"]) - 60)
+            left = max(0, int(tr["left"]) - 40)
         br = _abs_rect(page, anchors["bottom"])
         if not br and anchors.get("bottom_fallback"):
             br = _abs_rect(page, anchors["bottom_fallback"])
         if br:
             bottom = min(H, int(br["bottom"]) + 30)
-        if bottom <= top:
-            top, bottom = 0, H
-        img.crop((0, top, W, bottom)).save(output_path)
+        # szerokosc: prawa krawedz tabeli statusow + margines (odcina reklamy)
+        if anchors.get("table_marker"):
+            tab = _abs_table_rect(page, anchors["table_marker"])
+            if tab:
+                right = min(W, int(tab["right"]) + 30)
+                left = min(left, max(0, int(tab["left"]) - 30))
+        if bottom <= top or right <= left:
+            top, bottom, left, right = 0, H, 0, W
+        img.crop((left, top, right, bottom)).save(output_path)
         try:
             tmp.unlink()
         except Exception:
