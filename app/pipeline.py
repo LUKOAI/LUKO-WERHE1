@@ -14,7 +14,7 @@ from app.pdf_generator import generate_order_pdf, generate_summary_pdf, merge_pd
 from app.summary_export import export_summary_xlsx
 from app.tracking_capture import capture_tracking_screenshot
 from app.browser_session import CaptureSession, has_session
-from app.amazon_capture import build_amazon_order_url, download_amazon_pl_invoices
+from app.amazon_capture import build_amazon_order_url, download_amazon_pl_invoices, NA_COUNTRIES
 from app.apilo_panel_capture import build_apilo_order_url
 
 
@@ -240,18 +240,37 @@ class DocumentPipeline:
         #  - OWN z potwierdzona dostawa (received_date) -> screenshot trackingu
         #  - OWN bez potwierdzonej dostawy -> Amazon + Apilo
         #  - FBA -> Amazon + Apilo
+        #  - faktura Amazon: FBA zawsze; FBM/OWN gdy brak faktury PL w Apilo
         def _delivered(o: OrderRecord) -> bool:
             return bool(o.raw.get("_delivery_date"))
+
+        # Sprawdz z gory, ktore zamowienia maja fakture PL w Apilo
+        apilo_has_pl: dict[str, bool] = {}
+        if self.config.download_pl_invoices:
+            log("Sprawdzanie faktur w Apilo...")
+            for o in filtered:
+                try:
+                    docs = self.client.fetch_order_documents(o.order_id)
+                except Exception:
+                    docs = []
+                apilo_has_pl[o.order_id] = any(
+                    d.get("type") == 2 or is_pl_invoice_number(str(d.get("number") or ""))
+                    for d in docs
+                )
 
         plan: dict[str, dict[str, bool]] = {}
         for o in filtered:
             fba = o.warehouse_type == "fba"
             deliv = _delivered(o)
             has_track_url = bool(o.tracking_url and o.tracking_url.startswith("http"))
+            amazon_eu = bool(o.amazon_order_number) and o.country_code.upper() not in NA_COUNTRIES
             plan[o.order_id] = {
                 "tracking": (not fba) and deliv and has_track_url,
                 "amazon": (fba or (not fba and not deliv)) and bool(o.amazon_order_number),
                 "apilo": fba or (not fba and not deliv),
+                # faktury Amazon tylko z panelu EU (USA: faktury sa w Apilo)
+                "amazon_invoice": (self.config.download_pl_invoices and amazon_eu
+                                   and (fba or not apilo_has_pl.get(o.order_id, False))),
             }
 
         tracking_shot_paths: dict[str, Path] = {}
@@ -277,27 +296,25 @@ class DocumentPipeline:
         # === FAZA B: Amazon — screenshoty + faktury PL (Deemed supply) ===
         amazon_invoice_paths: dict[str, list[Path]] = {}
         amazon_pl_found: dict[str, bool] = {}
-        amazon_orders = [o for o in filtered if plan[o.order_id]["amazon"]]
+        amazon_orders = [o for o in filtered
+                         if plan[o.order_id]["amazon"] or plan[o.order_id]["amazon_invoice"]]
         if self.config.capture_amazon and amazon_orders:
             if has_session(self.config, "amazon"):
-                log(f"Screenshoty Amazon: {len(amazon_orders)} zamowien...")
+                log(f"Amazon (screenshoty/faktury): {len(amazon_orders)} zamowien...")
                 try:
                     with CaptureSession("amazon", self.config, headless=False) as sess:
                         for i, order in enumerate(amazon_orders, 1):
                             url = build_amazon_order_url(order.amazon_order_number, self.config,
                                                          country_code=order.country_code)
                             log(f"[Amazon {i}/{len(amazon_orders)}] {order.amazon_order_number} ({order.country_code})")
-                            out = sess.capture(url, order_folders[order.order_id] / f"{order.order_number}_amazon.png",
-                                               wait_ms=4000,
-                                               wait_for_text=order.amazon_order_number,
-                                               log_cb=log)
-                            if out:
-                                amazon_shot_paths[order.order_id] = out
-                            # Faktury PL z Amazona — tylko FBA i tylko panel europejski
-                            # (USA: faktury sa w Apilo, brak VCS)
-                            if (order.warehouse_type == "fba"
-                                    and self.config.download_pl_invoices
-                                    and order.country_code.upper() not in ("US", "CA", "MX", "BR")):
+                            if plan[order.order_id]["amazon"]:
+                                out = sess.capture(url, order_folders[order.order_id] / f"{order.order_number}_amazon.png",
+                                                   wait_ms=4000,
+                                                   wait_for_text=order.amazon_order_number,
+                                                   log_cb=log)
+                                if out:
+                                    amazon_shot_paths[order.order_id] = out
+                            if plan[order.order_id]["amazon_invoice"]:
                                 invs, has_pl = download_amazon_pl_invoices(
                                     sess, url, order_folders[order.order_id],
                                     order.amazon_order_number, log_cb=log)
