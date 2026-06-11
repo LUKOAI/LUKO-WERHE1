@@ -416,7 +416,18 @@ class ApiloClient:
 
     @staticmethod
     def _detect_fulfillment(src: dict[str, Any]) -> str:
-        """FBA gdy brak carrierId i carrierAccount (Amazon realizuje wysylke)."""
+        """Typ realizacji z API: preferences.type = FBA/FBM (panel: 'Typ zamowienia').
+
+        FBA/FBC -> 'fba' (Amazon wysyla), FBM -> 'own' (sprzedawca wysyla).
+        Fallback (brak preferences): FBA gdy brak carrierId i carrierAccount.
+        """
+        prefs = src.get("preferences") or {}
+        if isinstance(prefs, dict):
+            t = str(prefs.get("type") or "").upper()
+            if t in ("FBA", "FBC"):
+                return "fba"
+            if t == "FBM":
+                return "own"
         carrier_id = src.get("carrierId")
         carrier_account = src.get("carrierAccount")
         if carrier_id is None and carrier_account is None:
