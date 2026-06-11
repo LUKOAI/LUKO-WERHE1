@@ -34,6 +34,44 @@ def build_amazon_order_url(amazon_order_number: str, config: AppConfig,
     return f"https://{domain}/orders-v3/order/{amazon_order_number}"
 
 
+def _find_download_button_near(page, number: str):
+    """Znajduje przycisk Download w tym samym wierszu co numer faktury.
+
+    Modal Amazona nie zawsze uzywa <tr> — dopasowujemy PO POZYCJI:
+    bierzemy element z numerem i wybieramy przycisk/link 'Download'
+    o najblizszej wspolrzednej pionowej (ten sam wiersz wizualny).
+    """
+    try:
+        num_el = page.get_by_text(number, exact=False).first
+        num_el.wait_for(timeout=8000)
+        num_box = num_el.bounding_box()
+        if not num_box:
+            return None
+        num_y = num_box["y"] + num_box["height"] / 2
+
+        candidates = page.get_by_text("Download", exact=False)
+        count = candidates.count()
+        best, best_dist = None, 1e9
+        for i in range(count):
+            el = candidates.nth(i)
+            try:
+                box = el.bounding_box()
+            except Exception:
+                continue
+            if not box:
+                continue
+            y = box["y"] + box["height"] / 2
+            dist = abs(y - num_y)
+            if dist < best_dist:
+                best, best_dist = el, dist
+        # przycisk musi byc w sensownej odleglosci (ten sam wiersz, max ~60px)
+        if best is not None and best_dist <= 60:
+            return best
+        return best  # nawet jesli dalej — ostatnia szansa, kliknij najblizszy
+    except Exception:
+        return None
+
+
 def download_amazon_pl_invoices(sess, order_url: str, folder: Path,
                                 amazon_order_number: str,
                                 log_cb: Callable[[str], None] | None = None
@@ -96,9 +134,10 @@ def download_amazon_pl_invoices(sess, order_url: str, folder: Path,
 
         for number in pl_numbers:
             try:
-                # wiersz tabeli zawierajacy numer PL, w nim przycisk Download
-                row = page.locator("tr", has_text=number).first
-                btn = row.get_by_text("Download", exact=False).first
+                btn = _find_download_button_near(page, number)
+                if btn is None:
+                    log(f"  Amazon: nie znaleziono przycisku Download dla {number}")
+                    continue
                 with page.expect_download(timeout=30000) as dl_info:
                     btn.click()
                 download = dl_info.value
