@@ -119,16 +119,23 @@ def download_amazon_pl_invoices(sess, order_url: str, folder: Path,
         except Exception:
             log("  Amazon: modal faktur nie otworzyl sie.")
             return [], False
-        page.wait_for_timeout(1500)
 
-        # zbierz numery PL z tresci modala
-        try:
-            body_text = page.locator("body").inner_text(timeout=5000)
-        except Exception:
-            body_text = ""
-        pl_numbers = list(dict.fromkeys(PL_INVOICE_RE.findall(body_text)))
+        # wiersze modala laduja sie asynchronicznie — polluj do 16s
+        pl_numbers: list[str] = []
+        for _ in range(8):
+            page.wait_for_timeout(2000)
+            try:
+                body_text = page.locator("body").inner_text(timeout=5000)
+            except Exception:
+                body_text = ""
+            pl_numbers = list(dict.fromkeys(PL_INVOICE_RE.findall(body_text)))
+            if pl_numbers:
+                break
+            # tabela juz jest (widac Download), ale bez PL -> mozna konczyc wczesniej
+            if "Download" in body_text and _ >= 2:
+                break
         if not pl_numbers:
-            log("  Amazon: brak faktur PL w modalu.")
+            log("  Amazon: brak faktur PL w modalu (sprawdzono przez 16s).")
             return [], False
         has_pl = True
 
