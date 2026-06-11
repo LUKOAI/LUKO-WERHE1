@@ -139,6 +139,22 @@ class DocumentPipeline:
 
         log(f"Po wstepnym filtrze: {len(preliminary)} z {len(raw_orders)}")
 
+        # Krok 1b: Reczny wybor numerow PRZED pobieraniem szczegolow
+        # (numery Apilo = id, numery Amazon = idExternal — oba sa juz w danych listy;
+        # bez tego pobieralibysmy szczegoly tysiecy zamowien niepotrzebnie)
+        apilo_query = {v.strip().lower() for v in (selected_apilo_numbers or set()) if v.strip()}
+        amazon_query = {v.strip().lower() for v in (selected_amazon_numbers or set()) if v.strip()}
+        if apilo_query or amazon_query:
+            def matches_prelim(rec: OrderRecord) -> bool:
+                if apilo_query and (rec.order_number.strip().lower() in apilo_query
+                                    or rec.order_id.strip().lower() in apilo_query):
+                    return True
+                if amazon_query and rec.amazon_order_number.strip().lower() in amazon_query:
+                    return True
+                return False
+            preliminary = [(raw, rec) for raw, rec in preliminary if matches_prelim(rec)]
+            log(f"Po wstepnej selekcji numerow: {len(preliminary)}")
+
         # Krok 2: Pobieranie szczegółów TYLKO dla kwalifikujących się zamówień
         records: list[OrderRecord] = []
         for i, (raw, _) in enumerate(preliminary, 1):
@@ -158,10 +174,8 @@ class DocumentPipeline:
         filtered = [r for r in records if qualifies_for_tax_bundle(r)]
         log(f"Po filtrach (poza UE + faktura .pl + tracking): {len(filtered)}")
 
-        # Krok 3b: Reczny wybor numerow (PRZED szukaniem trackingu — wtedy szybciej)
-        apilo_query = {v.strip().lower() for v in (selected_apilo_numbers or set()) if v.strip()}
-        amazon_query = {v.strip().lower() for v in (selected_amazon_numbers or set()) if v.strip()}
-
+        # Krok 3b: Reczny wybor numerow — powtorka po wzbogaceniu danymi
+        # (wstepna selekcja byla w Kroku 1b; ta laczy dane ze szczegolow)
         if apilo_query or amazon_query:
             preselected_count = len(filtered)
 
