@@ -48,6 +48,26 @@ class DocumentPipeline:
         self.client = ApiloClient(self.config)
 
     @staticmethod
+    def _guess_courier_from_tracking(tracking_number: str) -> str:
+        """Rozpoznaje kuriera po formacie numeru przesylki.
+
+        1Z...            -> UPS
+        XX#########PL    -> Poczta Polska (np. CP919979907PL)
+        14 cyfr          -> DPD (np. 13349351985767)
+        """
+        import re
+        tn = (tracking_number or "").strip().upper()
+        if not tn:
+            return ""
+        if tn.startswith("1Z"):
+            return "UPS"
+        if re.fullmatch(r"[A-Z]{2}\d{9}PL", tn):
+            return "POCZTA POLSKA"
+        if re.fullmatch(r"\d{14}", tn):
+            return "DPD"
+        return ""
+
+    @staticmethod
     def _build_tracking_url(courier: str, tracking_number: str) -> str:
         courier_upper = courier.upper().split()[0]
         for key, tmpl in TRACKING_URLS.items():
@@ -215,6 +235,11 @@ class DocumentPipeline:
                     t = tracking_map[r.order_id]
                     r.tracking_number = t.get("tracking_number", "")
                     r.raw["_delivery_date"] = t.get("received_date") or ""
+                    # Kurier: najpierw z formatu numeru przesylki (pewne),
+                    # potem z nazwy pozycji wysylkowej Apilo (bywa "Shipping ...")
+                    guessed = self._guess_courier_from_tracking(r.tracking_number)
+                    if guessed:
+                        r.courier = guessed
                     courier = r.courier.upper() if r.courier != "UNKNOWN" else ""
                     if r.tracking_number and courier:
                         r.tracking_url = self._build_tracking_url(courier, r.tracking_number)
