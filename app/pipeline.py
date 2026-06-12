@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import time
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
@@ -329,6 +330,8 @@ class DocumentPipeline:
                 try:
                     with CaptureSession("amazon", self.config, headless=False) as sess:
                         for i, order in enumerate(amazon_orders, 1):
+                            if i > 1:
+                                time.sleep(2)  # lagodniejsze tempo — Amazon degraduje przy salwach
                             url = build_amazon_order_url(order.amazon_order_number, self.config,
                                                          country_code=order.country_code)
                             log(f"[Amazon {i}/{len(amazon_orders)}] {order.amazon_order_number} ({order.country_code})")
@@ -382,10 +385,10 @@ class DocumentPipeline:
             folder = order_folders[order.order_id]
             try:
                 # Filtr FBA: zamowienie kwalifikuje sie tylko z faktura PL w Amazon.
-                # Pomijamy TYLKO gdy faktycznie sprawdzilismy modal i PL nie bylo.
+                # Pomijamy TYLKO przy definitywnym False (modal otwarty, PL brak).
+                # None = nie udalo sie sprawdzic -> NIE pomijamy.
                 if (order.warehouse_type == "fba"
-                        and order.order_id in amazon_pl_found
-                        and not amazon_pl_found[order.order_id]):
+                        and amazon_pl_found.get(order.order_id) is False):
                     result.status = "pominieto"
                     result.message = "Brak faktury PL w Amazon (Deemed supply)"
                     log(f"[D {idx}/{total}] POMINIETO {order.order_number}: brak faktury PL w Amazon")

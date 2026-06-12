@@ -72,10 +72,29 @@ def _find_download_button_near(page, number: str):
         return None
 
 
+def _find_manage_invoice_button(page):
+    """Szuka przycisku 'Manage invoice' kilkoma strategiami (rozne warianty UI)."""
+    strategies = [
+        lambda: page.get_by_role("button", name=re.compile(r"manage invoices?", re.I)).first,
+        lambda: page.get_by_text(re.compile(r"Manage invoices?", re.I)).first,
+        lambda: page.locator("[id*='invoice' i], [class*='invoice' i]")
+                    .get_by_text(re.compile("manage", re.I)).first,
+    ]
+    for make in strategies:
+        try:
+            el = make()
+            el.wait_for(timeout=7000)
+            el.scroll_into_view_if_needed(timeout=3000)
+            return el
+        except Exception:
+            continue
+    return None
+
+
 def download_amazon_pl_invoices(sess, order_url: str, folder: Path,
                                 amazon_order_number: str,
                                 log_cb: Callable[[str], None] | None = None
-                                ) -> tuple[list[Path], bool]:
+                                ) -> tuple[list[Path], bool | None]:
     """Pobiera faktury PL (Deemed supply) z modala 'Manage invoice'.
 
     Przebieg (potwierdzony na screenshotach klienta):
@@ -83,14 +102,17 @@ def download_amazon_pl_invoices(sess, order_url: str, folder: Path,
       2. Modal 'Invoices for order {nr}' z tabela: Date / Type / Number / Status / Action
       3. Wiersze z numerem PL... (typ 'Deemed supply') -> przycisk Download
 
-    Zwraca (lista_pobranych_pdf, czy_znaleziono_fakture_PL).
+    Zwraca (lista_pobranych_pdf, czy_jest_faktura_PL):
+      True  = modal otwarty, faktura PL jest
+      False = modal otwarty, faktury PL NIE ma (definitywne — mozna pominac FBA)
+      None  = nie udalo sie sprawdzic (NIE pomijac zamowienia!)
     """
     def log(m: str) -> None:
         if log_cb:
             log_cb(m)
 
     downloaded: list[Path] = []
-    has_pl = False
+    has_pl: bool | None = None
     page = sess.new_page()
     try:
         try:
@@ -104,21 +126,41 @@ def download_amazon_pl_invoices(sess, order_url: str, folder: Path,
         try:
             page.get_by_text(amazon_order_number, exact=False).first.wait_for(timeout=30000)
         except Exception:
-            log("  Amazon: strona zamowienia nie zaladowala sie — pomijam faktury.")
-            return [], False
+            log("  Amazon: strona zamowienia nie zaladowala sie — nie sprawdzono faktur.")
+            return [], None
 
-        # otworz modal 'Manage invoice'
+        # otworz modal 'Manage invoice' (z reload i druga proba)
+        btn = _find_manage_invoice_button(page)
+        if btn is None:
+            log("  Amazon: brak przycisku 'Manage invoice' — przeladowuje strone...")
+            try:
+                page.reload(wait_until="domcontentloaded", timeout=45000)
+                page.wait_for_timeout(5000)
+                page.get_by_text(amazon_order_number, exact=False).first.wait_for(timeout=20000)
+            except Exception:
+                pass
+            btn = _find_manage_invoice_button(page)
+        if btn is None:
+            # screenshot diagnostyczny — zobaczymy co Amazon wyswietlil
+            try:
+                dbg = folder / f"{amazon_order_number}_DEBUG_brak_przycisku.png"
+                page.screenshot(path=str(dbg), full_page=True)
+                log(f"  Amazon: brak przycisku 'Manage invoice' (debug: {dbg.name})")
+            except Exception:
+                log("  Amazon: brak przycisku 'Manage invoice'.")
+            return [], None
+
         try:
-            page.get_by_text("Manage invoice", exact=False).first.click(timeout=8000)
+            btn.click(timeout=8000)
         except Exception:
-            log("  Amazon: brak przycisku 'Manage invoice' — pomijam faktury.")
-            return [], False
+            log("  Amazon: nie udalo sie kliknac 'Manage invoice'.")
+            return [], None
 
         try:
             page.get_by_text("Invoices for order", exact=False).first.wait_for(timeout=15000)
         except Exception:
             log("  Amazon: modal faktur nie otworzyl sie.")
-            return [], False
+            return [], None
 
         # wiersze modala laduja sie asynchronicznie — polluj do 16s
         pl_numbers: list[str] = []
