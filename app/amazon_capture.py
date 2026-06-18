@@ -73,7 +73,12 @@ def _find_download_button_near(page, number: str):
 
 
 def _find_manage_invoice_button(page):
-    """Szuka przycisku 'Manage invoice' kilkoma strategiami (rozne warianty UI)."""
+    """Szuka przycisku 'Manage invoice' kilkoma strategiami + JS fallback.
+
+    Po wielu nawigacjach w jednej sesji Amazon SPA degraduje sie i Playwright
+    nie znajduje przycisku standardowymi locatorami — JS querySelector dziala.
+    """
+    # Strategia 1-3: Playwright locatory
     strategies = [
         lambda: page.get_by_role("button", name=re.compile(r"manage invoices?", re.I)).first,
         lambda: page.get_by_text(re.compile(r"Manage invoices?", re.I)).first,
@@ -83,11 +88,29 @@ def _find_manage_invoice_button(page):
     for make in strategies:
         try:
             el = make()
-            el.wait_for(timeout=7000)
+            el.wait_for(timeout=5000)
             el.scroll_into_view_if_needed(timeout=3000)
             return el
         except Exception:
             continue
+
+    # Strategia 4: JavaScript querySelector (SPA moze miec elementy niedostepne dla locatorow)
+    try:
+        handle = page.evaluate_handle("""
+            () => {
+                const all = document.querySelectorAll('span, button, a, div');
+                for (const el of all) {
+                    const txt = (el.textContent || '').trim();
+                    if (/^manage invoices?$/i.test(txt)) return el;
+                }
+                return null;
+            }
+        """)
+        if handle and str(handle) != "JSHandle@null":
+            return handle.as_element()
+    except Exception:
+        pass
+
     return None
 
 
@@ -119,15 +142,16 @@ def download_amazon_pl_invoices(sess, order_url: str, folder: Path,
             page.goto(order_url, wait_until="domcontentloaded", timeout=45000)
         except Exception:
             page.goto(order_url, wait_until="commit", timeout=45000)
-        page.wait_for_timeout(3000)
+        page.wait_for_timeout(5000)
         sess.wait_if_login(page, order_url, log)
 
-        # czekaj na zaladowanie strony zamowienia
+        # czekaj na zaladowanie strony zamowienia (SPA — dlugie ladowanie)
         try:
             page.get_by_text(amazon_order_number, exact=False).first.wait_for(timeout=30000)
         except Exception:
             log("  Amazon: strona zamowienia nie zaladowala sie — nie sprawdzono faktur.")
             return [], None
+        page.wait_for_timeout(3000)
 
         # otworz modal 'Manage invoice' (z reload i druga proba)
         btn = _find_manage_invoice_button(page)
@@ -153,8 +177,12 @@ def download_amazon_pl_invoices(sess, order_url: str, folder: Path,
         try:
             btn.click(timeout=8000)
         except Exception:
-            log("  Amazon: nie udalo sie kliknac 'Manage invoice'.")
-            return [], None
+            # JS click fallback
+            try:
+                page.evaluate("e => e.click()", btn)
+            except Exception:
+                log("  Amazon: nie udalo sie kliknac 'Manage invoice'.")
+                return [], None
 
         try:
             page.get_by_text("Invoices for order", exact=False).first.wait_for(timeout=15000)
