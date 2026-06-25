@@ -34,16 +34,17 @@ def build_amazon_order_url(amazon_order_number: str, config: AppConfig,
     return f"https://{domain}/orders-v3/order/{amazon_order_number}"
 
 
-def _find_download_button_near(page, number: str):
-    """Znajduje przycisk Download w tym samym wierszu co numer faktury.
+def _click_download_for_number(page, number: str, log) -> Path | None:
+    """Klika Download przy numerze faktury i pobiera plik.
 
-    Modal Amazona nie zawsze uzywa <tr> — dopasowujemy PO POZYCJI:
-    bierzemy element z numerem i wybieramy przycisk/link 'Download'
-    o najblizszej wspolrzednej pionowej (ten sam wiersz wizualny).
+    Uzywa JS click (pomija problemy z 'waiting for element to be stable')
+    oraz szuka przycisku po pozycji (ten sam wiersz wizualny).
     """
     try:
         num_el = page.get_by_text(number, exact=False).first
         num_el.wait_for(timeout=8000)
+        num_el.scroll_into_view_if_needed(timeout=3000)
+        page.wait_for_timeout(500)
         num_box = num_el.bounding_box()
         if not num_box:
             return None
@@ -64,12 +65,63 @@ def _find_download_button_near(page, number: str):
             dist = abs(y - num_y)
             if dist < best_dist:
                 best, best_dist = el, dist
-        # przycisk musi byc w sensownej odleglosci (ten sam wiersz, max ~60px)
-        if best is not None and best_dist <= 60:
-            return best
-        return best  # nawet jesli dalej — ostatnia szansa, kliknij najblizszy
+        if best is None:
+            return None
+
+        # JS click — stabilniejszy niz Playwright click (modal cesto blokuje)
+        try:
+            with page.expect_download(timeout=30000) as dl_info:
+                page.evaluate("e => e.click()", best)
+            return dl_info.value
+        except Exception:
+            # fallback: Playwright force-click
+            try:
+                with page.expect_download(timeout=20000) as dl_info:
+                    best.click(force=True, timeout=10000)
+                return dl_info.value
+            except Exception:
+                return None
     except Exception:
         return None
+
+
+def _collect_pl_numbers_all_pages(page) -> list[str]:
+    """Zbiera numery PL ze WSZYSTKICH stron modala (paginacja 1,2,3...)."""
+    all_numbers: list[str] = []
+
+    def _scan_current_page():
+        try:
+            text = page.locator("body").inner_text(timeout=5000)
+        except Exception:
+            text = ""
+        return list(dict.fromkeys(PL_INVOICE_RE.findall(text)))
+
+    # polluj strone 1
+    for _ in range(6):
+        page.wait_for_timeout(2000)
+        nums = _scan_current_page()
+        if nums or "Download" in (page.locator("body").inner_text(timeout=3000) if True else ""):
+            all_numbers.extend(nums)
+            break
+
+    # przejdz przez kolejne strony modala (jesli sa)
+    while True:
+        try:
+            # szukamy przycisku nastepnej strony (> lub numer strony)
+            next_btn = page.locator("button:has-text('>'), a:has-text('>')").first
+            if not next_btn.is_visible(timeout=2000):
+                break
+            next_btn.click(timeout=5000)
+            page.wait_for_timeout(2500)
+            nums = _scan_current_page()
+            new = [n for n in nums if n not in all_numbers]
+            all_numbers.extend(new)
+            if not new:
+                break
+        except Exception:
+            break
+
+    return list(dict.fromkeys(all_numbers))
 
 
 def _find_manage_invoice_button(page):
@@ -190,40 +242,58 @@ def download_amazon_pl_invoices(sess, order_url: str, folder: Path,
             log("  Amazon: modal faktur nie otworzyl sie.")
             return [], None
 
-        # wiersze modala laduja sie asynchronicznie — polluj do 16s
-        pl_numbers: list[str] = []
-        for _ in range(8):
-            page.wait_for_timeout(2000)
-            try:
-                body_text = page.locator("body").inner_text(timeout=5000)
-            except Exception:
-                body_text = ""
-            pl_numbers = list(dict.fromkeys(PL_INVOICE_RE.findall(body_text)))
-            if pl_numbers:
-                break
-            # tabela juz jest (widac Download), ale bez PL -> mozna konczyc wczesniej
-            if "Download" in body_text and _ >= 2:
-                break
+        # Zbierz numery PL ze WSZYSTKICH stron modala (paginacja 1,2,3...)
+        pl_numbers = _collect_pl_numbers_all_pages(page)
         if not pl_numbers:
-            log("  Amazon: brak faktur PL w modalu (sprawdzono przez 16s).")
+            log("  Amazon: brak faktur PL w modalu (wszystkie strony sprawdzone).")
             return [], False
         has_pl = True
+        log(f"  Amazon: znaleziono {len(pl_numbers)} faktur PL: {', '.join(pl_numbers[:5])}")
 
-        for number in pl_numbers:
+        # Wracamy na strone 1 modala (klikamy '<' wielokrotnie lub 1)
+        for _ in range(5):
             try:
-                btn = _find_download_button_near(page, number)
-                if btn is None:
-                    log(f"  Amazon: nie znaleziono przycisku Download dla {number}")
+                prev = page.locator("button:has-text('<'), a:has-text('<')").first
+                if prev.is_visible(timeout=1000):
+                    prev.click(timeout=3000)
+                    page.wait_for_timeout(1000)
+                else:
+                    break
+            except Exception:
+                break
+
+        # Pobierz kazda fakture PL — przechodzac przez strony modala
+        remaining = set(pl_numbers)
+        max_pages = 5
+        for page_num in range(max_pages):
+            for number in list(remaining):
+                try:
+                    page.get_by_text(number, exact=False).first.wait_for(timeout=2000)
+                except Exception:
                     continue
-                with page.expect_download(timeout=30000) as dl_info:
-                    btn.click()
-                download = dl_info.value
-                out = folder / f"faktura_amazon_{number}.pdf"
-                download.save_as(str(out))
-                downloaded.append(out)
-                log(f"  Amazon: pobrano fakture {number}")
-            except Exception as exc:
-                log(f"  Amazon: nie udalo sie pobrac {number}: {exc}")
+                dl = _click_download_for_number(page, number, log)
+                if dl:
+                    out = folder / f"faktura_amazon_{number}.pdf"
+                    dl.save_as(str(out))
+                    downloaded.append(out)
+                    remaining.discard(number)
+                    log(f"  Amazon: pobrano fakture {number}")
+                    page.wait_for_timeout(1000)
+                else:
+                    log(f"  Amazon: nie udalo sie pobrac {number}")
+                    remaining.discard(number)
+            if not remaining:
+                break
+            # nastepna strona modala
+            try:
+                nxt = page.locator("button:has-text('>'), a:has-text('>')").first
+                if nxt.is_visible(timeout=2000):
+                    nxt.click(timeout=5000)
+                    page.wait_for_timeout(2500)
+                else:
+                    break
+            except Exception:
+                break
 
         return downloaded, has_pl
     except Exception as exc:
