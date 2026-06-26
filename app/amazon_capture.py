@@ -85,11 +85,15 @@ def _click_download_for_number(page, number: str, log) -> Path | None:
         return None
 
 
-def _collect_pl_numbers_all_pages(page) -> list[str]:
-    """Zbiera numery PL ze WSZYSTKICH stron modala (paginacja 1,2,3...)."""
+def _collect_pl_numbers_all_pages(page, log=None) -> list[str]:
+    """Zbiera numery PL ze WSZYSTKICH stron modala (paginacja 1,2,3...).
+
+    Amazon modal: na dole tabeli sa numery stron (< 1 2 3 >).
+    Klikamy kazdy numer strony i zbieramy PL numery.
+    """
     all_numbers: list[str] = []
 
-    def _scan_current_page():
+    def _scan():
         try:
             text = page.locator("body").inner_text(timeout=5000)
         except Exception:
@@ -99,25 +103,47 @@ def _collect_pl_numbers_all_pages(page) -> list[str]:
     # polluj strone 1
     for _ in range(6):
         page.wait_for_timeout(2000)
-        nums = _scan_current_page()
-        if nums or "Download" in (page.locator("body").inner_text(timeout=3000) if True else ""):
-            all_numbers.extend(nums)
+        nums = _scan()
+        all_numbers.extend(nums)
+        if nums:
             break
-
-    # przejdz przez kolejne strony modala (jesli sa)
-    while True:
         try:
-            # szukamy przycisku nastepnej strony (> lub numer strony)
-            next_btn = page.locator("button:has-text('>'), a:has-text('>')").first
-            if not next_btn.is_visible(timeout=2000):
+            body = page.locator("body").inner_text(timeout=3000)
+            if "Download" in body and _ >= 2:
                 break
-            next_btn.click(timeout=5000)
-            page.wait_for_timeout(2500)
-            nums = _scan_current_page()
+        except Exception:
+            pass
+
+    # Sprawdz czy sa dodatkowe strony — szukamy numerow stron w modalu
+    # Modal ma paginacje: < 1 2 3 >  — klikamy 2, 3, itd.
+    for page_num in range(2, 10):
+        try:
+            # Szukamy klikalnego elementu z numerem strony w kontekscie modala
+            # (nie moze byc zbyt ogolny zeby nie kliknac czegos innego)
+            page_btn = page.evaluate_handle(f"""
+                () => {{
+                    const modal = document.querySelector('[role="dialog"], [class*="modal"], [class*="Modal"]');
+                    const root = modal || document;
+                    const candidates = root.querySelectorAll('button, a, span[role="button"], [tabindex]');
+                    for (const el of candidates) {{
+                        const txt = (el.textContent || '').trim();
+                        if (txt === '{page_num}') return el;
+                    }}
+                    return null;
+                }}
+            """)
+            if not page_btn or str(page_btn) == "JSHandle@null":
+                break
+            el = page_btn.as_element()
+            if el is None:
+                break
+            page.evaluate("e => e.click()", el)
+            page.wait_for_timeout(3000)
+            nums = _scan()
             new = [n for n in nums if n not in all_numbers]
             all_numbers.extend(new)
-            if not new:
-                break
+            if log and new:
+                log(f"  Amazon: strona {page_num} modala: +{len(new)} faktur PL")
         except Exception:
             break
 
@@ -243,24 +269,31 @@ def download_amazon_pl_invoices(sess, order_url: str, folder: Path,
             return [], None
 
         # Zbierz numery PL ze WSZYSTKICH stron modala (paginacja 1,2,3...)
-        pl_numbers = _collect_pl_numbers_all_pages(page)
+        pl_numbers = _collect_pl_numbers_all_pages(page, log=log)
         if not pl_numbers:
             log("  Amazon: brak faktur PL w modalu (wszystkie strony sprawdzone).")
             return [], False
         has_pl = True
         log(f"  Amazon: znaleziono {len(pl_numbers)} faktur PL: {', '.join(pl_numbers[:5])}")
 
-        # Wracamy na strone 1 modala (klikamy '<' wielokrotnie lub 1)
-        for _ in range(5):
-            try:
-                prev = page.locator("button:has-text('<'), a:has-text('<')").first
-                if prev.is_visible(timeout=1000):
-                    prev.click(timeout=3000)
-                    page.wait_for_timeout(1000)
-                else:
-                    break
-            except Exception:
-                break
+        # Wracamy na strone 1 modala (klikamy numer '1')
+        try:
+            page1_btn = page.evaluate_handle("""
+                () => {
+                    const modal = document.querySelector('[role="dialog"], [class*="modal"], [class*="Modal"]');
+                    const root = modal || document;
+                    const els = root.querySelectorAll('button, a, span[role="button"], [tabindex]');
+                    for (const el of els) {
+                        if ((el.textContent || '').trim() === '1') return el;
+                    }
+                    return null;
+                }
+            """)
+            if page1_btn and str(page1_btn) != "JSHandle@null":
+                page.evaluate("e => e.click()", page1_btn.as_element())
+                page.wait_for_timeout(2000)
+        except Exception:
+            pass
 
         # Pobierz kazda fakture PL — przechodzac przez strony modala
         remaining = set(pl_numbers)
