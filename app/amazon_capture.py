@@ -34,26 +34,98 @@ def build_amazon_order_url(amazon_order_number: str, config: AppConfig,
     return f"https://{domain}/orders-v3/order/{amazon_order_number}"
 
 
-def _click_download_for_number(page, number: str, log) -> Path | None:
-    """Klika Download przy numerze faktury i pobiera plik.
+def _is_valid_pdf(path: Path) -> bool:
+    """Sprawdza czy plik to prawdziwy PDF (naglowek %PDF + sensowny rozmiar)."""
+    try:
+        if path.stat().st_size < 8000:  # prawdziwa faktura ~60-80 KB; 6 KB = smiec
+            return False
+        with open(path, "rb") as fh:
+            return fh.read(5).startswith(b"%PDF")
+    except Exception:
+        return False
 
-    Uzywa JS click (pomija problemy z 'waiting for element to be stable')
-    oraz szuka przycisku po pozycji (ten sam wiersz wizualny).
+
+def _download_url_for_number(page, number: str) -> str | None:
+    """Wyciaga URL dokumentu (href) z linku Download przy danym numerze faktury.
+
+    Amazon: przycisk Download to <a href="/documents/download/{uuid}/document.pdf">.
+    Pobranie po URL z ciasteczkami sesji = gwarantowany prawdziwy PDF
+    (bez problemow z klikaniem w niestabilnym modalu).
     """
+    try:
+        href = page.evaluate(
+            """
+            (num) => {
+                // znajdz element z numerem faktury
+                const all = Array.from(document.querySelectorAll('*'));
+                let numEl = null;
+                for (const el of all) {
+                    if (el.children.length === 0 && (el.textContent || '').trim() === num) {
+                        numEl = el; break;
+                    }
+                }
+                if (!numEl) return null;
+                // wiersz tabeli / kontener
+                let row = numEl;
+                for (let i = 0; i < 6 && row.parentElement; i++) {
+                    row = row.parentElement;
+                    const a = row.querySelector("a[href*='download'], a[href*='document'], a[download]");
+                    if (a) return a.href;
+                }
+                // fallback: najblizszy link Download wzgledem pozycji
+                const r0 = numEl.getBoundingClientRect();
+                const links = Array.from(document.querySelectorAll("a[href*='download'], a[href*='document'], a[download]"));
+                let best = null, bestD = 1e9;
+                for (const a of links) {
+                    const r = a.getBoundingClientRect();
+                    const d = Math.abs((r.top + r.height/2) - (r0.top + r0.height/2));
+                    if (d < bestD) { bestD = d; best = a; }
+                }
+                return best ? best.href : null;
+            }
+            """,
+            number,
+        )
+        return href
+    except Exception:
+        return None
+
+
+def _download_invoice_for_number(page, number: str, out_path: Path, log) -> bool:
+    """Pobiera fakture PL o danym numerze do out_path. Zwraca True przy sukcesie.
+
+    Kolejnosc (od najpewniejszej):
+      1. URL dokumentu + fetch przez zalogowana sesje (page.context.request)
+      2. Playwright klik na 'Download' + expect_download
+      3. force-click
+    Po kazdej probie waliduje, ze to prawdziwy PDF.
+    """
+    # Strategia 1: bezposredni fetch po URL (z ciasteczkami sesji)
+    url = _download_url_for_number(page, number)
+    if url:
+        try:
+            resp = page.context.request.get(url, timeout=30000)
+            if resp.ok:
+                body = resp.body()
+                if body[:5].startswith(b"%PDF") and len(body) >= 8000:
+                    out_path.write_bytes(body)
+                    return True
+        except Exception:
+            pass
+
+    # Strategie 2-3: klikanie przycisku Download (ten sam wiersz wizualny)
     try:
         num_el = page.get_by_text(number, exact=False).first
         num_el.wait_for(timeout=8000)
         num_el.scroll_into_view_if_needed(timeout=3000)
-        page.wait_for_timeout(500)
+        page.wait_for_timeout(400)
         num_box = num_el.bounding_box()
         if not num_box:
-            return None
+            return False
         num_y = num_box["y"] + num_box["height"] / 2
-
         candidates = page.get_by_text("Download", exact=False)
-        count = candidates.count()
         best, best_dist = None, 1e9
-        for i in range(count):
+        for i in range(candidates.count()):
             el = candidates.nth(i)
             try:
                 box = el.bounding_box()
@@ -62,27 +134,26 @@ def _click_download_for_number(page, number: str, log) -> Path | None:
             if not box:
                 continue
             y = box["y"] + box["height"] / 2
-            dist = abs(y - num_y)
-            if dist < best_dist:
-                best, best_dist = el, dist
+            if abs(y - num_y) < best_dist:
+                best, best_dist = el, abs(y - num_y)
         if best is None:
-            return None
+            return False
 
-        # JS click — stabilniejszy niz Playwright click (modal cesto blokuje)
-        try:
-            with page.expect_download(timeout=30000) as dl_info:
-                page.evaluate("e => e.click()", best)
-            return dl_info.value
-        except Exception:
-            # fallback: Playwright force-click
+        for clicker in (
+            lambda: best.click(timeout=10000),
+            lambda: best.click(force=True, timeout=10000),
+        ):
             try:
-                with page.expect_download(timeout=20000) as dl_info:
-                    best.click(force=True, timeout=10000)
-                return dl_info.value
+                with page.expect_download(timeout=25000) as dl_info:
+                    clicker()
+                dl_info.value.save_as(str(out_path))
+                if _is_valid_pdf(out_path):
+                    return True
             except Exception:
-                return None
+                continue
     except Exception:
-        return None
+        return False
+    return False
 
 
 def _collect_pl_numbers_all_pages(page, log=None) -> list[str]:
@@ -304,16 +375,15 @@ def download_amazon_pl_invoices(sess, order_url: str, folder: Path,
                     page.get_by_text(number, exact=False).first.wait_for(timeout=2000)
                 except Exception:
                     continue
-                dl = _click_download_for_number(page, number, log)
-                if dl:
-                    out = folder / f"faktura_amazon_{number}.pdf"
-                    dl.save_as(str(out))
+                out = folder / f"faktura_amazon_{number}.pdf"
+                if _download_invoice_for_number(page, number, out, log):
                     downloaded.append(out)
                     remaining.discard(number)
-                    log(f"  Amazon: pobrano fakture {number}")
-                    page.wait_for_timeout(1000)
+                    size_kb = out.stat().st_size // 1024
+                    log(f"  Amazon: pobrano fakture {number} ({size_kb} KB)")
+                    page.wait_for_timeout(800)
                 else:
-                    log(f"  Amazon: nie udalo sie pobrac {number}")
+                    log(f"  Amazon: nie udalo sie pobrac {number} (niepoprawny PDF)")
                     remaining.discard(number)
             if not remaining:
                 break
