@@ -231,35 +231,51 @@ def _collect_pl_numbers_all_pages(page, log=None) -> list[str]:
 
 
 def _find_manage_invoice_button(page):
-    """Szuka przycisku 'Manage invoice' kilkoma strategiami + JS fallback.
+    """Szuka przycisku 'Manage invoice' — stary i NOWY Seller Central.
 
-    Po wielu nawigacjach w jednej sesji Amazon SPA degraduje sie i Playwright
-    nie znajduje przycisku standardowymi locatorami — JS querySelector dziala.
+    Nowy UI (potwierdzony HTML od klienta):
+      <span data-test-id="manage-idu-invoice-button" class="a-button">
+        <input class="a-button-input" type="submit" value="Manage invoice">
+        <span class="a-button-text" aria-hidden="true">Manage invoice</span>
+    Klikalny jest INPUT (submit) — tekst w spanie jest tylko dekoracja,
+    JS-klik na spanie nic nie robi. Dlatego zawsze celujemy w input.
     """
-    # Strategia 1-3: Playwright locatory
     strategies = [
+        # NOWY UI: stabilny data-test-id — najpierw wewnetrzny input, potem kontener
+        lambda: page.locator("[data-test-id='manage-idu-invoice-button'] input").first,
+        lambda: page.locator("[data-test-id='manage-idu-invoice-button']").first,
+        # input[type=submit] z value 'Manage invoice' (bez data-test-id)
+        lambda: page.locator("input[type='submit'][value='Manage invoice']").first,
+        # STARY UI: klasyczne locatory
         lambda: page.get_by_role("button", name=re.compile(r"manage invoices?", re.I)).first,
         lambda: page.get_by_text(re.compile(r"Manage invoices?", re.I)).first,
-        lambda: page.locator("[id*='invoice' i], [class*='invoice' i]")
-                    .get_by_text(re.compile("manage", re.I)).first,
     ]
     for make in strategies:
         try:
             el = make()
-            el.wait_for(timeout=5000)
+            el.wait_for(timeout=4000)
             el.scroll_into_view_if_needed(timeout=3000)
             return el
         except Exception:
             continue
 
-    # Strategia 4: JavaScript querySelector (SPA moze miec elementy niedostepne dla locatorow)
+    # JS fallback: uwzglednia inputy (value) i zwraca element KLIKALNY
     try:
         handle = page.evaluate_handle("""
             () => {
+                const byId = document.querySelector(
+                    "[data-test-id='manage-idu-invoice-button'] input, [data-test-id='manage-idu-invoice-button']");
+                if (byId) return byId;
+                for (const inp of document.querySelectorAll("input[type='submit']")) {
+                    if (/manage invoices?/i.test(inp.value || '')) return inp;
+                }
                 const all = document.querySelectorAll('span, button, a, div');
                 for (const el of all) {
                     const txt = (el.textContent || '').trim();
-                    if (/^manage invoices?$/i.test(txt)) return el;
+                    if (/^manage invoices?$/i.test(txt)) {
+                        const inp = el.querySelector('input');  // klikaj input, nie span
+                        return inp || el;
+                    }
                 }
                 return null;
             }
