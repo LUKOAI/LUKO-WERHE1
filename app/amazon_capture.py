@@ -13,6 +13,15 @@ NA_COUNTRIES = {"US", "CA", "MX", "BR"}
 # Numer faktury PL Amazon (Deemed supply), np. PL600040G6O6HD, PL600005G6O6HR
 PL_INVOICE_RE = re.compile(r"\bPL[A-Z0-9]{8,}\b")
 
+# Numer zamowienia Amazon: XXX-XXXXXXX-XXXXXXX (3-7-7 cyfr).
+# eBay/Allegro/inne platformy maja INNY format idExternal — po tym je odrozniamy.
+AMAZON_ORDER_RE = re.compile(r"^\d{3}-\d{7}-\d{7}$")
+
+
+def is_amazon_order_number(external_number: str) -> bool:
+    """True gdy numer zewnetrzny ma format zamowienia Amazon (nie eBay/inne)."""
+    return bool(AMAZON_ORDER_RE.match((external_number or "").strip()))
+
 
 def amazon_domain_for_country(country_code: str, config: AppConfig) -> str:
     cc = (country_code or "").upper()

@@ -15,7 +15,10 @@ from app.pdf_generator import generate_order_pdf, generate_summary_pdf, merge_pd
 from app.summary_export import export_summary_xlsx
 from app.tracking_capture import capture_tracking_screenshot
 from app.browser_session import CaptureSession, has_session
-from app.amazon_capture import build_amazon_order_url, download_amazon_pl_invoices, NA_COUNTRIES
+from app.amazon_capture import (
+    build_amazon_order_url, download_amazon_pl_invoices, NA_COUNTRIES,
+    is_amazon_order_number,
+)
 from app.apilo_panel_capture import build_apilo_order_url
 
 
@@ -289,10 +292,13 @@ class DocumentPipeline:
             fba = o.warehouse_type == "fba"
             deliv = _delivered(o)
             has_track_url = bool(o.tracking_url and o.tracking_url.startswith("http"))
-            amazon_eu = bool(o.amazon_order_number) and o.country_code.upper() not in NA_COUNTRIES
+            # Tylko PRAWDZIWE zamowienia Amazon (format XXX-XXXXXXX-XXXXXXX).
+            # eBay/inne platformy tez maja idExternal — nie wolno ich slac do Amazona.
+            is_amazon = is_amazon_order_number(o.amazon_order_number)
+            amazon_eu = is_amazon and o.country_code.upper() not in NA_COUNTRIES
             plan[o.order_id] = {
                 "tracking": (not fba) and deliv and has_track_url,
-                "amazon": (fba or (not fba and not deliv)) and bool(o.amazon_order_number),
+                "amazon": (fba or (not fba and not deliv)) and is_amazon,
                 "apilo": fba or (not fba and not deliv),
                 # faktury Amazon tylko z panelu EU (USA: faktury sa w Apilo)
                 "amazon_invoice": (self.config.download_pl_invoices and amazon_eu
