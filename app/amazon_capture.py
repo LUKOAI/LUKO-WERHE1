@@ -136,35 +136,98 @@ def _download_invoice_for_number(page, number: str, out_path: Path, log) -> bool
 
     # Strategie 2-3: klikanie przycisku Download (ten sam wiersz wizualny)
     try:
-        num_el = page.get_by_text(number, exact=False).first
-        num_el.wait_for(timeout=8000)
-        num_el.scroll_into_view_if_needed(timeout=3000)
+        # numer moze wystepowac w DOM wielokrotnie (takze niewidocznie) —
+        # bierzemy pierwsze WIDOCZNE wystapienie, scroll nie moze blokowac
+        matches = page.get_by_text(number, exact=False)
+        matches.first.wait_for(timeout=8000)
+        num_el = None
+        for i in range(min(matches.count(), 10)):
+            cand = matches.nth(i)
+            try:
+                if cand.is_visible():
+                    num_el = cand
+                    break
+            except Exception:
+                continue
+        if num_el is None:
+            log(f"    [diag {number}] brak WIDOCZNEGO wystapienia numeru")
+            return False
+        try:
+            num_el.scroll_into_view_if_needed(timeout=2000)
+        except Exception:
+            pass  # scroll bywa flaky — nie przerywamy
         page.wait_for_timeout(400)
         num_box = num_el.bounding_box()
         if not num_box:
             log(f"    [diag {number}] numer niewidoczny (bounding_box=None)")
             return False
         num_y = num_box["y"] + num_box["height"] / 2
-        candidates = page.get_by_text("Download", exact=False)
+
+        # kandydaci: tekst 'Download' ORAZ input[value='Download'] (nowy UI a-button)
         best, best_dist = None, 1e9
-        for i in range(candidates.count()):
-            el = candidates.nth(i)
+        for loc in (
+            page.get_by_text("Download", exact=False),
+            page.locator("input[type='submit'][value='Download']"),
+        ):
             try:
-                box = el.bounding_box()
+                n = loc.count()
             except Exception:
                 continue
-            if not box:
-                continue
-            y = box["y"] + box["height"] / 2
-            if abs(y - num_y) < best_dist:
-                best, best_dist = el, abs(y - num_y)
+            for i in range(n):
+                el = loc.nth(i)
+                try:
+                    if not el.is_visible():
+                        continue
+                    box = el.bounding_box()
+                except Exception:
+                    continue
+                if not box:
+                    continue
+                y = box["y"] + box["height"] / 2
+                if abs(y - num_y) < best_dist:
+                    best, best_dist = el, abs(y - num_y)
         if best is None:
             log(f"    [diag {number}] brak przycisku Download na stronie")
             return False
 
+        def _js_click_nearest():
+            """JS: klika input/button/a Download najblizszy numerowi (omija overlay)."""
+            page.evaluate(
+                """
+                (num) => {
+                    const all = Array.from(document.querySelectorAll('*'));
+                    let numEl = null;
+                    for (const el of all) {
+                        if (el.children.length === 0 && (el.textContent || '').trim() === num) {
+                            const r = el.getBoundingClientRect();
+                            if (r.width > 0 && r.height > 0) { numEl = el; break; }
+                        }
+                    }
+                    if (!numEl) throw new Error('brak numeru');
+                    const r0 = numEl.getBoundingClientRect();
+                    const cands = [];
+                    for (const inp of document.querySelectorAll("input[type='submit']"))
+                        if (/download/i.test(inp.value || '')) cands.push(inp);
+                    for (const b of document.querySelectorAll('button, a'))
+                        if (/^download$/i.test((b.textContent || '').trim())) cands.push(b);
+                    let best = null, bestD = 1e9;
+                    for (const c of cands) {
+                        const r = c.getBoundingClientRect();
+                        if (r.width === 0) continue;
+                        const d = Math.abs((r.top + r.height/2) - (r0.top + r0.height/2));
+                        if (d < bestD) { bestD = d; best = c; }
+                    }
+                    if (!best) throw new Error('brak przycisku');
+                    best.click();
+                }
+                """,
+                number,
+            )
+
         for name, clicker in (
             ("klik", lambda: best.click(timeout=10000)),
             ("force-klik", lambda: best.click(force=True, timeout=10000)),
+            ("js-klik", _js_click_nearest),
         ):
             try:
                 with page.expect_download(timeout=25000) as dl_info:
