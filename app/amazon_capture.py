@@ -46,7 +46,9 @@ def build_amazon_order_url(amazon_order_number: str, config: AppConfig,
 def _is_valid_pdf(path: Path) -> bool:
     """Sprawdza czy plik to prawdziwy PDF (naglowek %PDF + sensowny rozmiar)."""
     try:
-        if path.stat().st_size < 8000:  # prawdziwa faktura ~60-80 KB; 6 KB = smiec
+        # Decyduje magic %PDF — smieci (HTML logowania itp.) go nie maja.
+        # Prog rozmiaru niski (1 KB): proste faktury/kredytowki bywaja male.
+        if path.stat().st_size < 1000:
             return False
         with open(path, "rb") as fh:
             return fh.read(5).startswith(b"%PDF")
@@ -109,18 +111,28 @@ def _download_invoice_for_number(page, number: str, out_path: Path, log) -> bool
       3. force-click
     Po kazdej probie waliduje, ze to prawdziwy PDF.
     """
-    # Strategia 1: bezposredni fetch po URL (z ciasteczkami sesji)
+    # Strategia 1: bezposredni fetch po URL (z ciasteczkami sesji + Referer)
     url = _download_url_for_number(page, number)
     if url:
         try:
-            resp = page.context.request.get(url, timeout=30000)
-            if resp.ok:
-                body = resp.body()
-                if body[:5].startswith(b"%PDF") and len(body) >= 8000:
-                    out_path.write_bytes(body)
-                    return True
-        except Exception:
-            pass
+            resp = page.context.request.get(
+                url, timeout=30000,
+                headers={
+                    "Referer": page.url,
+                    "Accept": "application/pdf,application/octet-stream,*/*",
+                },
+            )
+            body = resp.body() if resp.ok else b""
+            if body[:5].startswith(b"%PDF") and len(body) >= 1000:
+                out_path.write_bytes(body)
+                return True
+            log(f"    [diag {number}] fetch URL: status={resp.status}, "
+                f"typ={resp.headers.get('content-type','?')}, {len(body)}B, "
+                f"start={body[:12]!r}")
+        except Exception as exc:
+            log(f"    [diag {number}] fetch URL blad: {exc}")
+    else:
+        log(f"    [diag {number}] brak linku <a href> przy numerze — probuje klik")
 
     # Strategie 2-3: klikanie przycisku Download (ten sam wiersz wizualny)
     try:
@@ -130,6 +142,7 @@ def _download_invoice_for_number(page, number: str, out_path: Path, log) -> bool
         page.wait_for_timeout(400)
         num_box = num_el.bounding_box()
         if not num_box:
+            log(f"    [diag {number}] numer niewidoczny (bounding_box=None)")
             return False
         num_y = num_box["y"] + num_box["height"] / 2
         candidates = page.get_by_text("Download", exact=False)
@@ -146,11 +159,12 @@ def _download_invoice_for_number(page, number: str, out_path: Path, log) -> bool
             if abs(y - num_y) < best_dist:
                 best, best_dist = el, abs(y - num_y)
         if best is None:
+            log(f"    [diag {number}] brak przycisku Download na stronie")
             return False
 
-        for clicker in (
-            lambda: best.click(timeout=10000),
-            lambda: best.click(force=True, timeout=10000),
+        for name, clicker in (
+            ("klik", lambda: best.click(timeout=10000)),
+            ("force-klik", lambda: best.click(force=True, timeout=10000)),
         ):
             try:
                 with page.expect_download(timeout=25000) as dl_info:
@@ -158,9 +172,21 @@ def _download_invoice_for_number(page, number: str, out_path: Path, log) -> bool
                 dl_info.value.save_as(str(out_path))
                 if _is_valid_pdf(out_path):
                     return True
-            except Exception:
+                # zachowaj zly plik do diagnozy
+                size = out_path.stat().st_size if out_path.exists() else 0
+                head = open(out_path, "rb").read(12) if out_path.exists() else b""
+                bad = out_path.with_name(f"{out_path.stem}_INVALID.bin")
+                try:
+                    out_path.replace(bad)
+                except Exception:
+                    pass
+                log(f"    [diag {number}] {name}: pobrano {size}B, start={head!r} "
+                    f"(zachowano {bad.name})")
+            except Exception as exc:
+                log(f"    [diag {number}] {name} nieudany: {str(exc)[:120]}")
                 continue
-    except Exception:
+    except Exception as exc:
+        log(f"    [diag {number}] blad klikania: {str(exc)[:120]}")
         return False
     return False
 
@@ -173,26 +199,35 @@ def _collect_pl_numbers_all_pages(page, log=None) -> list[str]:
     """
     all_numbers: list[str] = []
 
+    def _all_frames_text() -> str:
+        """Tekst z glownego dokumentu + wszystkich iframe (modal moze byc w ramce)."""
+        parts = []
+        for fr in page.frames:
+            try:
+                parts.append(fr.locator("body").inner_text(timeout=2500))
+            except Exception:
+                continue
+        return "\n".join(parts)
+
     def _scan():
-        try:
-            text = page.locator("body").inner_text(timeout=5000)
-        except Exception:
-            text = ""
-        return list(dict.fromkeys(PL_INVOICE_RE.findall(text)))
+        return list(dict.fromkeys(PL_INVOICE_RE.findall(_all_frames_text())))
 
     # polluj strone 1
+    saw_download = False
     for _ in range(6):
         page.wait_for_timeout(2000)
-        nums = _scan()
+        text = _all_frames_text()
+        nums = list(dict.fromkeys(PL_INVOICE_RE.findall(text)))
         all_numbers.extend(nums)
+        if "Download" in text:
+            saw_download = True
         if nums:
             break
-        try:
-            body = page.locator("body").inner_text(timeout=3000)
-            if "Download" in body and _ >= 2:
-                break
-        except Exception:
-            pass
+        if saw_download and _ >= 2:
+            break
+    if log and not saw_download and not all_numbers:
+        log("  Amazon: UWAGA — w modalu nie widac ani faktur, ani przycisku Download"
+            " (mozliwy problem renderowania)")
 
     # Sprawdz czy sa dodatkowe strony — szukamy numerow stron w modalu
     # Modal ma paginacje: < 1 2 3 >  — klikamy 2, 3, itd.
@@ -367,7 +402,14 @@ def download_amazon_pl_invoices(sess, order_url: str, folder: Path,
         # Zbierz numery PL ze WSZYSTKICH stron modala (paginacja 1,2,3...)
         pl_numbers = _collect_pl_numbers_all_pages(page, log=log)
         if not pl_numbers:
-            log("  Amazon: brak faktur PL w modalu (wszystkie strony sprawdzone).")
+            # screenshot diagnostyczny modala — odroznimy prawdziwy brak PL
+            # od problemu z renderowaniem/iframe
+            try:
+                dbg = folder / f"{amazon_order_number}_DEBUG_modal.png"
+                page.screenshot(path=str(dbg))
+                log(f"  Amazon: brak faktur PL w modalu (debug: {dbg.name})")
+            except Exception:
+                log("  Amazon: brak faktur PL w modalu (wszystkie strony sprawdzone).")
             return [], False
         has_pl = True
         log(f"  Amazon: znaleziono {len(pl_numbers)} faktur PL: {', '.join(pl_numbers[:5])}")
