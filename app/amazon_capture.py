@@ -102,6 +102,61 @@ def _download_url_for_number(page, number: str) -> str | None:
         return None
 
 
+def _form_request_for_number(page, number: str):
+    """Odczytuje FORMULARZ przycisku Download przy numerze (nowy UI: input submit w <form>).
+
+    Zwraca {action, method, fields:{...}} albo None. Wyslanie tego formularza
+    przez zalogowana sesje = pobranie bez klikania (odporne na degradacje modala).
+    """
+    try:
+        return page.evaluate(
+            """
+            (num) => {
+                const all = Array.from(document.querySelectorAll('*'));
+                let numEl = null;
+                for (const el of all) {
+                    if (el.children.length === 0 && (el.textContent || '').trim() === num) {
+                        const r = el.getBoundingClientRect();
+                        if (r.width > 0 && r.height > 0) { numEl = el; break; }
+                    }
+                }
+                if (!numEl) return null;
+                const serialize = (form) => {
+                    const fields = {};
+                    for (const inp of form.querySelectorAll('input[name], select[name], textarea[name]')) {
+                        if (inp.type === 'submit' || inp.type === 'button') continue;
+                        fields[inp.name] = inp.value || '';
+                    }
+                    return { action: form.action || '', method: (form.method || 'get').toUpperCase(), fields };
+                };
+                // 1) form w wierszu (wspolny przodek z numerem)
+                let row = numEl;
+                for (let i = 0; i < 7 && row.parentElement; i++) {
+                    row = row.parentElement;
+                    for (const form of row.querySelectorAll('form')) {
+                        if (form.querySelector("input[type='submit']") && form.action)
+                            return serialize(form);
+                    }
+                }
+                // 2) form najblizszy pozycyjnie (ten sam wiersz wizualny)
+                const r0 = numEl.getBoundingClientRect();
+                let best = null, bestD = 1e9;
+                for (const form of document.querySelectorAll('form')) {
+                    if (!form.action || !form.querySelector("input[type='submit']")) continue;
+                    const r = form.getBoundingClientRect();
+                    if (r.width === 0) continue;
+                    const d = Math.abs((r.top + r.height/2) - (r0.top + r0.height/2));
+                    if (d < bestD) { bestD = d; best = form; }
+                }
+                return (best && bestD <= 80) ? serialize(best) : null;
+            }
+            """,
+            number,
+        )
+    except Exception:
+        return None
+
+
 def _download_invoice_for_number(page, number: str, out_path: Path, log) -> bool:
     """Pobiera fakture PL o danym numerze do out_path. Zwraca True przy sukcesie.
 
@@ -131,8 +186,34 @@ def _download_invoice_for_number(page, number: str, out_path: Path, log) -> bool
                 f"start={body[:12]!r}")
         except Exception as exc:
             log(f"    [diag {number}] fetch URL blad: {exc}")
+
+    # Strategia 1b: FORMULARZ przycisku Download (nowy UI) — submit przez sesje,
+    # zero klikania, odporne na degradacje modala po dlugiej sesji
+    form = _form_request_for_number(page, number)
+    if form and form.get("action"):
+        try:
+            headers = {
+                "Referer": page.url,
+                "Accept": "application/pdf,application/octet-stream,*/*",
+            }
+            if form.get("method") == "POST":
+                resp = page.context.request.post(
+                    form["action"], form=form.get("fields") or {},
+                    timeout=30000, headers=headers)
+            else:
+                resp = page.context.request.get(
+                    form["action"], params=form.get("fields") or {},
+                    timeout=30000, headers=headers)
+            body = resp.body() if resp.ok else b""
+            if body[:5].startswith(b"%PDF") and len(body) >= 1000:
+                out_path.write_bytes(body)
+                return True
+            log(f"    [diag {number}] form {form.get('method')}: status={resp.status}, "
+                f"typ={resp.headers.get('content-type','?')}, {len(body)}B")
+        except Exception as exc:
+            log(f"    [diag {number}] form submit blad: {str(exc)[:120]}")
     else:
-        log(f"    [diag {number}] brak linku <a href> przy numerze — probuje klik")
+        log(f"    [diag {number}] brak <a href> i <form> przy numerze — probuje klik")
 
     # Strategie 2-3: klikanie przycisku Download (ten sam wiersz wizualny)
     try:
@@ -210,6 +291,13 @@ def _download_invoice_for_number(page, number: str, out_path: Path, log) -> bool
                         if (/download/i.test(inp.value || '')) cands.push(inp);
                     for (const b of document.querySelectorAll('button, a'))
                         if (/^download$/i.test((b.textContent || '').trim())) cands.push(b);
+                    // nowy UI: tekst w spanie, klikalny input obok (value bywa puste)
+                    for (const sp of document.querySelectorAll('span')) {
+                        if (!/^download$/i.test((sp.textContent || '').trim())) continue;
+                        const btn = sp.closest('.a-button, [class*="button" i]') || sp.parentElement;
+                        const inp = btn ? btn.querySelector('input') : null;
+                        cands.push(inp || sp);
+                    }
                     let best = null, bestD = 1e9;
                     for (const c of cands) {
                         const r = c.getBoundingClientRect();
