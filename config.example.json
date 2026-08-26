@@ -6,6 +6,7 @@
   "apilo_access_token": "",
   "apilo_refresh_token": "",
   "apilo_token_expires_at": "",
+  "apilo_max_requests_per_minute": 130,
   "output_root": "C:\\Users\\MASTER\\Desktop\\Do pana paczesnego\\2026\\WERHE_PDFy",
   "playwright_headless": true,
   "tracking_timeout_ms": 45000,

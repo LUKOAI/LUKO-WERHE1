@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import logging
+import threading
 import time
+from collections import deque
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -19,14 +21,45 @@ ORDER_DETAIL_ENDPOINT = "/rest/api/orders/{order_id}/"
 STATUS_MAP_ENDPOINT = "/rest/api/orders/status-map/"
 MAX_LIMIT = 512
 MAX_RETRIES = 3
+MAX_429_RETRIES = 6
 
 
 class ApiloClientError(Exception):
     pass
 
 
+class _RateLimiter:
+    """Ogranicznik zapytan: max N w oknie 60 s (sliding window).
+
+    Apilo ograniczylo API do 150 zapytan/min — trzymamy sie ponizej limitu
+    (domyslnie 130/min, zapas na odswiezanie tokena itp.). Wspoldzielony
+    przez wszystkie instancje klienta w procesie.
+    """
+
+    def __init__(self, max_per_minute: int) -> None:
+        self.max = max(1, int(max_per_minute))
+        self._times: deque[float] = deque()
+        self._lock = threading.Lock()
+
+    def wait(self) -> None:
+        while True:
+            with self._lock:
+                now = time.monotonic()
+                while self._times and now - self._times[0] >= 60.0:
+                    self._times.popleft()
+                if len(self._times) < self.max:
+                    self._times.append(now)
+                    return
+                sleep_for = 60.0 - (now - self._times[0]) + 0.05
+            time.sleep(min(max(sleep_for, 0.05), 2.0))
+
+
 class ApiloClient:
     """Klient REST API Apilo — poprawna autentykacja OAuth, endpointy i paginacja offset/limit."""
+
+    # wspolny dla calego procesu — takze gdy powstanie kilka instancji klienta
+    _shared_limiter: _RateLimiter | None = None
+    _limiter_lock = threading.Lock()
 
     def __init__(self, config: AppConfig, timeout: int = 30) -> None:
         self.config = config
@@ -37,6 +70,12 @@ class ApiloClient:
             "Content-Type": "application/json",
         })
         self._update_auth_header()
+        with ApiloClient._limiter_lock:
+            if ApiloClient._shared_limiter is None:
+                per_min = getattr(config, "apilo_max_requests_per_minute", 130) or 130
+                ApiloClient._shared_limiter = _RateLimiter(per_min)
+                logger.info("Limit zapytan Apilo: %d/min", ApiloClient._shared_limiter.max)
+        self._limiter = ApiloClient._shared_limiter
 
     def _update_auth_header(self) -> None:
         if self.config.apilo_access_token:
@@ -48,7 +87,10 @@ class ApiloClient:
     def _request(self, method: str, endpoint: str, **kwargs: Any) -> dict[str, Any]:
         url = self._url(endpoint)
 
-        for attempt in range(MAX_RETRIES):
+        attempt = 0            # bledy sieciowe / 5xx
+        rate_hits = 0          # 429 — osobna pula, nie zuzywa zwyklych prob
+        while attempt < MAX_RETRIES:
+            self._limiter.wait()
             try:
                 response = self.session.request(method, url, timeout=self.timeout, **kwargs)
 
@@ -56,18 +98,32 @@ class ApiloClient:
                     logger.info("Token wygasł (401) — odświeżam...")
                     self.config = ensure_valid_token(self.config)
                     self._update_auth_header()
+                    attempt += 1
                     continue
 
                 if response.status_code == 429:
-                    wait = 2 ** (attempt + 1)
-                    logger.warning("Rate limit (429) — czekam %ds...", wait)
+                    rate_hits += 1
+                    if rate_hits > MAX_429_RETRIES:
+                        raise ApiloClientError(
+                            f"Limit API Apilo (429) utrzymuje sie mimo {MAX_429_RETRIES} prob: {url}")
+                    retry_after = response.headers.get("Retry-After")
+                    try:
+                        wait = max(float(retry_after), 5.0) if retry_after else 15.0 * rate_hits
+                    except ValueError:
+                        wait = 15.0 * rate_hits
+                    wait = min(wait, 90.0)
+                    logger.warning("Rate limit (429) — czekam %.0fs (proba %d/%d)...",
+                                   wait, rate_hits, MAX_429_RETRIES)
                     time.sleep(wait)
                     continue
 
                 response.raise_for_status()
 
+            except ApiloClientError:
+                raise
             except requests.RequestException as exc:
-                if attempt < MAX_RETRIES - 1:
+                attempt += 1
+                if attempt < MAX_RETRIES:
                     time.sleep(2 ** attempt)
                     continue
                 raise ApiloClientError(f"Błąd API {method} {url}: {exc}") from exc
@@ -183,13 +239,21 @@ class ApiloClient:
         else:
             url = self.config.apilo_base_url.rstrip("/") + f"/rest/api/media/{media}/"
 
-        try:
-            resp = self.session.get(url, timeout=self.timeout)
-            resp.raise_for_status()
-            output_path.write_bytes(resp.content)
-            return output_path
-        except requests.RequestException:
-            return None
+        for rate_hit in range(1, MAX_429_RETRIES + 1):
+            self._limiter.wait()
+            try:
+                resp = self.session.get(url, timeout=self.timeout)
+                if resp.status_code == 429:
+                    wait = min(15.0 * rate_hit, 90.0)
+                    logger.warning("Rate limit (429) przy pobieraniu pliku — czekam %.0fs...", wait)
+                    time.sleep(wait)
+                    continue
+                resp.raise_for_status()
+                output_path.write_bytes(resp.content)
+                return output_path
+            except requests.RequestException:
+                return None
+        return None
 
     TRACKING_ENDPOINT = "/rest/api/shipping/shipment/tracking/"
     SHIPMENT_DETAIL = "/rest/api/shipping/shipment/{sid}/"

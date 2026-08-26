@@ -19,6 +19,7 @@ class AppConfig:
     apilo_access_token: str = ""
     apilo_refresh_token: str = ""
     apilo_token_expires_at: str = ""
+    apilo_max_requests_per_minute: int = 130  # limit Apilo: 150/min; trzymamy zapas
     output_root: str = "output"
     playwright_headless: bool = True
     tracking_timeout_ms: int = 45000
