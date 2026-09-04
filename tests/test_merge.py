@@ -1,7 +1,7 @@
 from datetime import date
 
 from amazon_vat_merger.invoice_pdf import Address, Invoice, InvoiceItem
-from amazon_vat_merger.merge import Formula, build_sheets, merge
+from amazon_vat_merger.merge import Formula, build_sheets, merge, round2
 from amazon_vat_merger.nbp import RateInfo, RateProvider
 from amazon_vat_merger.report import transaction_from_row
 
@@ -123,3 +123,48 @@ def test_pln_transactions_do_not_duplicate_pln_columns():
     header = sheet.rows[1]
     assert header.count("Kwota netto PLN") == 1 and header.count("Kwota VAT PLN") == 1
     assert sheet.rows[2][header.index("Kwota netto PLN")] == 12.60
+
+
+def test_pln_rounding_half_up_and_gross_consistency():
+    assert round2(2.675) == 2.68 and round2(0.125) == 0.13 and round2(-2.675) == -2.68
+    tx = _tx(**{"OUR_PRICE Tax Inclusive Selling Price": "15.23", "OUR_PRICE Tax Amount": "2.43",
+                "OUR_PRICE Tax Exclusive Selling Price": "12.80"})
+    res = merge([tx], [], FixedRates())
+    r = res.rows[0]
+    assert r.gross_pln == round2(r.net_pln + r.vat_pln)
+
+
+def test_credit_note_uses_original_invoice_rate():
+    sale = _tx()
+    refund = _tx(**{"Transaction Type": "REFUND", "VAT Invoice Number": "PL6000000000CN", "Order Date": "12-Aug-2026 UTC",
+                    "Shipment Date": "29-Sep-2026 UTC", "OUR_PRICE Tax Inclusive Selling Price": "-14.99",
+                    "OUR_PRICE Tax Amount": "-2.39", "OUR_PRICE Tax Exclusive Selling Price": "-12.60"})
+
+    class DatedRates(RateProvider):
+        def __init__(self):
+            super().__init__(use_nbp=False)
+
+        def get(self, currency, ref_date):
+            return RateInfo(4.0 if ref_date < date(2026, 9, 1) else 5.0, ref_date, "test")
+
+    cn = _inv(number="PL6000000000CN", doc_type="credit_note", total=-14.99)
+    cn.invoice_date = date(2026, 9, 29)
+    cn.original_invoice_number = "PL6000000000AA"
+    res = merge([sale, refund], [_inv(), cn], DatedRates())
+    r_sale, r_ref = res.rows if res.rows[0].tx.invoice_number == "PL6000000000AA" else res.rows[::-1]
+    assert r_sale.rate.rate == 4.0
+    assert r_ref.rate.rate == 4.0 and "faktura pierwotna" in r_ref.rate.source and r_ref.rate_note
+    assert r_ref.net_pln == round2(-12.60 * 4.0)
+    # nota bez faktury pierwotnej w danych -> kurs z daty noty + uwaga
+    res2 = merge([refund], [cn], DatedRates())
+    assert res2.rows[0].rate.rate == 5.0 and res2.rows[0].rate_note.startswith("kurs z daty noty")
+
+
+def test_rate_basis_is_earlier_of_invoice_and_shipment():
+    tx = _tx(**{"Shipment Date": "29-Aug-2026 UTC"})
+    inv = _inv(); inv.invoice_date = date(2026, 8, 31)
+    res = merge([tx], [inv], FixedRates())
+    assert res.rows[0].rate_basis_date == date(2026, 8, 29)
+    inv.invoice_date = date(2026, 8, 27)
+    res = merge([tx], [inv], FixedRates())
+    assert res.rows[0].rate_basis_date == date(2026, 8, 27)

@@ -3,6 +3,8 @@
 Wszystkie etykiety są małymi literami. Dopasowanie: linia (albo prawa kolumna
 nagłówka) zaczyna się od etykiety; wybierana jest najdłuższa pasująca etykieta,
 a wartość to reszta linii (lub następna linia, gdy reszta jest pusta).
+Słowniki zweryfikowane na prawdziwych fakturach PL/IT/FR/DE/ES/NL/EN (sprzedaż,
+noty kredytowe, B2B, OSS, dokument dwujęzyczny BE).
 """
 from __future__ import annotations
 
@@ -34,50 +36,83 @@ MONTHS: dict[str, int] = {
     # nl
     "januari": 1, "februari": 2, "maart": 3, "mei": 5, "augustus": 8, "december": 12,
     # sv
-    "maj": 5, "augusti": 8,
+    "augusti": 8,
     # en
-    "january": 1, "february": 2, "march": 3, "may": 5, "june": 6, "july": 7,
-    "october": 10,
+    "january": 1, "february": 2, "march": 3, "may": 5, "june": 6, "july": 7, "october": 10,
     # skróty (CSV: 12-Aug-2026)
     "jan": 1, "feb": 2, "mar": 3, "apr": 4, "jun": 6, "jul": 7, "aug": 8, "sep": 9,
     "sept": 9, "oct": 10, "nov": 11, "dec": 12,
-    # skróty pl/de/it/fr
+    # skróty pl/de/it/fr/es
     "sty": 1, "lut": 2, "kwi": 4, "cze": 6, "lip": 7, "sie": 8, "wrz": 9, "paź": 10,
     "lis": 11, "gru": 12, "mrz": 3, "okt": 10, "dez": 12, "gen": 1, "mag": 5, "giu": 6,
     "lug": 7, "ago": 8, "set": 9, "ott": 10, "dic": 12, "janv": 1, "févr": 2, "avr": 4,
-    "juil": 7, "déc": 12, "ene": 1, "abr": 4, "ago.": 8,
+    "juil": 7, "déc": 12, "ene": 1, "abr": 4,
 }
 
 # ---------------------------------------------------------------------------
-# etykiety pól (prawa kolumna nagłówka / sekcja zamówienia)
+# etykiety pól (prawa kolumna nagłówka / sekcja zamówienia / tabela)
 # ---------------------------------------------------------------------------
 LABELS: dict[str, list[str]] = {
     "invoice_number": [
         "nr faktury", "numer faktury", "nr noty kredytowej", "numer noty kredytowej",
-        "numer ricevuta", "numero ricevuta", "numero fattura", "numero della fattura",
+        "nr faktury korygującej", "numer faktury korygującej", "nr dokumentu", "numer dokumentu",
+        "numero ricevuta", "numero fattura", "numero della fattura", "numero documento",
         "numero nota di credito", "numero della nota di credito",
         "numéro de la facture", "numéro de facture", "n° de facture", "no de facture",
-        "numéro de l'avoir", "numéro d'avoir",
+        "numéro de l'avoir", "numéro d'avoir", "numéro du document",
         "rechnungsnummer", "rechnungs-nr", "rechnungs-nr.", "gutschriftsnummer", "gutschrift-nr",
+        "belegnummer", "belegnr", "belegnr.",
         "número de factura", "número de la factura", "nº de factura", "n.º de factura",
+        "número del documento", "número de documento",
         "número de nota de crédito", "número de la nota de crédito",
-        "factuurnummer", "creditnotanummer", "creditfactuurnummer",
-        "fakturanummer", "kreditnotanummer", "kreditfakturanummer", "kvittonummer",
-        "invoice number", "invoice no", "invoice no.", "credit note number", "credit note no",
-        "receipt number",
+        "factuurnummer", "creditnotanummer", "creditfactuurnummer", "documentnummer",
+        "fakturanummer", "kreditnotanummer", "kreditfakturanummer", "kvittonummer", "dokumentnummer",
+        "invoice number", "invoice no", "invoice no.", "invoice #", "credit note number",
+        "credit note no", "credit note #", "receipt number", "document number", "document #",
+    ],
+    "original_invoice_number": [
+        "numer faktury pierwotnej", "nr faktury pierwotnej", "faktura pierwotna",
+        "numero fattura originale", "numero della fattura originale", "fattura originale",
+        "numéro de la facture originale", "numéro de facture originale", "facture originale",
+        "originalrechnungsnummer", "ursprüngliche rechnungsnummer", "original-rechnungsnummer",
+        "número de la factura original", "número de factura original", "factura original",
+        "oorspronkelijk factuurnummer", "oorspronkelijke factuurnummer", "origineel factuurnummer",
+        "ursprungligt fakturanummer", "ursprunglig faktura",
+        "original invoice #", "original invoice number", "original invoice no",
+    ],
+    # zdanie wprowadzające noty kredytowej ("This is a credit note for invoice # X")
+    "credit_intro": [
+        "to jest nota kredytowa do faktury", "nota kredytowa do faktury", "korekta faktury",
+        "questa è una nota di credito per la fattura", "nota di credito per la fattura",
+        "avoir pour la facture", "ceci est un avoir pour la facture",
+        "dies ist eine gutschrift", "gutschrift / rechnungskorrektur für die",
+        "gutschrift für die rechnung", "rechnungskorrektur für die",
+        "esta es una nota de crédito para la factura", "nota de crédito para la factura",
+        "dit is een creditnota voor factuur", "creditnota voor factuur",
+        "detta är en kreditnota för faktura", "kreditnota för faktura",
+        "this is a credit note for invoice", "credit note for invoice",
     ],
     "invoice_date": [
         "data faktury/data dostawy", "data faktury", "data wystawienia", "data noty kredytowej",
+        "data wystawienia noty",
         "data ricevuta", "data fattura/data di consegna", "data fattura", "data della fattura",
-        "data nota di credito", "data della nota di credito",
+        "data nota di credito", "data della nota di credito", "data documento",
         "date de la facture/date de la livraison", "date de la facture", "date de facture",
-        "date de l'avoir", "date d'avoir",
+        "date de l'avoir", "date d'avoir", "date d'émission de l'avoir", "date d'émission",
         "rechnungsdatum/lieferdatum", "rechnungsdatum", "gutschriftsdatum", "datum der gutschrift",
+        "belegdatum",
         "fecha de la factura/fecha de entrega", "fecha de la factura", "fecha de factura",
-        "fecha de la nota de crédito", "fecha de nota de crédito",
-        "factuurdatum/leverdatum", "factuurdatum", "creditnotadatum",
+        "fecha de la nota de crédito", "fecha de nota de crédito", "fecha de envío",
+        "fecha del documento", "fecha de emisión",
+        "factuurdatum/leverdatum", "factuurdatum", "creditnotadatum", "documentdatum",
         "fakturadatum/leveransdatum", "fakturadatum", "kreditnotadatum", "kvittodatum",
-        "invoice date/delivery date", "invoice date", "credit note date", "receipt date",
+        "invoice date/delivery date", "invoice date / delivery date", "invoice date",
+        "credit note date", "receipt date", "document date",
+    ],
+    "delivery_date": [
+        "data dostawy", "data di consegna", "date de livraison", "leistungszeitpunkt",
+        "lieferdatum", "leistungsdatum", "fecha de entrega", "leverdatum", "leveransdatum",
+        "delivery date", "date of supply",
     ],
     "order_date": [
         "data zamówienia", "data ordine", "data dell'ordine", "date de la commande",
@@ -89,13 +124,14 @@ LABELS: dict[str, list[str]] = {
         "numero dell'ordine", "contratto", "numéro de la commande", "numéro de commande",
         "n° de commande", "bestellnummer", "bestell-nr", "bestell-nr.", "número de pedido",
         "número del pedido", "nº de pedido", "bestelnummer", "ordernummer",
-        "beställningsnummer", "order number", "order no", "order no.", "order id",
+        "beställningsnummer", "order number", "order no", "order no.", "order id", "order #",
     ],
     "payment_reference": [
         "numer referencyjny płatności", "numero di riferimento del pagamento",
         "riferimento pagamento", "référence de paiement", "zahlungsreferenz",
-        "referencia de pago", "referencia del pago", "betalingsreferentie",
-        "betalningsreferens", "payment reference",
+        "zahlungsreferenznummer", "referencia de pago", "referencia del pago",
+        "nº de referencia de pago", "número de referencia de pago", "betalingsreferentie",
+        "referentie-id betaling", "betalningsreferens", "payment reference id", "payment reference",
     ],
     "seller": [
         "sprzedawca", "venduto da", "vendu par", "verkauft von", "vendido por",
@@ -105,44 +141,54 @@ LABELS: dict[str, list[str]] = {
         "nip", "p. iva", "p.iva", "partita iva", "tva", "n° tva", "numéro de tva",
         "ust-idnr", "ust-idnr.", "ust-id", "ust-id-nr", "ust-id-nr.", "umsatzsteuer-id",
         "umsatzsteuer-identifikationsnummer", "steuernummer",
-        "nif", "cif", "nif/cif", "nif-iva", "n.º de iva", "número de iva",
+        "iva", "nif", "cif", "nif/cif", "nif-iva", "n.º de iva", "número de iva",
         "btw-nummer", "btw nummer", "btw-id", "btw-identificatienummer", "btw",
         "momsregistreringsnummer", "momsreg.nr", "momsreg. nr", "moms nr", "momsnummer",
-        "vat number", "vat no", "vat no.", "vat reg. no", "vat registration number", "vat id",
+        "vat number", "vat no", "vat no.", "vat reg. no", "vat registration number", "vat id", "vat #",
         "dič", "dic", "ic dph",
     ],
     "total_to_pay": [
         "razem do zapłaty", "do zapłaty", "totale da pagare", "total à payer",
         "gesamtbetrag", "zu zahlender betrag", "zahlbetrag", "fälliger betrag",
-        "total a pagar", "importe a pagar", "totaal te betalen", "te betalen",
-        "totalt att betala", "att betala", "total to pay", "amount due", "total payable",
-        "total due",
+        "total a pagar", "importe a pagar", "total pendiente", "totaal te betalen", "te betalen",
+        "totalt att betala", "att betala", "total to pay", "total payable", "amount due",
+        "total due", "amount payable",
     ],
     "invoice_total": [
-        "suma faktury", "razem faktura", "totale fattura", "totale ricevuta", "facture total",
-        "total facture", "total de la facture", "rechnungsbetrag", "rechnungssumme",
-        "gesamtsumme rechnung", "total factura", "total de la factura", "factuurtotaal",
-        "totaal factuur", "fakturatotal", "fakturasumma", "totalt faktura", "invoice total",
-        "receipt total",
+        "suma faktury", "razem faktura", "suma noty", "totale fattura", "totale ricevuta",
+        "totale nota di credito", "facture total", "total facture", "total de la facture",
+        "avoir total", "total de l'avoir", "rechnungsbetrag", "rechnungssumme",
+        "gesamtsumme rechnung", "gesamtpreis", "gutschriftsbetrag", "total factura",
+        "total de la factura", "factuurtotaal", "totaal factuur", "totaal creditnota",
+        "fakturatotal", "fakturasumma", "totalt faktura", "invoice total", "receipt total",
+        "credit note total",
     ],
     "shipping": [
-        "koszty wysyłki", "koszt wysyłki", "koszty dostawy", "costi di spedizione",
-        "spese di spedizione", "frais d'expédition", "frais de livraison", "frais de port",
-        "versandkosten", "gastos de envío", "gastos de envio", "costes de envío",
-        "verzendkosten", "fraktkostnad", "fraktkostnader", "frakt", "shipping charges",
-        "shipping costs", "shipping cost", "delivery charges", "postage",
+        "koszty wysyłki", "koszt wysyłki", "koszty dostawy", "wysyłka", "costi di spedizione",
+        "spese di spedizione", "spedizione", "frais d'expédition", "frais de livraison",
+        "frais de port", "livraison", "versandkosten", "versand", "gastos de envío",
+        "gastos de envio", "costes de envío", "envío", "envio", "verzendkosten", "verzending",
+        "fraktkostnad", "fraktkostnader", "frakt", "shipping charges", "shipping costs",
+        "shipping cost", "shipping", "delivery charges", "postage",
+    ],
+    "discount": [
+        "promocje", "rabat", "zniżka", "promozioni", "sconto", "promotions", "remise",
+        "aktionsrabatt", "rabatt", "promoción", "promociones", "descuento", "promoties",
+        "korting", "kampanj", "rabatt", "promotion", "discount",
     ],
     "billing_address": [
-        "adres rozliczeniowy", "adres do faktury", "indirizzo di fatturazione",
-        "adresse de facturation", "rechnungsadresse", "rechnungsanschrift",
-        "dirección de facturación", "factuuradres", "faktureringsadress", "fakturaadress",
-        "billing address",
+        "adres rozliczeniowy", "adres do faktury", "adres firmy", "indirizzo di fatturazione",
+        "indirizzo aziendale", "adresse de facturation", "adresse professionnelle",
+        "rechnungsadresse", "rechnungsanschrift", "geschäftsadresse",
+        "dirección de facturación", "dirección comercial", "factuuradres", "bedrijfsadres",
+        "faktureringsadress", "fakturaadress", "företagsadress", "billing address",
+        "business address",
     ],
     "shipping_address": [
         "adres dostawy", "adres wysyłki", "indirizzo di spedizione", "indirizzo di consegna",
         "adresse de livraison", "adresse d'expédition", "lieferadresse", "versandadresse",
         "dirección de envío", "dirección de entrega", "verzendadres", "afleveradres",
-        "leveransadress", "shipping address", "delivery address",
+        "bezorgadres", "leveransadress", "shipping address", "delivery address",
     ],
     "order_details": [
         "szczegóły zamówienia", "informazioni sull'ordine", "dettagli dell'ordine",
@@ -153,10 +199,15 @@ LABELS: dict[str, list[str]] = {
         "order information",
     ],
     "items_header": [
-        "szczegóły faktury", "dettagli ricevuta", "dettagli fattura", "dettagli della fattura",
-        "détails de la facture", "rechnungsdetails", "rechnungspositionen",
-        "detalles de la factura", "factuurgegevens", "factuurdetails", "fakturainformation",
-        "fakturadetaljer", "fakturaspecifikation", "invoice details", "receipt details",
+        "szczegóły faktury", "szczegóły noty", "szczegóły noty kredytowej", "szczegóły dokumentu",
+        "dettagli ricevuta", "dettagli fattura", "dettagli della fattura",
+        "dettagli nota di credito", "dettagli documento",
+        "détails de la facture", "détails de l'avoir", "détails du avoir", "détails du document",
+        "rechnungsdetails", "rechnungspositionen", "gutschriftsdetails", "belegdetails",
+        "detalles de la factura", "detalles del documento", "detalles de la nota de crédito",
+        "factuurgegevens", "factuurdetails", "creditnotagegevens", "documentgegevens",
+        "fakturainformation", "fakturadetaljer", "fakturaspecifikation", "kreditnotadetaljer",
+        "invoice details", "receipt details", "credit note details", "document details",
     ],
     "qty": [
         "ilość", "ilosc", "quant.", "quantità", "quantita", "qtà", "qté", "qte", "quantité",
@@ -164,31 +215,47 @@ LABELS: dict[str, list[str]] = {
     ],
     "description": [
         "opis", "descrizione", "description", "beschreibung", "artikel", "descripción",
-        "descripcion", "omschrijving", "beskrivning",
+        "descripcion", "omschrijving", "beschrijving", "beskrivning",
     ],
     "paid": [
         "zapłacono", "opłacono", "pagato", "payé", "paye", "bezahlt", "pagado", "betaald",
         "betald", "betalt", "paid",
     ],
+    "refunded": [
+        "zwrócono", "zwrot", "rimborsato", "remboursé", "rembourse", "zurückerstattet",
+        "erstattet", "reembolsado", "terugbetaald", "återbetald", "refunded",
+    ],
+    "payment_due": [
+        "płatne w ciągu", "termin płatności", "pagabile entro", "payable sous", "à payer sous",
+        "zahlbar innerhalb", "zahlungsbedingungen", "pagadero en", "betaalbaar binnen",
+        "betalas inom", "payable within", "payment due", "due within",
+    ],
     "vat_summary_header": [
-        "stawka podatku", "aliquota iva", "aliquota", "taux tva", "taux de tva", "steuersatz",
-        "mwst.-satz", "mwst-satz", "ust.-satz", "tipo de iva", "tipo iva", "btw-tarief",
-        "btw tarief", "momssats", "vat rate", "tax rate",
+        "stawka podatku", "stawka vat", "aliquota iva", "aliquota", "taux tva", "taux de tva",
+        "steuersatz", "mwst.-satz", "mwst-satz", "ust.-satz", "ust. %", "ust.%", "mwst. %",
+        "tipo de iva", "tipo iva", "iva %", "btw-tarief", "btw tarief", "btw %", "momssats",
+        "moms %", "vat rate", "tax rate", "vat %",
     ],
     "summary_total": [
-        "suma", "razem", "totale", "total", "gesamt", "gesamtsumme", "summe", "totaal",
-        "summa", "totalt",
+        "suma", "razem", "totale", "total", "gesamt", "gesamtsumme", "summe", "ust. gesamt",
+        "totaal", "summa", "totalt",
     ],
     "shipped_from": [
-        "towary wysłane z", "merci spedite da", "marchandises expédiées depuis",
-        "marchandises expédiées de", "waren versandt aus", "waren versendet aus",
-        "versand aus", "mercancías enviadas desde", "productos enviados desde",
-        "goederen verzonden vanuit", "goederen verzonden uit", "varor skickade från",
-        "varor levererade från", "goods shipped from", "items shipped from",
+        "towary wysłane z", "kraj wysyłki", "merci spedite da", "paese di spedizione",
+        "marchandises expédiées depuis", "marchandises expédiées de", "expédié depuis",
+        "pays d'expédition", "waren versandt aus", "waren versendet aus", "versand aus",
+        "versendungsland", "versandland", "mercancías enviadas desde", "productos enviados desde",
+        "país de envío", "goederen verzonden vanuit", "goederen verzonden uit", "land van verzending",
+        "varor skickade från", "varor levererade från", "avsändningsland", "goods shipped from",
+        "items shipped from", "shipped from",
     ],
     "exchange_rate": [
         "kurs wymiany", "kurs", "tasso di cambio", "taux de change", "wechselkurs",
         "umrechnungskurs", "tipo de cambio", "wisselkoers", "växelkurs", "exchange rate",
+    ],
+    "customer_number": [
+        "numer klienta", "numero cliente", "numéro de client", "kundennummer", "número de cliente",
+        "klantnummer", "kundnummer", "customer number", "customer no",
     ],
 }
 
@@ -196,25 +263,25 @@ LABELS: dict[str, list[str]] = {
 DOC_TITLES_INVOICE = [
     "faktura", "faktura vat", "fattura", "ricevuta d'acquisto", "ricevuta", "facture",
     "rechnung", "factura", "factuur", "invoice", "kvitto", "reçu", "recibo", "quittung",
-    "tax invoice", "paragon",
+    "tax invoice", "paragon", "faktura sprzedaży",
 ]
 DOC_TITLES_CREDIT = [
-    "nota kredytowa", "faktura korygująca", "korekta faktury", "nota di credito",
-    "avoir", "gutschrift", "stornorechnung", "nota de crédito", "factura rectificativa",
-    "creditnota", "creditfactuur", "kreditnota", "kreditfaktura", "credit note",
-    "credit memo", "kreditnote",
+    "nota kredytowa", "faktura korygująca", "faktura korygujaca", "korekta faktury", "korekta",
+    "nota di credito", "avoir", "gutschrift", "stornorechnung", "rechnungskorrektur",
+    "nota de crédito", "factura rectificativa", "creditnota", "creditfactuur", "kreditnota",
+    "kreditfaktura", "credit note", "credit memo", "kreditnote",
 ]
 
 # język na podstawie tytułu / etykiet
 LANG_HINTS = {
     "pl": ["faktura", "sprzedawca", "nr faktury", "zapłacono", "szczegóły"],
     "it": ["ricevuta", "fattura", "venduto da", "pagato", "dettagli"],
-    "fr": ["facture", "vendu par", "payé", "détails", "commande"],
-    "de": ["rechnung", "verkauft von", "bezahlt", "bestell"],
-    "es": ["factura", "vendido por", "pagado", "pedido"],
+    "fr": ["facture", "vendu par", "payé", "détails", "commande", "avoir"],
+    "de": ["rechnung", "verkauft von", "bezahlt", "bestell", "gutschrift"],
+    "es": ["factura", "vendido por", "pagado", "pedido", "documento"],
     "nl": ["factuur", "verkocht door", "betaald", "bestel"],
     "sv": ["faktura", "säljs av", "betald", "beställning", "kvitto"],
-    "en": ["invoice", "sold by", "paid", "order details"],
+    "en": ["invoice", "sold by", "paid", "order details", "credit note"],
 }
 
 # nazwy krajów po polsku (na tytuł zakładki)
@@ -241,6 +308,51 @@ JURISDICTION_TO_ISO = {
     "MONACO": "MC", "TURKEY": "TR",
 }
 
+# nazwy krajów w językach faktur (linia kraju w adresie, "Versendungsland: Polen") -> ISO
+_COUNTRY_NAMES: dict[str, list[str]] = {
+    "DE": ["deutschland", "germany", "allemagne", "niemcy", "germania", "alemania", "duitsland", "tyskland"],
+    "AT": ["österreich", "osterreich", "austria", "autriche", "oostenrijk", "österrike"],
+    "PL": ["polen", "poland", "pologne", "polska", "polonia", "polónia"],
+    "FR": ["frankreich", "france", "francja", "francia", "frankrijk", "frankrike"],
+    "IT": ["italien", "italy", "italie", "włochy", "wlochy", "italia", "italië", "italie"],
+    "ES": ["spanien", "spain", "espagne", "hiszpania", "spagna", "españa", "espana", "spanje", "spanien"],
+    "NL": ["niederlande", "netherlands", "pays-bas", "holandia", "paesi bassi", "países bajos", "nederland", "nederländerna", "the netherlands"],
+    "BE": ["belgien", "belgium", "belgique", "belgia", "belgio", "bélgica", "belgië", "belgie"],
+    "LU": ["luxemburg", "luxembourg", "lussemburgo", "luxemburgo", "luksemburg"],
+    "SE": ["schweden", "sweden", "suède", "suede", "szwecja", "svezia", "suecia", "zweden", "sverige"],
+    "CZ": ["tschechien", "tschechische republik", "czech republic", "czechia", "république tchèque", "czechy", "republika czeska", "repubblica ceca", "república checa", "tsjechië", "tjeckien"],
+    "GB": ["vereinigtes königreich", "großbritannien", "united kingdom", "great britain", "royaume-uni", "wielka brytania", "regno unito", "reino unido", "verenigd koninkrijk", "storbritannien", "uk"],
+    "IE": ["irland", "ireland", "irlande", "irlandia", "irlanda", "ierland"],
+    "DK": ["dänemark", "denmark", "danemark", "dania", "danimarca", "dinamarca", "denemarken", "danmark"],
+    "PT": ["portugal", "portugalia", "portogallo"],
+    "HU": ["ungarn", "hungary", "hongrie", "węgry", "wegry", "ungheria", "hungría", "hongarije", "ungern"],
+    "SK": ["slowakei", "slovakia", "slovaquie", "słowacja", "slowacja", "slovacchia", "eslovaquia", "slowakije"],
+    "CH": ["schweiz", "switzerland", "suisse", "szwajcaria", "svizzera", "suiza", "zwitserland", "schweiz"],
+    "NO": ["norwegen", "norway", "norvège", "norwegia", "norvegia", "noruega", "noorwegen", "norge"],
+    "GR": ["griechenland", "greece", "grèce", "grecja", "grecia", "griekenland", "grekland"],
+    "FI": ["finnland", "finland", "finlande", "finlandia"],
+    "HR": ["kroatien", "croatia", "croatie", "chorwacja", "croazia", "croacia", "kroatië"],
+    "RO": ["rumänien", "romania", "roumanie", "rumunia", "rumania", "roemenië"],
+    "BG": ["bulgarien", "bulgaria", "bulgarie", "bułgaria", "bulgarije"],
+    "SI": ["slowenien", "slovenia", "slovénie", "słowenia", "eslovenia", "slovenië"],
+    "LT": ["litauen", "lithuania", "lituanie", "litwa", "lituania", "litouwen"],
+    "LV": ["lettland", "latvia", "lettonie", "łotwa", "lettonia", "letonia", "letland"],
+    "EE": ["estland", "estonia", "estonie"],
+    "MT": ["malta", "malte"],
+    "CY": ["zypern", "cyprus", "chypre", "cypr", "cipro", "chipre"],
+    "US": ["usa", "united states", "vereinigte staaten", "états-unis", "stany zjednoczone"],
+}
+
+
+def _norm_simple(text: str) -> str:
+    text = "".join(c for c in unicodedata.normalize("NFKD", text) if not unicodedata.combining(c))
+    return re.sub(r"\s+", " ", text.lower()).strip()
+
+
+COUNTRY_NAME_TO_ISO: dict[str, str] = {
+    _norm_simple(name): iso for iso, names in _COUNTRY_NAMES.items() for name in names
+}
+
 EU_COUNTRIES = {
     "AT", "BE", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR", "DE", "GR", "HU", "IE",
     "IT", "LV", "LT", "LU", "MT", "NL", "PL", "PT", "RO", "SK", "SI", "ES", "SE", "MC",
@@ -262,8 +374,9 @@ DESCRIPTION_NOISE = [
 _BOILERPLATE_RE = re.compile(
     r"(www\.amazon\.[a-z.]+/contact-us|amazon\.[a-z.]+/kontakt|customer service|"
     r"service client|servizio clienti|kundenservice|atención al cliente|klantenservice|"
-    r"kundtjänst|jeśli masz pytania|per domande|veuillez contacter|bei fragen|"
-    r"si tiene preguntas|si tienes preguntas|als u vragen|om du har frågor|if you have questions|"
+    r"kundtjänst|jeśli masz pytania|per domande|veuillez contacter|bei fragen|um unseren|"
+    r"si tiene preguntas|si tienes preguntas|als u vragen|voor vragen|om du har frågor|"
+    r"for questions|"
     r"strona \d+ z \d+|pagina \d+ di \d+|page \d+ de \d+|page \d+ of \d+|seite \d+ von \d+|"
     r"página \d+ de \d+|pagina \d+ van \d+|sida \d+ av \d+)",
     re.IGNORECASE,
@@ -277,8 +390,10 @@ def strip_accents(text: str) -> str:
 
 
 def norm(text: str) -> str:
-    """Normalizacja do porównań etykiet: małe litery, bez akcentów, pojedyncze spacje."""
-    text = strip_accents(text or "").lower().replace(" ", " ")
+    """Normalizacja do porównań etykiet: małe litery, bez akcentów, apostrofy proste,
+    pojedyncze spacje. Zachowuje liczbę znaków 1:1 poza zwijaniem białych znaków."""
+    text = (text or "").replace(" ", " ").replace("’", "'").replace("‘", "'").replace("`", "'").replace("´", "'")
+    text = strip_accents(text).lower()
     text = re.sub(r"\s+", " ", text).strip()
     return text
 
@@ -289,6 +404,8 @@ NORM_LABELS: dict[str, list[str]] = {
     key: sorted({norm(v) for v in values}, key=len, reverse=True)
     for key, values in LABELS.items()
 }
+
+_SEPARATORS = " :/-(.)#№,"
 
 
 def match_label(text: str, key: str) -> str | None:
@@ -304,26 +421,34 @@ def match_label(text: str, key: str) -> str | None:
             rest = t[len(label):]
             # następny znak musi być separatorem (spacja, ':', '/', nawias) – żeby
             # 'nip' nie łapało 'nipx', ale 'nr faktury CZ...' tak
-            if rest[0] in " :/-(.)":
+            if rest[0] in _SEPARATORS:
                 # zwracamy oryginalny (nieznormalizowany) fragment, żeby zachować
                 # wielkość liter numerów/nazwisk
-                orig_rest = _original_rest(text, len(label))
-                return orig_rest.lstrip(" :/-").strip()
+                orig_rest = _original_rest(text, len(label)).strip()
+                orig_rest = re.sub(r"^[:#№,]+\s*", "", orig_rest)
+                orig_rest = re.sub(r"^[/-]\s+", "", orig_rest)   # '- wartość', ale nie '-11,68'
+                return orig_rest.strip()
     return None
 
 
 def _original_rest(text: str, norm_prefix_len: int) -> str:
-    """Odcina prefix o długości `norm_prefix_len` liczonej na tekście znormalizowanym.
-
-    Normalizacja nie zmienia liczby znaków poza zwijaniem białych znaków i
-    usunięciem akcentów (1:1), więc wystarczy zliczyć znaki po zwinięciu spacji.
-    """
-    collapsed = re.sub(r"\s+", " ", (text or "").replace(" ", " ")).strip()
+    """Odcina prefix o długości `norm_prefix_len` liczonej na tekście znormalizowanym."""
+    collapsed = re.sub(r"\s+", " ", (text or "").replace(" ", " ")).strip()
     return collapsed[norm_prefix_len:]
 
 
 def is_boilerplate(text: str) -> bool:
     return bool(_BOILERPLATE_RE.search(text or ""))
+
+
+def country_to_iso(text: str | None) -> str | None:
+    """'Polen' / 'République tchèque' / 'DE' -> kod ISO albo None."""
+    if not text:
+        return None
+    t = text.strip().rstrip(".")
+    if re.fullmatch(r"[A-Z]{2}", t):
+        return "GB" if t == "UK" else t
+    return COUNTRY_NAME_TO_ISO.get(_norm_simple(t))
 
 
 def detect_language(full_text: str) -> str:

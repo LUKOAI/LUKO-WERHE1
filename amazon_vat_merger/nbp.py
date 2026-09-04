@@ -26,6 +26,20 @@ class RateInfo:
     source: str            # np. "NBP 166/A/NBP/2026", "plik kursów", "Amazon (CSV)"
 
 
+def _parse_any_date(value: str) -> date | None:
+    """RRRR-MM-DD / DD.MM.RRRR / DD/MM/RRRR / DD-MM-RRRR -> date."""
+    import re
+
+    v = (value or "").strip()
+    m = re.match(r"^(\d{4})-(\d{1,2})-(\d{1,2})", v)
+    if m:
+        return date(int(m.group(1)), int(m.group(2)), int(m.group(3)))
+    m = re.match(r"^(\d{1,2})[./-](\d{1,2})[./-](\d{4})$", v)
+    if m:
+        return date(int(m.group(3)), int(m.group(2)), int(m.group(1)))
+    return None
+
+
 class RateProvider:
     def __init__(
         self,
@@ -63,19 +77,25 @@ class RateProvider:
         c_rate = cols.get("kurs") or cols.get("rate") or cols.get("mid")
         if not (c_cur and c_date and c_rate):
             raise ValueError(f"plik kursów {path}: wymagane kolumny waluta,data,kurs (są: {list(cols)})")
-        n = 0
+        n, skipped = 0, []
         for row in reader:
             try:
                 cur = (row[c_cur] or "").strip().upper()
-                d = date.fromisoformat((row[c_date] or "").strip()[:10])
-                rate = float((row[c_rate] or "").strip().replace(",", "."))
-            except (ValueError, KeyError):
-                continue
-            if cur and rate > 0:
+                d = _parse_any_date((row[c_date] or "").strip())
+                rate = float((row[c_rate] or "").strip().replace(" ", "").replace(",", "."))
+            except (ValueError, KeyError, TypeError):
+                d, rate, cur = None, 0.0, ""
+            if cur and d and rate > 0:
                 self.manual.setdefault(cur, []).append((d, rate))
                 n += 1
+            elif any((v or "").strip() for v in row.values()):
+                skipped.append(row)
         for lst in self.manual.values():
             lst.sort()
+        if skipped:
+            log.warning("plik kursów %s: pominięto %d wierszy (zły format daty/kursu), np. %s", path, len(skipped), skipped[0])
+        if n == 0:
+            raise ValueError(f"plik kursów {path}: nie wczytano żadnego kursu (format: waluta;data;kurs, data RRRR-MM-DD lub DD.MM.RRRR)")
         log.info("plik kursów %s: %d kursów", path, n)
 
     def _from_manual(self, cur: str, ref_date: date) -> RateInfo | None:
@@ -137,8 +157,11 @@ class RateProvider:
         key = (cur, ref_date)
         if key in self._cache:
             return self._cache[key]
+        failures_before = self.failures
         info = self._from_manual(cur, ref_date) or self._from_nbp(cur, ref_date)
-        self._cache[key] = info
+        # błąd transportowy nie jest odpowiedzią – nie zapamiętujemy None
+        if info is not None or self.failures == failures_before:
+            self._cache[key] = info
         return info
 
     @property

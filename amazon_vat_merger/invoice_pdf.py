@@ -2,13 +2,13 @@
 
 Układ faktury Amazon jest stały niezależnie od języka:
   * prawy górny blok: tytuł, status, referencja płatności, sprzedawca, NIP,
-    data faktury, nr faktury, razem do zapłaty
+    data faktury, nr faktury, (nr faktury pierwotnej), razem do zapłaty
   * lewy górny blok: adres nabywcy (WIELKIMI LITERAMI)
   * blok 3 kolumn: adres rozliczeniowy | adres dostawy | sprzedawca
   * sekcja zamówienia: data zamówienia, nr zamówienia
   * tabela pozycji (opis / ilość / cena / stawka / suma) z liniami "ASIN: ..."
-  * koszty wysyłki, suma faktury, podsumowanie VAT, przeliczenie na walutę
-    rejestracji (np. "CZK0.00"), przypisy.
+  * koszty wysyłki, rabat, suma faktury, podsumowanie VAT, przeliczenie na walutę
+    rejestracji (np. "CZK0.00"), przypisy, kraj wysyłki.
 Parser nie rzuca wyjątków na nieznanym układzie – brakujące pola zostają None,
 a problemy trafiają do `Invoice.warnings`.
 """
@@ -33,16 +33,19 @@ ASIN_RE = re.compile(r"\b(B0[0-9A-Z]{8}|\d{9}[0-9X])\b")
 COUNTRY_LINE_RE = re.compile(r"^[A-Z]{2}$")
 RATE_RE = re.compile(r"^(\d{1,2}(?:[.,]\d{1,2})?)\s?%$")
 CONVERSION_RE = re.compile(r"^([A-Z]{3})\s?([-−–]?\d[\d.,\s]*)$")
-_AMOUNT_CORE = r"[-−–]?\d{1,3}(?:[  .,]\d{3})*(?:[.,]\d{1,2})?|[-−–]?\d+(?:[.,]\d{1,2})?"
+_AMOUNT_CORE = r"\d{1,3}(?:[  .,]\d{3})*(?:[.,]\d{1,2})?|\d+(?:[.,]\d{1,2})?"
+_CUR = r"[€£$]|zł|kr|kč|[A-Z]{3}"
 AMOUNT_TOKEN_RE = re.compile(
-    r"^(?P<pre>[€£$]|zł|kr|kč|[A-Z]{3})?\s?(?P<num>" + _AMOUNT_CORE + r")\s?(?P<post>[€£$]|zł|kr|kč|[A-Z]{3})?$",
+    r"^(?P<sign>[-−–])?\s?(?P<pre>" + _CUR + r")?\s?(?P<sign2>[-−–])?\s?(?P<num>" + _AMOUNT_CORE
+    + r")\s?(?P<post>" + _CUR + r")?$",
     re.IGNORECASE,
 )
-STREET_VAT_RE = re.compile(
-    r",?\s*(?:nip|p\.? ?iva|partita iva|tva|ust-?idnr\.?|ust-?id|nif|cif|btw(?:-nummer|-id)?|"
-    r"vat(?: no\.?| number| id)?|momsreg\.? ?nr|dič)\s*:?\s*([A-Z]{2}[0-9A-Z]{8,13})\s*$",
-    re.IGNORECASE,
+_VAT_LABEL = (
+    r"(?:nip|p\.? ?iva|partita iva|tva|ust-?idnr\.?|ust-?id|iva|nif|cif|btw(?:-nummer|-id)?|"
+    r"vat(?: no\.?| number| id| #)?|momsreg\.? ?nr|dič|steuernummer)"
 )
+STREET_VAT_RE = re.compile(r",?\s*" + _VAT_LABEL + r"\s*:?\s*#?\s*([A-Z]{2}[0-9A-Z]{8,13})\s*$", re.IGNORECASE)
+VAT_LINE_RE = re.compile(r"^" + _VAT_LABEL + r"\s*:?\s*#?\s*([A-Z]{2}[0-9A-Z]{8,13})\s*$", re.IGNORECASE)
 DATE_RES = [
     re.compile(r"(\d{1,2})\.?\s*(?:de\s+)?([^\d\s,.]+)\.?,?\s*(?:de\s+)?(\d{4})"),
     re.compile(r"([^\d\s,.]+)\.?\s+(\d{1,2}),?\s+(\d{4})"),
@@ -69,6 +72,7 @@ class Address:
     region: str | None = None
     postal_code: str | None = None
     country: str | None = None
+    country_name: str | None = None
     vat_id: str | None = None
     city_line: str | None = None
     lines: list[str] = field(default_factory=list)
@@ -102,19 +106,25 @@ class Invoice:
     file: str
     invoice_number: str | None = None
     invoice_number_source: str | None = None
+    original_invoice_number: str | None = None
     doc_type: str = "unknown"          # invoice | credit_note | unknown
     title: str | None = None
     language: str = "unknown"
+    pages: int = 0
     paid: bool | None = None
+    payment_status: str | None = None  # paid | refunded | due
     payment_reference: str | None = None
+    customer_number: str | None = None
     seller_name: str | None = None
     seller_vat_id: str | None = None
     invoice_date: date | None = None
+    delivery_date: date | None = None
     order_date: date | None = None
     order_number: str | None = None
     total_to_pay: float | None = None
     invoice_total: float | None = None
     shipping_gross: float | None = None
+    discount_gross: float | None = None
     currency: str | None = None
     billing: Address = field(default_factory=Address)
     shipping: Address = field(default_factory=Address)
@@ -128,6 +138,7 @@ class Invoice:
     converted_vat_amount: float | None = None
     exchange_rate: float | None = None
     shipped_from: str | None = None
+    shipped_from_country: str | None = None
     notes: list[str] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
     text: str = ""
@@ -141,9 +152,13 @@ class Invoice:
     def buyer_vat_id(self) -> str | None:
         return self.billing.vat_id or self.buyer_header.vat_id or self.shipping.vat_id
 
+    @property
+    def is_credit_note(self) -> bool:
+        return self.doc_type == "credit_note"
+
     def to_dict(self) -> dict:
         d = asdict(self)
-        for k in ("invoice_date", "order_date"):
+        for k in ("invoice_date", "order_date", "delivery_date"):
             if d[k] is not None:
                 d[k] = d[k].isoformat()
         d.pop("text", None)
@@ -157,7 +172,7 @@ def parse_amount(token: str) -> float | None:
     """'121,87' / '1.234,56' / '12.90' / '-3,99' / '1 234,56' -> float."""
     if token is None:
         return None
-    s = str(token).strip().replace(" ", " ").replace(" ", "")
+    s = str(token).strip().replace(" ", " ").replace(" ", "")
     if not s:
         return None
     neg = s[0] in "-−–"
@@ -180,17 +195,20 @@ def parse_amount(token: str) -> float | None:
 
 
 def amount_token(token: str) -> tuple[float, str | None] | None:
-    """Rozpoznaje token kwoty (z opcjonalnym symbolem waluty) -> (kwota, waluta)."""
+    """Rozpoznaje token kwoty (z opcjonalnym symbolem waluty i znakiem) -> (kwota, waluta)."""
     m = AMOUNT_TOKEN_RE.match(token.strip())
     if not m:
         return None
     num = m.group("num")
+    has_cur = bool(m.group("pre") or m.group("post"))
     # sam integer bez separatora dziesiętnego i bez symbolu waluty to nie kwota
-    if not re.search(r"[.,]\d{1,2}$", num) and not (m.group("pre") or m.group("post")):
+    if not re.search(r"[.,]\d{1,2}$", num) and not has_cur:
         return None
     val = parse_amount(num)
     if val is None:
         return None
+    if m.group("sign") or m.group("sign2"):
+        val = -abs(val)
     sym = (m.group("pre") or m.group("post") or "").strip()
     cur = L.CURRENCY_SYMBOLS.get(sym.lower()) or (sym.upper() if len(sym) == 3 else None)
     return val, cur
@@ -256,20 +274,22 @@ def _build_lines(words: Iterable[Word], tol: float = 3.0) -> list[Line]:
     return lines
 
 
-def _extract_words(path: Path) -> tuple[list[Word], float, float, str]:
+def _extract_words(path: Path) -> tuple[list[Word], float, float, str, int]:
     import pdfplumber  # import lokalny – ciężka zależność
 
     words: list[Word] = []
     texts: list[str] = []
     width = height = 0.0
+    npages = 0
     with pdfplumber.open(str(path)) as pdf:
         for pno, page in enumerate(pdf.pages):
+            npages += 1
             width, height = float(page.width), float(page.height)
             offset = pno * (height + 50)
             for w in page.extract_words(use_text_flow=False, keep_blank_chars=False):
                 words.append(Word(w["text"], float(w["x0"]), float(w["x1"]), float(w["top"]) + offset))
             texts.append(page.extract_text() or "")
-    return words, width, height, "\n".join(texts)
+    return words, width, height, "\n".join(texts), npages
 
 
 def _first_label_line(lines: list[Line], key: str) -> int | None:
@@ -284,6 +304,10 @@ def _line_contains_label(text: str, key: str) -> bool:
     return any(lbl in t for lbl in L.NORM_LABELS[key])
 
 
+def _is_any_label(text: str) -> bool:
+    return any(L.match_label(text, k) is not None for k in L.LABELS)
+
+
 # ---------------------------------------------------------------------------
 # adresy
 # ---------------------------------------------------------------------------
@@ -293,26 +317,25 @@ def parse_address(lines: list[str]) -> Address:
     if not lines:
         return addr
     addr.name = lines[0]
-    idx_country = None
-    for i in range(len(lines) - 1, 0, -1):
-        if COUNTRY_LINE_RE.match(lines[i]):
-            idx_country = i
-            break
-    if idx_country is not None:
-        addr.country = lines[idx_country]
-        middle = lines[1:idx_country]
-        after = lines[idx_country + 1:]
-    else:
-        middle = lines[1:]
-        after = []
-    for ln in after:
-        m = VAT_ID_RE.search(ln)
-        if m and not addr.vat_id:
-            addr.vat_id = m.group(0)
-    if middle:
-        addr.city_line = middle[-1]
+    rest: list[str] = []
+    for ln in lines[1:]:
+        m = VAT_LINE_RE.match(ln)
+        if m:
+            addr.vat_id = addr.vat_id or m.group(1)
+            continue
+        rest.append(ln)
+    # linia kraju: kod ISO albo nazwa słowna (np. "Luxemburg")
+    if rest:
+        last = rest[-1]
+        iso = L.country_to_iso(last) if (COUNTRY_LINE_RE.match(last) or not re.search(r"\d", last)) else None
+        if iso:
+            addr.country = iso
+            addr.country_name = last
+            rest = rest[:-1]
+    if rest:
+        addr.city_line = rest[-1]
         street_lines = []
-        for ln in middle[:-1]:
+        for ln in rest[:-1]:
             m = STREET_VAT_RE.search(ln)
             if m:
                 addr.vat_id = addr.vat_id or m.group(1)
@@ -329,10 +352,12 @@ def parse_address(lines: list[str]) -> Address:
                     postal = p
                     break
             if postal is None and len(parts) == 1:
-                # "Homburg 66424" bez przecinka
+                # "Homburg 66424" bez przecinka, albo sam kod "L-1855"
                 m = re.match(r"^(.*?)[\s,]+([A-Z0-9][A-Z0-9 -]{2,9})$", parts[0])
                 if m and re.search(r"\d", m.group(2)):
                     addr.city, postal = m.group(1).strip(), m.group(2)
+                elif re.fullmatch(r"[A-Z]{0,2}-?\d[\d -]{2,9}", parts[0]):
+                    addr.city, postal = None, parts[0]
             addr.postal_code = postal
             region_parts = [p for p in parts[1:] if p != postal]
             addr.region = ", ".join(region_parts) if region_parts else None
@@ -356,10 +381,14 @@ def _assign_column(x0: float, starts: list[float]) -> int:
     return idx
 
 
+def _is_address_header(text: str) -> bool:
+    return _line_contains_label(text, "billing_address") or _line_contains_label(text, "shipping_address")
+
+
 def _parse_address_block(body: list[Line], inv: Invoice) -> None:
     hi = None
     for i, ln in enumerate(body):
-        if _line_contains_label(ln.text, "billing_address") or _line_contains_label(ln.text, "shipping_address"):
+        if _is_address_header(ln.text):
             hi = i
             break
     if hi is None:
@@ -367,7 +396,6 @@ def _parse_address_block(body: list[Line], inv: Invoice) -> None:
         return
     header = body[hi]
     starts = _split_columns(header)
-    # role kolumn wg etykiet w nagłówku
     roles: list[str] = []
     for k, s in enumerate(starts):
         end = starts[k + 1] if k + 1 < len(starts) else 1e9
@@ -410,63 +438,108 @@ def _parse_address_block(body: list[Line], inv: Invoice) -> None:
 # ---------------------------------------------------------------------------
 # nagłówek (prawa / lewa kolumna)
 # ---------------------------------------------------------------------------
-def _kv_from_lines(lines: list[Line], key: str) -> str | None:
+def _kv_all(lines: list[Line], key: str) -> list[str]:
+    """Wszystkie wartości dla etykiety `key` (wartość z tej samej lub następnej linii)."""
+    out: list[str] = []
     for i, ln in enumerate(lines):
         v = L.match_label(ln.text, key)
         if v is None:
             continue
         if v:
-            return v
-        # wartość w następnej linii (np. długa referencja płatności)
-        if i + 1 < len(lines):
-            nxt = lines[i + 1].text
-            if not any(L.match_label(nxt, k) is not None for k in L.LABELS):
-                return nxt.strip()
-        return ""
-    return None
+            out.append(v)
+        elif i + 1 < len(lines) and not _is_any_label(lines[i + 1].text):
+            out.append(lines[i + 1].text.strip())
+        else:
+            out.append("")
+    return out
 
 
-def _parse_header(right: list[Line], left: list[Line], inv: Invoice) -> None:
-    if right:
-        title = right[0].text.strip()
-        inv.title = title
-        nt = L.norm(title)
-        if nt in {L.norm(t) for t in L.DOC_TITLES_CREDIT}:
-            inv.doc_type = "credit_note"
-        elif nt in {L.norm(t) for t in L.DOC_TITLES_INVOICE}:
-            inv.doc_type = "invoice"
+def _kv_first(lines: list[Line], key: str) -> str | None:
+    vals = _kv_all(lines, key)
+    return vals[0] if vals else None
+
+
+def _amounts_in(text: str) -> tuple[list[float], str | None]:
+    words = [Word(t, 0.0, 0.0, 0.0) for t in text.split()]
+    nums = _numbers_from_words(words)
+    return nums["amounts"], nums["currency"]
+
+
+def _parse_header(right: list[Line], left: list[Line], inv: Invoice, stem_number: str | None) -> None:
+    titles = [ln.text.strip() for ln in right if ln.top < 60]
+    if titles:
+        inv.title = " / ".join(titles)
+        credit = {L.norm(t) for t in L.DOC_TITLES_CREDIT}
+        invoice = {L.norm(t) for t in L.DOC_TITLES_INVOICE}
+        for t in titles:
+            nt = L.norm(t)
+            if nt in credit:
+                inv.doc_type = "credit_note"
+                break
+            if nt in invoice and inv.doc_type == "unknown":
+                inv.doc_type = "invoice"
     for ln in right:
-        if L.match_label(ln.text, "paid") is not None and L.norm(ln.text) in L.NORM_LABELS["paid"]:
-            inv.paid = True
-    inv.payment_reference = _kv_from_lines(right, "payment_reference") or None
-    inv.seller_name = _kv_from_lines(right, "seller") or None
-    v = _kv_from_lines(right, "vat_id")
+        nt = L.norm(ln.text)
+        if nt in L.NORM_LABELS["paid"]:
+            inv.paid, inv.payment_status = True, "paid"
+        elif nt in L.NORM_LABELS["refunded"]:
+            inv.paid, inv.payment_status = None, "refunded"
+        elif L.match_label(ln.text, "payment_due") is not None and inv.payment_status is None:
+            inv.payment_status = "due"
+        if L.match_label(ln.text, "credit_intro") is not None:
+            inv.doc_type = "credit_note"
+    v = _kv_first(right, "payment_reference")
+    if v:
+        inv.payment_reference = re.sub(r"^(id|nr|no\.?|#)\s*[:#]?\s*", "", v, flags=re.IGNORECASE).strip() or None
+    inv.customer_number = _kv_first(right, "customer_number") or None
+    inv.seller_name = _kv_first(right, "seller") or None
+    v = _kv_first(right, "vat_id")
     if v:
         m = VAT_ID_RE.search(v)
         inv.seller_vat_id = m.group(0) if m else v
-    v = _kv_from_lines(right, "invoice_date")
-    if v is not None:
-        inv.invoice_date = parse_date_text(v)
-        if inv.invoice_date is None:
-            inv.warnings.append(f"nie rozpoznano daty faktury: {v!r}")
-    v = _kv_from_lines(right, "invoice_number")
+    for v in _kv_all(right, "invoice_date"):
+        d = parse_date_text(v)
+        if d:
+            inv.invoice_date = d
+            break
+    v = _kv_first(right, "delivery_date")
+    if v:
+        inv.delivery_date = parse_date_text(v)
+    # numer faktury: wszystkie dopasowania; zdanie "Gutschrift für die Rechnungsnummer X"
+    # daje numer faktury pierwotnej, właściwy numer jest w liście klucz/wartość niżej
+    cands: list[str] = []
+    for v in _kv_all(right, "invoice_number"):
+        m = INVOICE_NO_RE.search(v.upper())
+        if m and m.group(0) not in cands:
+            cands.append(m.group(0))
+    if cands:
+        if stem_number and stem_number in cands:
+            inv.invoice_number = stem_number
+        else:
+            inv.invoice_number = cands[-1]
+        inv.invoice_number_source = "etykieta"
+    v = _kv_first(right, "original_invoice_number")
     if v:
         m = INVOICE_NO_RE.search(v.upper())
-        inv.invoice_number = m.group(0) if m else v.strip()
-        inv.invoice_number_source = "etykieta"
-    v = _kv_from_lines(right, "total_to_pay")
+        inv.original_invoice_number = m.group(0) if m else v
+    if not inv.original_invoice_number:
+        for v in _kv_all(right, "credit_intro"):
+            m = INVOICE_NO_RE.search(v.upper())
+            if m:
+                inv.original_invoice_number = m.group(0)
+                break
+    if not inv.original_invoice_number and len(cands) > 1:
+        inv.original_invoice_number = next((c for c in cands if c != inv.invoice_number), None)
+    if inv.original_invoice_number and inv.original_invoice_number == inv.invoice_number:
+        inv.original_invoice_number = None
+    if inv.original_invoice_number and inv.doc_type == "unknown":
+        inv.doc_type = "credit_note"
+    v = _kv_first(right, "total_to_pay")
     if v:
-        toks = [amount_token(t) for t in v.split()]
-        toks = [t for t in toks if t]
-        if toks:
-            inv.total_to_pay, cur = toks[-1]
+        amounts, cur = _amounts_in(v)
+        if amounts:
+            inv.total_to_pay = amounts[-1]
             inv.currency = inv.currency or cur
-        else:
-            # np. "121,87 zł" rozbite na tokeny
-            a = amount_token(v.replace(" ", ""))
-            if a:
-                inv.total_to_pay, cur = a
-                inv.currency = inv.currency or cur
     # lewy blok = adres nabywcy WIELKIMI LITERAMI
     left_texts = [ln.text for ln in left]
     if left_texts and L.norm(left_texts[0]) in {L.norm(b) for b in BUYER_HEADER_LABELS}:
@@ -506,22 +579,19 @@ def _numbers_from_words(words: list[Word]) -> dict:
             out["qty"] = int(t)
             i += 1
             continue
-        # kwota + osobny symbol waluty
-        joined = t
+        # kwota + osobny symbol waluty ("12,90 €" / "€ 12,90" / "-11,76 €")
+        joined, consumed = t, 1
         if i + 1 < len(toks) and toks[i + 1].lower() in L.CURRENCY_SYMBOLS:
-            joined = t + toks[i + 1]
+            joined, consumed = t + toks[i + 1], 2
         a = amount_token(joined)
         if a is None and i + 1 < len(toks):
             a2 = amount_token(t + toks[i + 1])
             if a2:
-                a = a2
-                i += 1
+                a, consumed = a2, 2
         if a:
             out["amounts"].append(a[0])
             out["currency"] = out["currency"] or a[1]
-            if joined != t:
-                i += 1
-        i += 1
+        i += consumed
     return out
 
 
@@ -535,8 +605,6 @@ def _parse_items(body: list[Line], inv: Invoice) -> int:
     if qty_x is None:
         inv.warnings.append("nie znaleziono kolumny ilości – opisy pozycji mogą zawierać liczby")
         qty_x = 300.0
-    # pomiń linie nagłówka tabeli (do pierwszej linii z ASIN / kwotą / do 'koszty wysyłki')
-    i = hi + 1
     header_words = {L.norm(x) for k in ("qty", "description") for x in L.NORM_LABELS[k]}
     block: list[Line] = []
     end = len(body)
@@ -567,29 +635,32 @@ def _parse_items(body: list[Line], inv: Invoice) -> int:
         desc = " ".join(desc_parts)
         for noise in L.DESCRIPTION_NOISE:
             desc = re.sub(re.escape(noise), "", desc, flags=re.IGNORECASE)
+        desc = re.sub(r"\s*\|\s*[A-Z0-9]{10}\s*$", "", desc)   # "... | B07N7CJMNH" (EN)
         desc = re.sub(r"\s+", " ", desc).strip(" ,")
         item.description = desc or None
         inv.items.append(item)
 
+    i = hi + 1
     while i < len(body):
         ln = body[i]
-        t = L.norm(ln.text)
-        if L.match_label(ln.text, "shipping") is not None or L.match_label(ln.text, "invoice_total") is not None:
+        has_left = any(w.x0 < qty_x - 5 for w in ln.words)
+        has_digit = any(re.search(r"\d", w.text) for w in ln.words)
+        for key in ("shipping", "discount", "invoice_total"):
+            if L.match_label(ln.text, key) is not None:
+                end = i
+                break
+        if end == i:
+            break
+        # sumy / podsumowanie VAT: linia bez tekstu w kolumnie opisu, gdy pozycje już są
+        if not block and inv.items and not has_left:
             end = i
             break
-        # nagłówek podsumowania VAT kończy tabelę – ale tylko gdy mamy już pozycje
-        # (nagłówek tabeli pozycji też zawiera 'stawka podatku' / 'taux tva')
-        if _line_contains_label(ln.text, "vat_summary_header") and inv.items and not block:
+        if not block and inv.items and L.match_label(ln.text, "summary_total") is not None:
             end = i
             break
-        # linie nagłówka tabeli: same etykiety kolumn / nawiasy
-        only_header = all(
-            L.norm(w.text) in header_words or re.fullmatch(r"[()\w./-]*", L.norm(w.text)) and not re.search(r"\d", w.text)
-            for w in ln.words
-        ) and not any(w.x0 < qty_x - 5 and re.search(r"\d", w.text) for w in ln.words)
-        if not block and only_header and not ASIN_RE.search(ln.text) and not any(
-            amount_token(w.text) for w in ln.words
-        ):
+        # nagłówek tabeli (etykiety kolumn, nawiasy): bez cyfr albo słowa nagłówka
+        if not block and (not has_digit or any(L.norm(w.text) in header_words for w in ln.words)) \
+                and not ASIN_RE.search(ln.text):
             i += 1
             continue
         m = re.search(r"asin\s*:?\s*([A-Z0-9]{10})", ln.text, re.IGNORECASE)
@@ -612,15 +683,30 @@ def _parse_items(body: list[Line], inv: Invoice) -> int:
 
 def _parse_totals(body: list[Line], start: int, inv: Invoice) -> None:
     in_summary = False
+    after_summary = False
     for ln in body[start:]:
         text = ln.text
         nums = _numbers_from_words(ln.words)
-        if L.match_label(text, "shipping") is not None and nums["amounts"]:
-            inv.shipping_gross = nums["amounts"][-1]
+        am = nums["amounts"]
+        if L.is_boilerplate(text):
             continue
-        if L.match_label(text, "invoice_total") is not None and nums["amounts"]:
-            inv.invoice_total = nums["amounts"][-1]
+        if L.match_label(text, "shipping") is not None and am:
+            inv.shipping_gross = am[-1]
+            continue
+        if L.match_label(text, "discount") is not None and am:
+            inv.discount_gross = am[-1]
+            continue
+        if L.match_label(text, "invoice_total") is not None and am:
+            inv.invoice_total = am[-1]
             inv.currency = inv.currency or nums["currency"]
+            continue
+        if not in_summary and L.match_label(text, "summary_total") is not None and len(am) == 1 and ln.x0 > 250:
+            # np. hiszpańskie "Total 19,99 €" jako suma faktury
+            inv.invoice_total = am[-1]
+            inv.currency = inv.currency or nums["currency"]
+            continue
+        if L.match_label(text, "total_to_pay") is not None and am and inv.invoice_total is None:
+            inv.invoice_total = am[-1]
             continue
         if _line_contains_label(text, "vat_summary_header"):
             in_summary = True
@@ -634,7 +720,10 @@ def _parse_totals(body: list[Line], start: int, inv: Invoice) -> None:
             continue
         v = L.match_label(text, "shipped_from")
         if v is not None:
-            inv.shipped_from = v.lstrip(": ").strip() or None
+            val = v.lstrip(": ").strip() or None
+            if val and not inv.shipped_from:
+                inv.shipped_from = val
+                inv.shipped_from_country = L.country_to_iso(val)
             continue
         v = L.match_label(text, "exchange_rate")
         if v is not None:
@@ -642,23 +731,28 @@ def _parse_totals(body: list[Line], start: int, inv: Invoice) -> None:
             if m2:
                 inv.exchange_rate = parse_amount(m2.group(0))
             continue
-        if re.match(r"^\(\d+\)", text.strip()) and not nums["amounts"]:
-            inv.notes.append(text.strip())
-            continue
         if in_summary:
             first = ln.words[0].text if ln.words else ""
             starts_with_rate = bool(RATE_RE.match(first)) or (
                 len(ln.words) > 1 and ln.words[1].text == "%" and re.fullmatch(r"\d{1,2}(?:[.,]\d{1,2})?", first)
             )
-            if starts_with_rate and nums["rate"] is not None and len(nums["amounts"]) == 2:
-                am = nums["amounts"]
+            if starts_with_rate and nums["rate"] is not None and len(am) == 2:
                 inv.vat_lines.append(VatLine(nums["rate"], am[0], am[1]))
                 continue
-            if L.match_label(text, "summary_total") is not None and nums["amounts"]:
-                am = nums["amounts"]
+            if L.match_label(text, "summary_total") is not None and am:
                 inv.total_net = am[0]
                 inv.total_vat = am[1] if len(am) > 1 else None
+                after_summary = True
+                in_summary = False
                 continue
+        if after_summary and am and not re.match(r"^\(\d+\)", text.strip()):
+            # po podsumowaniu VAT nie ma już kwot do odczytu (np. nagłówek kolejnej strony)
+            continue
+        if re.match(r"^\(\d+\)", text.strip()) and not am:
+            inv.notes.append(text.strip())
+            continue
+        if (after_summary or in_summary) and ln.x0 < 100 and not am and len(text) > 15:
+            inv.notes.append(text.strip())
     if inv.total_net is None and inv.vat_lines:
         inv.total_net = round(sum(v.net or 0 for v in inv.vat_lines), 2)
         inv.total_vat = round(sum(v.vat or 0 for v in inv.vat_lines), 2)
@@ -671,12 +765,15 @@ def parse_pdf(path: str | Path, known_invoice_numbers: Iterable[str] | None = No
     path = Path(path)
     inv = Invoice(file=path.name)
     known = {k.upper() for k in (known_invoice_numbers or [])}
+    stem_m = INVOICE_NO_RE.search(path.stem.upper())
+    stem_number = stem_m.group(0) if stem_m else None
     try:
-        words, width, height, text = _extract_words(path)
+        words, width, height, text, npages = _extract_words(path)
     except Exception as exc:  # noqa: BLE001 – każdy błąd odczytu ma być raportowany, nie rzucany
         inv.warnings.append(f"nie udało się odczytać PDF: {exc}")
         return inv
     inv.text = text
+    inv.pages = npages
     inv.language = L.detect_language(text)
     if not words:
         inv.warnings.append("PDF nie zawiera tekstu (skan?) – wymagane OCR")
@@ -686,7 +783,7 @@ def parse_pdf(path: str | Path, known_invoice_numbers: Iterable[str] | None = No
     # koniec nagłówka: linia z nagłówkiem bloku adresów albo boilerplate 'contact-us'
     header_end = None
     for ln in all_lines:
-        if _line_contains_label(ln.text, "billing_address") or _line_contains_label(ln.text, "shipping_address"):
+        if _is_address_header(ln.text):
             header_end = ln.top
             break
     if header_end is None:
@@ -702,9 +799,17 @@ def parse_pdf(path: str | Path, known_invoice_numbers: Iterable[str] | None = No
     right = _build_lines([w for w in words if w.top < header_end and w.x0 >= split_x])
     left = _build_lines([w for w in words if w.top < header_end and w.x0 < split_x])
     body = [ln for ln in all_lines if ln.top >= header_end]
+    # dokument dwujęzyczny (np. BE: strona 1 NL, strona 2 FR) – używamy pierwszej wersji
+    hdr_idx = [i for i, ln in enumerate(body) if _is_address_header(ln.text)]
+    if len(hdr_idx) > 1:
+        second_top = body[hdr_idx[1]].top
+        page_of_second = int(second_top // (height + 50))
+        page_start = next((i for i, ln in enumerate(body) if ln.top >= page_of_second * (height + 50)), hdr_idx[1])
+        body = body[: min(page_start, hdr_idx[1])]
+        inv.notes.append("dokument wielojęzyczny – odczytano pierwszą wersję językową")
 
     try:
-        _parse_header(right, left, inv)
+        _parse_header(right, left, inv, stem_number)
     except Exception as exc:  # noqa: BLE001
         inv.warnings.append(f"błąd parsowania nagłówka: {exc}")
     try:
@@ -713,10 +818,10 @@ def parse_pdf(path: str | Path, known_invoice_numbers: Iterable[str] | None = No
         inv.warnings.append(f"błąd parsowania adresów: {exc}")
 
     # zamówienie
-    v = _kv_from_lines(body, "order_date")
+    v = _kv_first(body, "order_date")
     if v is not None:
         inv.order_date = parse_date_text(v)
-    v = _kv_from_lines(body, "order_number")
+    v = _kv_first(body, "order_number")
     m = ORDER_NO_RE.search(v or "") or ORDER_NO_RE.search(text)
     inv.order_number = m.group(0) if m else (v or None)
 
@@ -731,17 +836,16 @@ def parse_pdf(path: str | Path, known_invoice_numbers: Iterable[str] | None = No
         inv.warnings.append(f"błąd parsowania sum: {exc}")
 
     # numer faktury: etykieta -> nazwa pliku -> token znany z CSV -> dowolny token
-    stem_m = INVOICE_NO_RE.search(path.stem.upper())
-    if not inv.invoice_number and stem_m:
-        inv.invoice_number, inv.invoice_number_source = stem_m.group(0), "nazwa pliku"
+    if not inv.invoice_number and stem_number:
+        inv.invoice_number, inv.invoice_number_source = stem_number, "nazwa pliku"
     if not inv.invoice_number:
         tokens = INVOICE_NO_RE.findall(text.upper())
         hit = next((t for t in tokens if t in known), None) or (tokens[0] if tokens else None)
         if hit:
             inv.invoice_number, inv.invoice_number_source = hit, "tekst"
-    if inv.invoice_number and stem_m and stem_m.group(0) != inv.invoice_number:
+    if inv.invoice_number and stem_number and stem_number != inv.invoice_number:
         inv.warnings.append(
-            f"numer z pliku ({stem_m.group(0)}) różni się od numeru z treści ({inv.invoice_number})"
+            f"numer z pliku ({stem_number}) różni się od numeru z treści ({inv.invoice_number})"
         )
     if not inv.invoice_number:
         inv.warnings.append("nie rozpoznano numeru faktury")
@@ -749,6 +853,8 @@ def parse_pdf(path: str | Path, known_invoice_numbers: Iterable[str] | None = No
         inv.doc_type = "invoice"
     if inv.invoice_total is None and inv.total_to_pay is not None:
         inv.invoice_total = inv.total_to_pay
+    if inv.invoice_total is not None and inv.total_to_pay is not None and abs(inv.invoice_total - inv.total_to_pay) > 0.011:
+        inv.warnings.append(f"suma faktury ({inv.invoice_total}) różni się od 'do zapłaty' ({inv.total_to_pay})")
     if not inv.items:
         inv.warnings.append("nie rozpoznano pozycji faktury")
     if inv.invoice_date is None:

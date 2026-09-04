@@ -103,3 +103,44 @@ def test_sample_pdfs_parse():
             assert inv.total_net == exp["net"] and inv.total_vat == exp["vat"]
             assert inv.vat_lines and inv.vat_lines[0].rate == exp["rate"]
         assert not [w for w in inv.warnings if "nie rozpoznano" in w or "brak" in w], inv.warnings
+
+
+@pytest.mark.skipif(not SAMPLES, reason="brak próbek PDF (samples/faktury)")
+def test_all_sample_pdfs_against_csv():
+    """Każda faktura z próbek: numer = nazwa pliku, zamówienie/kwota/ASIN zgodne z CSV."""
+    from amazon_vat_merger.report import read_report
+    from tests.conftest import SAMPLE_CSV
+    if not SAMPLE_CSV.exists():
+        pytest.skip("brak próbki CSV")
+    txs = {}
+    for t in read_report(SAMPLE_CSV):
+        txs.setdefault(t.invoice_number, []).append(t)
+    problems = []
+    for path in SAMPLES:
+        inv = parse_pdf(path)
+        rows = txs.get(inv.invoice_number or "", [])
+        if inv.invoice_number != path.stem:
+            problems.append(f"{path.name}: numer {inv.invoice_number}")
+        if not rows:
+            continue  # PDF spoza raportu – dopuszczalne
+        tx = rows[0]
+        if len(rows) == 1 and (inv.invoice_total is None or abs(abs(inv.invoice_total) - abs(tx.total.gross)) > 0.011):
+            problems.append(f"{path.name}: kwota PDF {inv.invoice_total} vs CSV {tx.total.gross}")
+        if inv.currency != tx.currency:
+            problems.append(f"{path.name}: waluta {inv.currency} vs {tx.currency}")
+        if not any(it.asin == tx.asin for it in inv.items):
+            problems.append(f"{path.name}: brak ASIN {tx.asin} w pozycjach {[i.asin for i in inv.items]}")
+        if not inv.billing.name or not inv.billing.country:
+            problems.append(f"{path.name}: brak adresu rozliczeniowego")
+        if inv.invoice_date is None:
+            problems.append(f"{path.name}: brak daty")
+        if inv.is_credit_note != tx.is_negative:
+            problems.append(f"{path.name}: typ {inv.doc_type} vs {tx.transaction_type}")
+        if inv.is_credit_note and not inv.original_invoice_number:
+            problems.append(f"{path.name}: nota bez numeru faktury pierwotnej")
+        if inv.total_vat is not None and len(rows) == 1 and abs(abs(inv.total_vat) - abs(tx.total.vat)) > 0.011:
+            problems.append(f"{path.name}: VAT PDF {inv.total_vat} vs CSV {tx.total.vat}")
+        bad = [w for w in inv.warnings if "nie rozpoznano" in w or w.startswith("brak") or "różni się od 'do zapłaty'" in w]
+        if bad:
+            problems.append(f"{path.name}: {bad}")
+    assert not problems, "\n".join(problems)

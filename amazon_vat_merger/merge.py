@@ -4,6 +4,7 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass, field
 from datetime import date
+from decimal import ROUND_HALF_UP, Decimal
 from typing import Any, Callable
 
 from . import labels as L
@@ -14,6 +15,14 @@ from .report import CATEGORY_DESCRIPTION, Transaction
 log = logging.getLogger(__name__)
 
 DOC_TYPE_PL = {"invoice": "Faktura", "credit_note": "Nota kredytowa", "unknown": ""}
+
+
+def round2(value: float | None) -> float | None:
+    """Zaokrąglenie księgowe (HALF_UP) do 2 miejsc – round() Pythona zaokrągla 'do parzystej'."""
+    if value is None:
+        return None
+    return float(Decimal(str(value)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
+PAYMENT_STATUS_PL = {"paid": "Zapłacono", "refunded": "Zwrócono", "due": "Do zapłaty"}
 
 
 @dataclass
@@ -30,6 +39,7 @@ class MergedRow:
     net_eur: float | None = None
     vat_eur: float | None = None
     amount_check: str = ""
+    rate_note: str = ""
 
     # ---- wygodne gettery ----
     @property
@@ -97,25 +107,32 @@ def _basis_date(tx: Transaction, inv: Invoice | None, basis: str) -> date | None
         return tx.order_date or tx.shipment_date
     if basis == "shipment":
         return tx.shipment_date or tx.order_date
-    # invoice (domyślnie): data faktury z PDF -> data wysyłki -> data zamówienia
-    if inv and inv.invoice_date:
-        return inv.invoice_date
-    return tx.shipment_date or tx.order_date
+    # invoice (domyślnie): obowiązek podatkowy = dostawa (data wysyłki), chyba że faktura
+    # wystawiona wcześniej (art. 31a ust. 2) -> wcześniejsza z dat faktury (PDF) i wysyłki
+    cands = [d for d in ((inv.invoice_date if inv else None), tx.shipment_date) if d]
+    if cands:
+        return min(cands)
+    return tx.order_date
 
 
-def _apply_rates(row: MergedRow, rates: RateProvider | None, basis: str) -> None:
+def _apply_rates(row: MergedRow, rates: RateProvider | None, basis: str, original: "MergedRow | None" = None) -> None:
     tx = row.tx
     row.rate_basis_date = _basis_date(tx, row.invoice, basis)
     info = None
-    if rates is not None:
+    if original is not None and original.rate is not None:
+        # nota kredytowa: kurs faktury pierwotnej (art. 31b ust. 1 ustawy o VAT)
+        info = RateInfo(original.rate.rate, original.rate.rate_date, f"{original.rate.source} (faktura pierwotna {original.tx.invoice_number})")
+        row.rate_basis_date = original.rate_basis_date
+        row.rate_note = f"kurs faktury pierwotnej {original.tx.invoice_number}"
+    if info is None and rates is not None:
         info = rates.get(tx.currency, row.rate_basis_date)
     if info is None and tx.invoice_currency == "PLN" and tx.invoice_exchange_rate:
         info = RateInfo(tx.invoice_exchange_rate, tx.invoice_exchange_rate_date or row.rate_basis_date, "Amazon (CSV)")
     row.rate = info
     if info:
-        row.net_pln = round(tx.total.net * info.rate, 2)
-        row.vat_pln = round(tx.total.vat * info.rate, 2)
-        row.gross_pln = round(tx.total.gross * info.rate, 2)
+        row.net_pln = round2(tx.total.net * info.rate)
+        row.vat_pln = round2(tx.total.vat * info.rate)
+        row.gross_pln = round2(row.net_pln + row.vat_pln)
     # EUR
     if tx.currency == "EUR":
         row.net_eur, row.vat_eur = tx.total.net, tx.total.vat
@@ -186,9 +203,24 @@ def merge(
                 row.item = next((it for it in inv.items if it.asin and it.asin == tx.asin), None)
                 if row.item is None and len(inv.items) == 1:
                     row.item = inv.items[0]
-        _apply_rates(row, rates, rate_basis)
         row.amount_check = _amount_check(row, per_invoice.get(tx.invoice_number, 1))
         rows.append(row)
+    # kursy: najpierw sprzedaż, potem zwroty (kurs faktury pierwotnej, jeśli jest w danych)
+    by_invoice: dict[str, MergedRow] = {}
+    for row in rows:
+        if not row.tx.is_negative:
+            _apply_rates(row, rates, rate_basis)
+            by_invoice.setdefault(row.tx.invoice_number, row)
+    for row in rows:
+        if row.tx.is_negative:
+            orig_no = (row.invoice.original_invoice_number if row.invoice else None) or row.tx.original_invoice_number
+            original = by_invoice.get(orig_no) if orig_no else None
+            _apply_rates(row, rates, rate_basis, original)
+            if original is None and row.tx.currency != "PLN":
+                row.rate_note = (
+                    f"kurs z daty noty – faktura pierwotna {orig_no} poza danymi" if orig_no
+                    else "kurs z daty noty – brak numeru faktury pierwotnej"
+                )
     unmatched = [inv for inv in invoices if id(inv) not in used]
     log.info("dopasowano %d/%d transakcji do PDF; PDF bez transakcji: %d", sum(1 for r in rows if r.invoice), len(rows), len(unmatched))
     return MergeResult(rows=rows, invoices=invoices, unmatched_invoices=unmatched, duplicate_invoices=dups, rate_provider=rates)
@@ -233,6 +265,10 @@ MASTER_COLUMNS: list[tuple[str, Callable[[MergedRow], Any], str]] = [
     ("Data zamówienia", lambda r: r.tx.order_date, "d"),
     ("Data wysyłki", lambda r: r.tx.shipment_date, "d"),
     ("Data faktury (PDF)", lambda r: r.invoice.invoice_date if r.invoice else None, "d"),
+    ("Data naliczenia podatku (CSV)", lambda r: r.tx.tax_calculation_date, "d"),
+    ("Data dostawy (PDF)", lambda r: r.invoice.delivery_date if r.invoice else None, "d"),
+    ("Faktura pierwotna (PDF)", lambda r: r.invoice.original_invoice_number if r.invoice else None, "s"),
+    ("Status płatności (PDF)", lambda r: PAYMENT_STATUS_PL.get(r.invoice.payment_status or "", "") if r.invoice else "", "s"),
     ("Numer zamówienia", lambda r: r.tx.order_id, "s"),
     ("Marketplace", lambda r: r.tx.marketplace, "s"),
     ("Imię i nazwisko Kupującego", lambda r: r.buyer_name, "s"),
@@ -250,11 +286,13 @@ MASTER_COLUMNS: list[tuple[str, Callable[[MergedRow], Any], str]] = [
     ("Kod pocztowy dostawy (CSV)", lambda r: r.tx.ship_to_postal, "s"),
     ("Kraj wysyłki (magazyn)", lambda r: r.tx.ship_from_country, "s"),
     ("Miasto wysyłki (magazyn)", lambda r: r.tx.ship_from_city, "s"),
+    ("Kraj wysyłki (PDF)", lambda r: (r.invoice.shipped_from_country or r.invoice.shipped_from) if r.invoice else None, "s"),
     ("NIP sprzedawcy", lambda r: r.tx.seller_vat, "s"),
     ("Kraj rejestracji sprzedawcy", lambda r: r.tx.seller_jurisdiction, "s"),
     ("Jurysdykcja podatkowa", lambda r: r.tx.jurisdiction_name, "s"),
     ("System sprawozdawczości podatkowej", lambda r: r.tx.scheme, "s"),
     ("Odpowiedzialność za VAT", lambda r: r.tx.collection_responsibility, "s"),
+    ("Eksport poza UE (CSV)", lambda r: "TAK" if r.tx.export_outside_eu else "", "s"),
     ("Waluta", lambda r: r.tx.currency, "s"),
     ("Stawka VAT %", lambda r: r.tx.tax_rate_pct, "p"),
     ("Kwota netto", lambda r: r.tx.total.net, "m"),
@@ -272,6 +310,7 @@ MASTER_COLUMNS: list[tuple[str, Callable[[MergedRow], Any], str]] = [
     ("Data kursu", lambda r: r.rate.rate_date if r.rate else None, "d"),
     ("Źródło kursu", lambda r: r.rate.source if r.rate else None, "s"),
     ("Data bazowa kursu", lambda r: r.rate_basis_date, "d"),
+    ("Uwaga do kursu", lambda r: r.rate_note or None, "s"),
     ("Kwota netto PLN", lambda r: r.net_pln, "m"),
     ("Kwota VAT PLN", lambda r: r.vat_pln, "m"),
     ("Kwota brutto PLN", lambda r: r.gross_pln, "m"),
@@ -280,6 +319,10 @@ MASTER_COLUMNS: list[tuple[str, Callable[[MergedRow], Any], str]] = [
     ("Ilość", lambda r: r.tx.quantity, "s"),
     ("Opis produktu (PDF)", lambda r: r.item.description if r.item else None, "s"),
     ("Kwota faktury (PDF)", lambda r: r.invoice.invoice_total if r.invoice else None, "m"),
+    ("Netto wg PDF", lambda r: r.invoice.total_net if r.invoice else None, "m"),
+    ("VAT wg PDF", lambda r: r.invoice.total_vat if r.invoice else None, "m"),
+    ("Rabat (PDF)", lambda r: r.invoice.discount_gross if r.invoice else None, "m"),
+    ("Uwagi z faktury (PDF)", lambda r: " | ".join(r.invoice.notes) if r.invoice and r.invoice.notes else None, "s"),
     ("Waluta (PDF)", lambda r: r.invoice.currency if r.invoice else None, "s"),
     ("Zgodność kwoty PDF/CSV", lambda r: r.amount_check, "s"),
     ("VAT w walucie rejestracji (PDF)", lambda r: (
@@ -349,6 +392,10 @@ def build_group_sheets(result: MergeResult) -> list[Sheet]:
             ("Ulica", lambda r: r.street, "s"),
             ("Miasto i kod pocztowy", lambda r: r.city_line, "s"),
             ("Kraj dostawy", lambda r: r.tx.ship_to_country, "s"),
+            ("ASIN", lambda r: r.tx.asin, "s"),
+            ("SKU", lambda r: r.tx.sku, "s"),
+            ("Nazwa produktu", lambda r: (r.item.description if r.item else None) or None, "s"),
+            ("Ilość", lambda r: r.tx.quantity, "s"),
             ("Kwota netto PLN", lambda r: r.net_pln, "m"),
             ("Kwota VAT PLN", lambda r: r.vat_pln, "m"),
             ("Kwota netto EUR", lambda r: r.net_eur, "m"),
@@ -364,7 +411,6 @@ def build_group_sheets(result: MergeResult) -> list[Sheet]:
             ("System sprawozdawczości podatkowej", lambda r: r.tx.scheme or "—", "s"),
             ("NIP nabywcy", lambda r: r.tx.buyer_vat or (r.invoice.buyer_vat_id if r.invoice else None), "s"),
             ("Kraj wysyłki (magazyn)", lambda r: r.tx.ship_from_country, "s"),
-            ("ASIN", lambda r: r.tx.asin, "s"),
             ("Dopasowanie PDF", lambda r: r.match, "s"),
         ]
         title = [L.COUNTRY_PL.get(country, country), category, CATEGORY_DESCRIPTION.get(category, "")]
@@ -409,6 +455,9 @@ def build_diagnostics_sheet(result: MergeResult, name: str = "Diagnostyka") -> S
     for inv in result.invoices:
         for w in inv.warnings:
             rows.append(["Ostrzeżenie PDF", inv.file, w])
+    per_invoice_rows: dict[str, int] = {}
+    for r in result.rows:
+        per_invoice_rows[r.tx.invoice_number] = per_invoice_rows.get(r.tx.invoice_number, 0) + 1
     for r in result.rows:
         if r.amount_check.startswith("RÓŻNICA"):
             rows.append(["Kwota PDF ≠ CSV", r.tx.invoice_number, f"{r.amount_check}: PDF {r.invoice.invoice_total} vs CSV {r.tx.total.gross}"])
@@ -416,6 +465,19 @@ def build_diagnostics_sheet(result: MergeResult, name: str = "Diagnostyka") -> S
             rows.append(["Nr zamówienia PDF ≠ CSV", r.tx.invoice_number, f"PDF {r.invoice.order_number} vs CSV {r.tx.order_id}"])
         if r.rate is None and r.tx.currency != "PLN":
             rows.append(["Brak kursu PLN", r.tx.invoice_number, f"{r.tx.currency}, data bazowa {r.rate_basis_date}"])
+        elif r.rate_note.startswith("kurs z daty noty"):
+            rows.append(["Kurs noty kredytowej", r.tx.invoice_number, r.rate_note])
+        if r.invoice and r.invoice.is_credit_note != r.tx.is_negative:
+            rows.append(["Typ dokumentu ≠ typ transakcji", r.tx.invoice_number,
+                         f"PDF: {DOC_TYPE_PL.get(r.invoice.doc_type, '?')}, CSV: {r.tx.transaction_type_pl}"])
+        if r.invoice and r.invoice.total_vat is not None and abs(abs(r.invoice.total_vat) - abs(r.tx.total.vat)) > 0.011 \
+                and per_invoice_rows.get(r.tx.invoice_number, 1) == 1:
+            rows.append(["VAT PDF ≠ CSV", r.tx.invoice_number, f"PDF {r.invoice.total_vat} vs CSV {r.tx.total.vat}"])
+    known_numbers = {r.tx.invoice_number for r in result.rows}
+    for inv in result.invoices:
+        if inv.is_credit_note and inv.original_invoice_number and inv.original_invoice_number not in known_numbers:
+            rows.append(["Nota do faktury spoza raportu", inv.invoice_number or inv.file,
+                         f"faktura pierwotna {inv.original_invoice_number} nie występuje w CSV (wcześniejszy okres?)"])
     return Sheet(name=name, rows=rows, header_row=1)
 
 

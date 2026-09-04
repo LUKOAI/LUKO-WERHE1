@@ -74,7 +74,8 @@ def write_xlsx(path: str | Path, sheets: list[Sheet]) -> Path:
                 if ci - 1 < len(row) and row[ci - 1] is not None:
                     width = max(width, min(60, len(str(row[ci - 1])) + 2))
             ws.column_dimensions[get_column_letter(ci)].width = width
-        ws.auto_filter.ref = f"A{sheet.header_row}:{get_column_letter(max(ncols, 1))}{max(last, sheet.header_row)}"
+        filter_last = last - 1 if (sheet.rows and sheet.rows[-1][0] == "RAZEM") else last
+        ws.auto_filter.ref = f"A{sheet.header_row}:{get_column_letter(max(ncols, 1))}{max(filter_last, sheet.header_row)}"
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     wb.save(str(path))

@@ -63,3 +63,24 @@ def test_nbp_per_100_currency():
     sess = FakeSession([FakeResp(200, {"rates": [{"no": "1", "effectiveDate": "2026-08-03", "mid": 1.05}]})])
     rp = RateProvider(session=sess)
     assert rp.get("HUF", date(2026, 8, 4)).rate == 0.0105
+
+
+def test_rates_file_accepts_dd_mm_yyyy_and_rejects_empty(tmp_path):
+    f = tmp_path / "kursy.csv"
+    f.write_text("waluta,data,kurs\nEUR,31.07.2026,4.3128\nEUR,03/08/2026,4.32\n", encoding="utf-8")
+    rp = RateProvider(use_nbp=False, rates_file=f)
+    assert rp.get("EUR", date(2026, 8, 1)).rate == 4.3128
+    bad = tmp_path / "zle.csv"
+    bad.write_text("waluta,data,kurs\nEUR,wczoraj,4.3\n", encoding="utf-8")
+    import pytest
+    with pytest.raises(ValueError):
+        RateProvider(use_nbp=False, rates_file=bad)
+
+
+def test_transport_error_is_not_cached():
+    payload = {"rates": [{"no": "1", "effectiveDate": "2026-07-31", "mid": 4.31}]}
+    sess = FakeSession([RuntimeError("timeout"), FakeResp(200, payload)])
+    rp = RateProvider(session=sess)
+    assert rp.get("EUR", date(2026, 8, 1)) is None
+    assert rp.get("EUR", date(2026, 8, 1)).rate == 4.31
+    assert len(sess.calls) == 2
