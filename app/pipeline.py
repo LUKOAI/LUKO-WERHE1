@@ -136,11 +136,14 @@ class DocumentPipeline:
     ) -> PipelineOutput:
         month_label = f"{date_from.strftime('%Y_%m')}"
         output_dir = Path(self.config.output_root) / f"PDFy_{month_label}"
-        shots_dir = output_dir / "_screenshots"
-        order_pdf_dir = output_dir / "zamowienia"
+        # DO_WYDRUKU: tylko gotowe PDF-y zamowien spelniajacych kryteria + podsumowania
+        # DO_KONTROLI: wszystkie zebrane materialy robocze (screenshoty, pojedyncze
+        #              faktury, pliki DEBUG/INVALID, materialy zamowien pominietych)
+        print_dir = output_dir / "DO_WYDRUKU"
+        kontrola_dir = output_dir / "DO_KONTROLI"
         output_dir.mkdir(parents=True, exist_ok=True)
-        shots_dir.mkdir(parents=True, exist_ok=True)
-        order_pdf_dir.mkdir(parents=True, exist_ok=True)
+        print_dir.mkdir(parents=True, exist_ok=True)
+        kontrola_dir.mkdir(parents=True, exist_ok=True)
 
         def log(msg: str) -> None:
             self.logger.info(msg)
@@ -253,7 +256,7 @@ class DocumentPipeline:
         # Folder per zamowienie
         order_folders: dict[str, Path] = {}
         for order in filtered:
-            folder = order_pdf_dir / order.order_number
+            folder = kontrola_dir / order.order_number
             # wyczysc pozostalosci z poprzednich uruchomien (stare screenshoty/PDF-y)
             if folder.exists():
                 for old in folder.iterdir():
@@ -264,6 +267,14 @@ class DocumentPipeline:
                         pass
             folder.mkdir(parents=True, exist_ok=True)
             order_folders[order.order_id] = folder
+            # usun tez stary gotowy PDF z DO_WYDRUKU — jesli zamowienie tym razem
+            # zostanie pominiete, nie moze zostac nieaktualny plik do druku
+            try:
+                (print_dir / f"{self._safe_filename(order.order_number)}.pdf").unlink()
+            except FileNotFoundError:
+                pass
+            except Exception:
+                pass
 
         # Plan dowodu per zamowienie:
         #  - OWN z potwierdzona dostawa (received_date) -> screenshot trackingu
@@ -425,7 +436,7 @@ class DocumentPipeline:
                     company_name=self.config.pdf_company_name,
                 )
                 final_name = f"{self._safe_filename(order.order_number)}.pdf"
-                pdf = merge_pdfs(cover, invoice_pdfs, folder / final_name)
+                pdf = merge_pdfs(cover, invoice_pdfs, print_dir / final_name)
                 try:
                     Path(folder / "_cover.pdf").unlink()
                 except Exception:
@@ -449,10 +460,10 @@ class DocumentPipeline:
         summary_pdf = generate_summary_pdf(
             own_orders=own_orders,
             fba_orders=fba_orders,
-            output_path=output_dir / "podsumowanie.pdf",
+            output_path=print_dir / "podsumowanie.pdf",
             company_name=self.config.pdf_company_name,
         )
-        summary_xlsx = export_summary_xlsx(ok_orders, output_dir / "podsumowanie.xlsx")
+        summary_xlsx = export_summary_xlsx(ok_orders, print_dir / "podsumowanie.xlsx")
 
         log(f"Zakończono. Wyniki: {output_dir}")
         return PipelineOutput(
