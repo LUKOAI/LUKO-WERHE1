@@ -1,0 +1,17 @@
+.venv/
+venv/
+__pycache__/
+*.pyc
+dist/
+build/
+*.spec
+output/
+# dane klienta (PII) – nigdy do repo
+samples/
+*.pdf
+*.csv
+*.xlsx
+# poświadczenia Google
+credentials/
+*service*account*.json
+.pytest_cache/

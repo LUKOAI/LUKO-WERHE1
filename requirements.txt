@@ -2,3 +2,10 @@ customtkinter==5.2.2
 reportlab==4.2.2
 Pillow==10.4.0
 pyinstaller==6.10.0
+# amazon_vat_merger
+pdfplumber>=0.11
+openpyxl>=3.1
+gspread>=6.0
+google-auth>=2.0
+requests>=2.31
+pytest>=8.0
