@@ -15,3 +15,5 @@ samples/
 credentials/
 *service*account*.json
 .pytest_cache/
+# przykłady bez danych osobowych – wyjątek od *.csv
+!examples/*.csv
