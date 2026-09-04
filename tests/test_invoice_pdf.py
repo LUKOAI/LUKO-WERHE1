@@ -37,6 +37,10 @@ def test_amount_token():
     ("29.08.2026", date(2026, 8, 29)),
     ("2026-08-29", date(2026, 8, 29)),
     ("1 mars 2026", date(2026, 3, 1)),
+    ("3. März 2026", date(2026, 3, 3)),
+    ("5 października 2026", date(2026, 10, 5)),
+    ("12 février 2026", date(2026, 2, 12)),
+    ("7. Jänner 2026", date(2026, 1, 7)),
     ("brak daty", None),
 ])
 def test_parse_date_text(s, d):
@@ -144,3 +148,61 @@ def test_all_sample_pdfs_against_csv():
         if bad:
             problems.append(f"{path.name}: {bad}")
     assert not problems, "\n".join(problems)
+
+
+def test_thousands_with_space_and_currency_words():
+    from amazon_vat_merger.invoice_pdf import Word, _numbers_from_words
+    # "1 234,56 €" – odstęp jednej spacji między '1' a '234,56'
+    words = [Word("1", 300, 304, 0), Word("234,56", 306, 340, 0), Word("€", 342, 348, 0)]
+    nums = _numbers_from_words(words)
+    assert nums["amounts"] == [1234.56] and nums["qty"] is None
+    # ilość w osobnej kolumnie (duży odstęp) nie jest sklejana
+    words = [Word("1", 300, 304, 0), Word("234,56", 360, 394, 0), Word("€", 396, 402, 0)]
+    nums = _numbers_from_words(words)
+    assert nums["qty"] == 1 and nums["amounts"] == [234.56]
+    # 'von 30' to nie kwota w walucie VON
+    assert amount_token("von30") is None and amount_token("Art194") is None
+    assert amount_token("EUR12,50") == (12.5, "EUR")
+
+
+def test_parse_amount_many_decimals():
+    assert parse_amount("4,2345") == 4.2345
+    assert parse_amount("1,234") == 1234.0      # tysiące
+    assert parse_amount("1.234,5") == 1234.5
+
+
+def _line(top, text, x0=344.0):
+    from amazon_vat_merger.invoice_pdf import Line, Word
+    words, x = [], x0
+    for tok in text.split():
+        words.append(Word(tok, x, x + 5 * len(tok), top))
+        x += 5 * len(tok) + 4
+    return Line(top=top, words=words)
+
+
+def test_credit_note_number_chosen_without_filename_hint():
+    from amazon_vat_merger.invoice_pdf import Invoice, _parse_header
+    # FR: "Avoir pour la facture numéro X." przed "Numéro de l'avoir Y" i "... facture originale X"
+    right = [_line(28, "Avoir", 532), _line(90, "Avoir pour la facture numéro FR6001ZYG6O6HI."),
+             _line(160, "Numéro de l'avoir FR60005IG6O6HC"),
+             _line(172, "Numéro de la facture originale FR6001ZYG6O6HI"), _line(186, "Total à payer -39,90 €")]
+    inv = Invoice(file="x.pdf")
+    _parse_header(right, [], inv, None)
+    assert inv.invoice_number == "FR60005IG6O6HC" and inv.original_invoice_number == "FR6001ZYG6O6HI"
+    assert inv.doc_type == "credit_note" and inv.total_to_pay == -39.9
+    # DE: zdanie wprowadzające zawinięte – numer faktury pierwotnej w następnej linii
+    right = [_line(28, "Rechnungskorrektur", 436), _line(90, "Dies ist eine Gutschrift / Rechnungskorrektur für die"),
+             _line(104, "Rechnungsnummer DE6002GUG6O6HI"), _line(160, "Rechnungsdatum"), _line(170, "/Lieferdatum 29 August 2026"),
+             _line(184, "Rechnungsnummer DE60006WG6O6HC"), _line(196, "Originalrechnungsnummer DE6002GUG6O6HI"),
+             _line(210, "Zahlbetrag -13,99 €")]
+    inv = Invoice(file="y.pdf")
+    _parse_header(right, [], inv, None)
+    assert inv.invoice_number == "DE60006WG6O6HC" and inv.original_invoice_number == "DE6002GUG6O6HI"
+    assert inv.invoice_date == date(2026, 8, 29) and inv.total_to_pay == -13.99
+
+
+def test_invoice_number_regex_with_underscores_and_vat_ids():
+    from amazon_vat_merger.invoice_pdf import INVOICE_NO_RE, NON_INVOICE_TOKEN_RE
+    assert INVOICE_NO_RE.search("PL600IIBG6O6HU_kopia".upper()).group(0) == "PL600IIBG6O6HU"
+    assert INVOICE_NO_RE.search("faktura_PL600IIBG6O6HU.pdf".upper()).group(0) == "PL600IIBG6O6HU"
+    assert NON_INVOICE_TOKEN_RE.match("NL123456789B01") and NON_INVOICE_TOKEN_RE.match("GB123456789012")

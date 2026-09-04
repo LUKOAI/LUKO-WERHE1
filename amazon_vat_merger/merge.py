@@ -88,7 +88,9 @@ class MergeResult:
     invoices: list[Invoice]
     unmatched_invoices: list[Invoice] = field(default_factory=list)
     duplicate_invoices: list[str] = field(default_factory=list)
+    ambiguous: list[str] = field(default_factory=list)
     rate_provider: RateProvider | None = None
+    csv_duplicates: int = 0
 
     @property
     def matched(self) -> int:
@@ -143,17 +145,22 @@ def _apply_rates(row: MergedRow, rates: RateProvider | None, basis: str, origina
         row.vat_eur = row.invoice.converted_vat_amount
 
 
-def _amount_check(row: MergedRow, rows_per_invoice: int) -> str:
-    inv, tx = row.invoice, row.tx
-    if inv is None or inv.invoice_total is None:
+def _inv_key(tx: Transaction) -> str:
+    """Klucz grupowania wierszy CSV w jedną fakturę (wiersze bez numeru – per zamówienie i typ)."""
+    return tx.invoice_number or f"order:{tx.order_id}:{tx.transaction_type}"
+
+
+def _amount_check(row: MergedRow, rows_per_invoice: int, gross_sum: float) -> str:
+    inv = row.invoice
+    if inv is None:
         return ""
-    if rows_per_invoice > 1:
-        return "faktura wielopozycyjna – porównaj sumę"
-    expected = abs(tx.total.gross)
-    diff = round(abs(inv.invoice_total) - expected, 2)
+    if inv.invoice_total is None:
+        return "BRAK SUMY W PDF"
+    diff = round2(abs(inv.invoice_total) - abs(gross_sum))
+    suffix = f" (suma {rows_per_invoice} pozycji)" if rows_per_invoice > 1 else ""
     if abs(diff) < 0.011:
-        return "OK"
-    return f"RÓŻNICA {diff:+.2f}"
+        return "OK" + suffix
+    return f"RÓŻNICA {diff:+.2f}" + suffix
 
 
 def merge(
@@ -177,11 +184,20 @@ def merge(
         if inv.order_number:
             by_order.setdefault(inv.order_number, []).append(inv)
 
+    dup_ids = {id(inv) for inv in invoices if inv.invoice_number and by_number.get(inv.invoice_number.upper()) is not inv}
     used: set[int] = set()
     rows: list[MergedRow] = []
     per_invoice: dict[str, int] = {}
+    gross_per_invoice: dict[str, float] = {}
+    vat_per_invoice: dict[str, float] = {}
+    numbers_per_order: dict[tuple[str, bool], set[str]] = {}
     for tx in transactions:
-        per_invoice[tx.invoice_number] = per_invoice.get(tx.invoice_number, 0) + 1
+        k = _inv_key(tx)
+        per_invoice[k] = per_invoice.get(k, 0) + 1
+        gross_per_invoice[k] = round2(gross_per_invoice.get(k, 0.0) + tx.total.gross)
+        vat_per_invoice[k] = round2(vat_per_invoice.get(k, 0.0) + tx.total.vat)
+        numbers_per_order.setdefault((tx.order_id, tx.is_negative), set()).add(tx.invoice_number)
+    ambiguous: list[str] = []
     for tx in transactions:
         row = MergedRow(tx=tx)
         inv = by_number.get(tx.invoice_number) if tx.invoice_number else None
@@ -193,9 +209,13 @@ def merge(
                 if (not c.invoice_number or c.invoice_number.upper() not in by_number)
                 and ((c.doc_type == "credit_note") == tx.is_negative)
             ]
-            if len(cands) == 1:
+            distinct_numbers = numbers_per_order.get((tx.order_id, tx.is_negative), set())
+            if len(cands) == 1 and len(distinct_numbers) <= 1:
                 inv = cands[0]
                 row.match = "PDF (po nr zamówienia)"
+            elif cands:
+                row.match = f"BRAK PDF ({len(cands)} kandydatów po nr zamówienia)"
+                ambiguous.append(f"{tx.invoice_number or tx.order_id}: {', '.join(c.file for c in cands)}")
         row.invoice = inv
         if inv is not None:
             used.add(id(inv))
@@ -203,7 +223,8 @@ def merge(
                 row.item = next((it for it in inv.items if it.asin and it.asin == tx.asin), None)
                 if row.item is None and len(inv.items) == 1:
                     row.item = inv.items[0]
-        row.amount_check = _amount_check(row, per_invoice.get(tx.invoice_number, 1))
+        k = _inv_key(tx)
+        row.amount_check = _amount_check(row, per_invoice.get(k, 1), gross_per_invoice.get(k, tx.total.gross))
         rows.append(row)
     # kursy: najpierw sprzedaż, potem zwroty (kurs faktury pierwotnej, jeśli jest w danych)
     by_invoice: dict[str, MergedRow] = {}
@@ -221,9 +242,10 @@ def merge(
                     f"kurs z daty noty – faktura pierwotna {orig_no} poza danymi" if orig_no
                     else "kurs z daty noty – brak numeru faktury pierwotnej"
                 )
-    unmatched = [inv for inv in invoices if id(inv) not in used]
+    unmatched = [inv for inv in invoices if id(inv) not in used and id(inv) not in dup_ids]
     log.info("dopasowano %d/%d transakcji do PDF; PDF bez transakcji: %d", sum(1 for r in rows if r.invoice), len(rows), len(unmatched))
-    return MergeResult(rows=rows, invoices=invoices, unmatched_invoices=unmatched, duplicate_invoices=dups, rate_provider=rates)
+    return MergeResult(rows=rows, invoices=invoices, unmatched_invoices=unmatched, duplicate_invoices=dups,
+                       ambiguous=ambiguous, rate_provider=rates)
 
 
 # ---------------------------------------------------------------------------
@@ -441,6 +463,8 @@ def build_diagnostics_sheet(result: MergeResult, name: str = "Diagnostyka") -> S
     rows.append(["Podsumowanie", "Dopasowane do PDF", result.matched])
     rows.append(["Podsumowanie", "Bez PDF", result.missing])
     rows.append(["Podsumowanie", "Plików PDF", len(result.invoices)])
+    if result.csv_duplicates:
+        rows.append(["Podsumowanie", "Pominięte duplikaty wierszy CSV", result.csv_duplicates])
     rp = result.rate_provider
     if rp is not None:
         status = "OK" if rp.nbp_available and rp.failures == 0 else (f"niedostępne ({rp.last_error})" if rp.use_nbp else "wyłączone")
@@ -452,15 +476,27 @@ def build_diagnostics_sheet(result: MergeResult, name: str = "Diagnostyka") -> S
         rows.append(["PDF bez transakcji w CSV", inv.file, f"nr {inv.invoice_number or '?'}, zamówienie {inv.order_number or '?'}"])
     for d in result.duplicate_invoices:
         rows.append(["Zduplikowany PDF", d, ""])
+    for a in result.ambiguous:
+        rows.append(["Niejednoznaczne dopasowanie po nr zamówienia", a.split(":")[0], a])
     for inv in result.invoices:
         for w in inv.warnings:
             rows.append(["Ostrzeżenie PDF", inv.file, w])
     per_invoice_rows: dict[str, int] = {}
+    vat_sum: dict[str, float] = {}
     for r in result.rows:
-        per_invoice_rows[r.tx.invoice_number] = per_invoice_rows.get(r.tx.invoice_number, 0) + 1
+        k = _inv_key(r.tx)
+        per_invoice_rows[k] = per_invoice_rows.get(k, 0) + 1
+        vat_sum[k] = round2(vat_sum.get(k, 0.0) + r.tx.total.vat)
+    reported: set[str] = set()
     for r in result.rows:
-        if r.amount_check.startswith("RÓŻNICA"):
+        k = _inv_key(r.tx)
+        if r.amount_check.startswith("RÓŻNICA") and k not in reported:
+            reported.add(k)
             rows.append(["Kwota PDF ≠ CSV", r.tx.invoice_number, f"{r.amount_check}: PDF {r.invoice.invoice_total} vs CSV {r.tx.total.gross}"])
+        if r.amount_check == "BRAK SUMY W PDF":
+            rows.append(["Brak sumy w PDF", r.tx.invoice_number, f"plik {r.invoice.file} – nie odczytano kwoty faktury"])
+        if r.invoice and r.invoice.currency and r.tx.currency and r.invoice.currency != r.tx.currency:
+            rows.append(["Waluta PDF ≠ CSV", r.tx.invoice_number, f"PDF {r.invoice.currency} vs CSV {r.tx.currency}"])
         if r.invoice and r.tx.order_id and r.invoice.order_number and r.invoice.order_number != r.tx.order_id:
             rows.append(["Nr zamówienia PDF ≠ CSV", r.tx.invoice_number, f"PDF {r.invoice.order_number} vs CSV {r.tx.order_id}"])
         if r.rate is None and r.tx.currency != "PLN":
@@ -470,9 +506,10 @@ def build_diagnostics_sheet(result: MergeResult, name: str = "Diagnostyka") -> S
         if r.invoice and r.invoice.is_credit_note != r.tx.is_negative:
             rows.append(["Typ dokumentu ≠ typ transakcji", r.tx.invoice_number,
                          f"PDF: {DOC_TYPE_PL.get(r.invoice.doc_type, '?')}, CSV: {r.tx.transaction_type_pl}"])
-        if r.invoice and r.invoice.total_vat is not None and abs(abs(r.invoice.total_vat) - abs(r.tx.total.vat)) > 0.011 \
-                and per_invoice_rows.get(r.tx.invoice_number, 1) == 1:
-            rows.append(["VAT PDF ≠ CSV", r.tx.invoice_number, f"PDF {r.invoice.total_vat} vs CSV {r.tx.total.vat}"])
+        if r.invoice and r.invoice.total_vat is not None and abs(abs(r.invoice.total_vat) - abs(vat_sum.get(k, r.tx.total.vat))) > 0.011 \
+                and ("vat:" + k) not in reported:
+            reported.add("vat:" + k)
+            rows.append(["VAT PDF ≠ CSV", r.tx.invoice_number, f"PDF {r.invoice.total_vat} vs CSV {vat_sum.get(k)}"])
     known_numbers = {r.tx.invoice_number for r in result.rows}
     for inv in result.invoices:
         if inv.is_credit_note and inv.original_invoice_number and inv.original_invoice_number not in known_numbers:

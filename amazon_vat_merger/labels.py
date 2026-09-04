@@ -398,6 +398,11 @@ def norm(text: str) -> str:
     return text
 
 
+# klucze miesięcy bez akcentów – wyszukiwanie idzie przez norm() (März -> marz, październik -> pazdziernik)
+MONTHS = {norm(k): v for k, v in MONTHS.items()}
+
+CURRENCY_CODES = {"EUR", "GBP", "PLN", "SEK", "CZK", "CHF", "DKK", "NOK", "USD", "HUF", "RON", "BGN", "HRK", "ISK"}
+
 # etykiety znormalizowane, posortowane od najdłuższej (żeby 'data faktury/data dostawy'
 # wygrało z 'data faktury')
 NORM_LABELS: dict[str, list[str]] = {

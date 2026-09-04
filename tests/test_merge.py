@@ -168,3 +168,46 @@ def test_rate_basis_is_earlier_of_invoice_and_shipment():
     inv.invoice_date = date(2026, 8, 27)
     res = merge([tx], [inv], FixedRates())
     assert res.rows[0].rate_basis_date == date(2026, 8, 27)
+
+
+def test_multi_row_invoice_amount_check_uses_sum():
+    tx1 = _tx()
+    tx2 = _tx(**{"ASIN": "B000000002", "OUR_PRICE Tax Inclusive Selling Price": "10.00", "OUR_PRICE Tax Amount": "1.60",
+                 "OUR_PRICE Tax Exclusive Selling Price": "8.40"})
+    inv = _inv(total=24.99)
+    inv.items.append(InvoiceItem(description="Drugi", asin="B000000002", quantity=1, line_total=10.0))
+    res = merge([tx1, tx2], [inv], None)
+    assert [r.amount_check for r in res.rows] == ["OK (suma 2 pozycji)"] * 2
+    assert res.rows[1].item.description == "Drugi"
+    inv.invoice_total = 20.00
+    res = merge([tx1, tx2], [inv], None)
+    assert res.rows[0].amount_check == "RÓŻNICA -4.99 (suma 2 pozycji)"
+    diag = [s for s in build_sheets(res) if s.name == "Diagnostyka"][0]
+    assert sum(1 for r in diag.rows if r[0] == "Kwota PDF ≠ CSV") == 1
+
+
+def test_missing_pdf_total_flagged():
+    inv = _inv(total=None)
+    res = merge([_tx()], [inv], None)
+    assert res.rows[0].amount_check == "BRAK SUMY W PDF"
+
+
+def test_order_fallback_refused_when_order_has_two_invoices():
+    tx1 = _tx()
+    tx2 = _tx(**{"VAT Invoice Number": "PL6000000000AB", "ASIN": "B000000002"})
+    inv = _inv(number=None)   # PDF bez numeru, ten sam nr zamówienia
+    res = merge([tx1, tx2], [inv], None)
+    assert all(r.invoice is None for r in res.rows)
+    assert res.rows[0].match.startswith("BRAK PDF (1 kandydat")
+    assert res.ambiguous and res.unmatched_invoices == [inv]
+
+
+def test_duplicate_pdf_not_reported_as_unmatched():
+    res = merge([_tx()], [_inv(), _inv()], None)
+    assert len(res.duplicate_invoices) == 1 and res.unmatched_invoices == []
+
+
+def test_rows_without_invoice_number_are_grouped_per_order():
+    tx = _tx(**{"VAT Invoice Number": ""})
+    res = merge([tx], [_inv(number=None)], None)
+    assert res.rows[0].match == "PDF (po nr zamówienia)" and res.rows[0].amount_check == "OK"

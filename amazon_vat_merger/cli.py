@@ -41,7 +41,8 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO, format="%(levelname)s %(message)s")
 
-    transactions = read_reports(args.csv)
+    stats: dict = {}
+    transactions = read_reports(args.csv, stats)
     if not transactions:
         log.error("brak transakcji w CSV")
         return 2
@@ -50,6 +51,7 @@ def main(argv: list[str] | None = None) -> int:
     invoices = parse_pdfs(pdf_paths, known)
     rates = RateProvider(use_nbp=not args.no_nbp, rates_file=args.rates_file)
     result = merge(transactions, invoices, rates, rate_basis=args.rate_basis)
+    result.csv_duplicates = stats.get("duplicates", 0)
     sheets = build_sheets(result)
 
     out = write_xlsx(args.out, sheets)

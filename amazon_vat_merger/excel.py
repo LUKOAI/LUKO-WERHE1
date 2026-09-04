@@ -47,6 +47,8 @@ def write_xlsx(path: str | Path, sheets: list[Sheet]) -> Path:
                     cell.number_format = "yyyy-mm-dd"
                 else:
                     cell.value = val
+                    if isinstance(val, str) and val.startswith("="):
+                        cell.data_type = "s"   # tekst zaczynający się od '=' to nie formuła
                 if ri > sheet.header_row:
                     if ci in sheet.money_cols and isinstance(val, (int, float, Formula)):
                         cell.number_format = "#,##0.00"

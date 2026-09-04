@@ -26,7 +26,8 @@ from . import labels as L
 
 log = logging.getLogger(__name__)
 
-INVOICE_NO_RE = re.compile(r"\b[A-Z]{2}[0-9A-Z]{12}\b")
+INVOICE_NO_RE = re.compile(r"(?<![0-9A-Z])[A-Z]{2}[0-9A-Z]{12}(?![0-9A-Z])")
+NON_INVOICE_TOKEN_RE = re.compile(r"^(NL\d{9}B\d{2}|GB\d{12})$")
 ORDER_NO_RE = re.compile(r"\b\d{3}-\d{7}-\d{7}\b")
 VAT_ID_RE = re.compile(r"\b[A-Z]{2}[0-9A-Z]{8,13}\b")
 ASIN_RE = re.compile(r"\b(B0[0-9A-Z]{8}|\d{9}[0-9X])\b")
@@ -180,6 +181,10 @@ def parse_amount(token: str) -> float | None:
     if not re.fullmatch(r"\d[\d.,]*", s):
         return None
     int_part, frac = s, "00"
+    m_dec = re.fullmatch(r"(\d+)[.,](\d{3,})", s)
+    if m_dec and "," in s and "." not in s and len(m_dec.group(2)) != 3:
+        # '4,2345' (kurs) – jeden przecinek i więcej niż 3 cyfry po nim to część dziesiętna
+        return float(f"{m_dec.group(1)}.{m_dec.group(2)}") * (-1 if neg else 1)
     if len(s) >= 3 and s[-3] in ",." and s[-2:].isdigit():
         int_part, frac = s[:-3], s[-2:]
     elif len(s) >= 2 and s[-2] in ",." and s[-1].isdigit():
@@ -210,6 +215,8 @@ def amount_token(token: str) -> tuple[float, str | None] | None:
     if m.group("sign") or m.group("sign2"):
         val = -abs(val)
     sym = (m.group("pre") or m.group("post") or "").strip()
+    if len(sym) == 3 and sym.upper() not in L.CURRENCY_CODES and sym.lower() not in L.CURRENCY_SYMBOLS:
+        return None   # 'von 30', 'Art 194' – trzyliterowe słowo to nie kod waluty
     cur = L.CURRENCY_SYMBOLS.get(sym.lower()) or (sym.upper() if len(sym) == 3 else None)
     return val, cur
 
@@ -508,15 +515,27 @@ def _parse_header(right: list[Line], left: list[Line], inv: Invoice, stem_number
     # numer faktury: wszystkie dopasowania; zdanie "Gutschrift für die Rechnungsnummer X"
     # daje numer faktury pierwotnej, właściwy numer jest w liście klucz/wartość niżej
     cands: list[str] = []
-    for v in _kv_all(right, "invoice_number"):
+    prev_intro_without_number = False
+    for ln in right:
+        text = ln.text
+        is_original = L.match_label(text, "original_invoice_number") is not None
+        is_intro = L.match_label(text, "credit_intro") is not None
+        if is_intro:
+            # "Dies ist eine Gutschrift ... für die" + w następnej linii "Rechnungsnummer X"
+            prev_intro_without_number = INVOICE_NO_RE.search(text.upper()) is None
+            continue
+        skip_wrapped = prev_intro_without_number
+        prev_intro_without_number = False
+        if is_original or skip_wrapped:
+            continue
+        v = L.match_label(text, "invoice_number")
+        if v is None:
+            continue
         m = INVOICE_NO_RE.search(v.upper())
         if m and m.group(0) not in cands:
             cands.append(m.group(0))
     if cands:
-        if stem_number and stem_number in cands:
-            inv.invoice_number = stem_number
-        else:
-            inv.invoice_number = cands[-1]
+        inv.invoice_number = stem_number if (stem_number and stem_number in cands) else cands[0]
         inv.invoice_number_source = "etykieta"
     v = _kv_first(right, "original_invoice_number")
     if v:
@@ -559,8 +578,32 @@ def _find_qty_x(body: list[Line], start: int) -> float | None:
     return None
 
 
+def _merge_thousands(words: list[Word]) -> list[Word]:
+    """'1 234,56' rozbite przez pdfplumber na '1' i '234,56' (odstęp ~1 spacji) -> '1234,56'.
+    Ilość w osobnej kolumnie ma odstęp kilkudziesięciu punktów, więc nie zostanie sklejona."""
+    out: list[Word] = []
+    i = 0
+    while i < len(words):
+        w = words[i]
+        if (i + 1 < len(words) and re.fullmatch(r"[-−–]?\d{1,3}", w.text)
+                and re.fullmatch(r"\d{3}(?:[  ]\d{3})*(?:[.,]\d{1,2})?", words[i + 1].text)
+                and 0 <= words[i + 1].x0 - w.x1 <= 6.0):
+            merged = Word(w.text + words[i + 1].text, w.x0, words[i + 1].x1, w.top)
+            j = i + 2
+            while j < len(words) and re.fullmatch(r"\d{3}(?:[.,]\d{1,2})?", words[j].text) and 0 <= words[j].x0 - merged.x1 <= 6.0:
+                merged = Word(merged.text + words[j].text, merged.x0, words[j].x1, merged.top)
+                j += 1
+            out.append(merged)
+            i = j
+            continue
+        out.append(w)
+        i += 1
+    return out
+
+
 def _numbers_from_words(words: list[Word]) -> dict:
     out: dict = {"qty": None, "rate": None, "amounts": [], "currency": None}
+    words = _merge_thousands(list(words))
     toks = [w.text for w in words]
     i = 0
     while i < len(toks):
@@ -640,9 +683,16 @@ def _parse_items(body: list[Line], inv: Invoice) -> int:
         item.description = desc or None
         inv.items.append(item)
 
+    doc_titles = {L.norm(t) for t in L.DOC_TITLES_INVOICE + L.DOC_TITLES_CREDIT}
     i = hi + 1
     while i < len(body):
         ln = body[i]
+        # stopka strony / nagłówek kolejnej strony ("Rechnung", "Rechnungsnummer X", "Seite 1 von 2")
+        if L.is_boilerplate(ln.text) or L.norm(ln.text) in doc_titles or (
+            L.match_label(ln.text, "invoice_number") is not None and ln.x0 > qty_x
+        ):
+            i += 1
+            continue
         has_left = any(w.x0 < qty_x - 5 for w in ln.words)
         has_digit = any(re.search(r"\d", w.text) for w in ln.words)
         for key in ("shipping", "discount", "invoice_total"):
@@ -729,7 +779,7 @@ def _parse_totals(body: list[Line], start: int, inv: Invoice) -> None:
         if v is not None:
             m2 = re.search(r"\d+[.,]\d+", v)
             if m2:
-                inv.exchange_rate = parse_amount(m2.group(0))
+                inv.exchange_rate = float(m2.group(0).replace(",", "."))
             continue
         if in_summary:
             first = ln.words[0].text if ln.words else ""
@@ -795,7 +845,7 @@ def parse_pdf(path: str | Path, known_invoice_numbers: Iterable[str] | None = No
         header_end = height * 0.4
         inv.warnings.append("nie znaleziono granicy nagłówka – użyto 40% wysokości strony")
 
-    split_x = width / 2.0
+    split_x = min(width * 0.56, 335.0)   # prawy blok zaczyna się przy x≈342; lewy adres może być długi
     right = _build_lines([w for w in words if w.top < header_end and w.x0 >= split_x])
     left = _build_lines([w for w in words if w.top < header_end and w.x0 < split_x])
     body = [ln for ln in all_lines if ln.top >= header_end]
@@ -839,7 +889,9 @@ def parse_pdf(path: str | Path, known_invoice_numbers: Iterable[str] | None = No
     if not inv.invoice_number and stem_number:
         inv.invoice_number, inv.invoice_number_source = stem_number, "nazwa pliku"
     if not inv.invoice_number:
-        tokens = INVOICE_NO_RE.findall(text.upper())
+        vat_ids = {x for x in (inv.seller_vat_id, inv.billing.vat_id, inv.shipping.vat_id, inv.buyer_header.vat_id, inv.seller.vat_id) if x}
+        tokens = [t for t in INVOICE_NO_RE.findall(text.upper())
+                  if t not in vat_ids and not NON_INVOICE_TOKEN_RE.match(t) and t != inv.original_invoice_number]
         hit = next((t for t in tokens if t in known), None) or (tokens[0] if tokens else None)
         if hit:
             inv.invoice_number, inv.invoice_number_source = hit, "tekst"
@@ -853,6 +905,8 @@ def parse_pdf(path: str | Path, known_invoice_numbers: Iterable[str] | None = No
         inv.doc_type = "invoice"
     if inv.invoice_total is None and inv.total_to_pay is not None:
         inv.invoice_total = inv.total_to_pay
+    if inv.invoice_total is None:
+        inv.warnings.append("nie rozpoznano sumy faktury")
     if inv.invoice_total is not None and inv.total_to_pay is not None and abs(inv.invoice_total - inv.total_to_pay) > 0.011:
         inv.warnings.append(f"suma faktury ({inv.invoice_total}) różni się od 'do zapłaty' ({inv.total_to_pay})")
     if not inv.items:

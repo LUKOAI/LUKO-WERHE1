@@ -5,6 +5,10 @@ Konfiguracja po stronie klienta:
   2. Utworzyć konto serwisowe, pobrać klucz JSON.
   3. Udostępnić docelowy arkusz (Udostępnij -> e-mail konta serwisowego, Edytor).
   4. Uruchomić: --sheet-id <ID z URL> --credentials klucz.json
+
+Limity API (60 zapisów/min/użytkownik): na zakładkę idą 2-3 wywołania (clear, update,
+ewentualnie resize), a całe formatowanie jedzie jednym batch_update; klient gspread ma
+włączony backoff na HTTP 429.
 """
 from __future__ import annotations
 
@@ -20,7 +24,12 @@ log = logging.getLogger(__name__)
 
 
 def to_sheet_values(rows: list[list[Any]]) -> list[list[Any]]:
-    """Konwersja wartości na typy akceptowane przez Sheets API (USER_ENTERED)."""
+    """Konwersja wartości na typy akceptowane przez Sheets API (USER_ENTERED).
+
+    Tekst dostaje wiodący apostrof (Sheets go zjada i zapisuje komórkę jako tekst) –
+    inaczej kody pocztowe '01234', numery zamówień i SKU zamieniałyby się w liczby/daty.
+    Liczby, daty (ISO) i formuły idą bez apostrofu, żeby Sheets je zinterpretował.
+    """
     out: list[list[Any]] = []
     for row in rows:
         conv: list[Any] = []
@@ -32,13 +41,12 @@ def to_sheet_values(rows: list[list[Any]]) -> list[list[Any]]:
             elif isinstance(v, date):
                 conv.append(v.isoformat())
             elif isinstance(v, bool):
-                conv.append("TAK" if v else "NIE")
+                conv.append("'TAK" if v else "'NIE")
             elif isinstance(v, (int, float)):
                 conv.append(v)
             else:
                 s = str(v)
-                # tekst zaczynający się od '=' / '+' byłby zinterpretowany jako formuła
-                conv.append("'" + s if s[:1] in "=+" else s)
+                conv.append("'" + s if s else "")
         out.append(conv)
     return out
 
@@ -46,6 +54,35 @@ def to_sheet_values(rows: list[list[Any]]) -> list[list[Any]]:
 def extract_spreadsheet_id(value: str) -> str:
     m = re.search(r"/spreadsheets/d/([A-Za-z0-9_-]+)", value or "")
     return m.group(1) if m else (value or "").strip()
+
+
+def _format_requests(sheet_id: int, sheet: Sheet, nrows: int, reset: bool) -> list[dict]:
+    reqs: list[dict] = []
+    if reset:
+        reqs.append({"repeatCell": {"range": {"sheetId": sheet_id}, "cell": {"userEnteredFormat": {}},
+                                    "fields": "userEnteredFormat"}})
+    reqs.append({"updateSheetProperties": {
+        "properties": {"sheetId": sheet_id,
+                       "gridProperties": {"frozenRowCount": sheet.header_row, "frozenColumnCount": 1}},
+        "fields": "gridProperties.frozenRowCount,gridProperties.frozenColumnCount"}})
+    reqs.append({"repeatCell": {
+        "range": {"sheetId": sheet_id, "startRowIndex": sheet.header_row - 1, "endRowIndex": sheet.header_row},
+        "cell": {"userEnteredFormat": {"textFormat": {"bold": True}}},
+        "fields": "userEnteredFormat.textFormat.bold"}})
+    if nrows > sheet.header_row:
+        for c in sheet.money_cols:
+            reqs.append({"repeatCell": {
+                "range": {"sheetId": sheet_id, "startRowIndex": sheet.header_row, "endRowIndex": nrows,
+                          "startColumnIndex": c - 1, "endColumnIndex": c},
+                "cell": {"userEnteredFormat": {"numberFormat": {"type": "NUMBER", "pattern": "#,##0.00"}}},
+                "fields": "userEnteredFormat.numberFormat"}})
+        for c in sheet.date_cols:
+            reqs.append({"repeatCell": {
+                "range": {"sheetId": sheet_id, "startRowIndex": sheet.header_row, "endRowIndex": nrows,
+                          "startColumnIndex": c - 1, "endColumnIndex": c},
+                "cell": {"userEnteredFormat": {"numberFormat": {"type": "DATE", "pattern": "yyyy-mm-dd"}}},
+                "fields": "userEnteredFormat.numberFormat"}})
+    return reqs
 
 
 def push_sheets(
@@ -65,44 +102,37 @@ def push_sheets(
 
         if not credentials_path:
             raise ValueError("podaj ścieżkę do klucza konta serwisowego (--credentials)")
-        client = gspread.service_account(filename=credentials_path)
+        client = gspread.service_account(filename=credentials_path, http_client=gspread.BackOffHTTPClient)
     sh = client.open_by_key(extract_spreadsheet_id(spreadsheet_id))
     existing = {ws.title: ws for ws in sh.worksheets()}
     used: set[str] = set()
     written: list[str] = []
     ordered = []
+    requests: list[dict] = []
     for sheet in sheets:
         name = safe_sheet_name(sheet.name, used) if sheet.name not in existing else sheet.name
         values = to_sheet_values(sheet.rows)
         nrows = max(len(values) + 5, 20)
         ncols = max((len(r) for r in values), default=1) + 2
         ws = existing.get(name)
+        reset = ws is not None
         if ws is None:
             ws = sh.add_worksheet(title=name, rows=nrows, cols=ncols)
             existing[name] = ws
         else:
             ws.clear()
-            try:
-                ws.resize(rows=nrows, cols=ncols)
-            except Exception as exc:  # noqa: BLE001 – resize nie jest krytyczny
-                log.debug("resize %s: %s", name, exc)
+            if getattr(ws, "row_count", nrows) < nrows or getattr(ws, "col_count", ncols) < ncols:
+                ws.resize(rows=max(nrows, getattr(ws, "row_count", 0)), cols=max(ncols, getattr(ws, "col_count", 0)))
         ws.update(values=values, range_name="A1", value_input_option="USER_ENTERED")
-        try:
-            ws.format(f"{sheet.header_row}:{sheet.header_row}", {"textFormat": {"bold": True}})
-            ws.freeze(rows=sheet.header_row, cols=1)
-            if sheet.money_cols and len(values) > sheet.header_row:
-                from gspread.utils import rowcol_to_a1
-
-                ranges = [
-                    f"{rowcol_to_a1(sheet.header_row + 1, c)}:{rowcol_to_a1(len(values), c)}"
-                    for c in sheet.money_cols
-                ]
-                ws.batch_format([{"range": rg, "format": {"numberFormat": {"type": "NUMBER", "pattern": "#,##0.00"}}} for rg in ranges])
-        except Exception as exc:  # noqa: BLE001 – formatowanie nie jest krytyczne
-            log.warning("formatowanie zakładki %s nie powiodło się: %s", name, exc)
+        requests += _format_requests(ws.id, sheet, len(values), reset)
         written.append(name)
         ordered.append(ws)
         log.info("Google Sheets: zakładka %s – %d wierszy", name, len(values))
+    if requests:
+        try:
+            sh.batch_update({"requests": requests})
+        except Exception as exc:  # noqa: BLE001 – formatowanie nie jest krytyczne
+            log.warning("formatowanie zakładek nie powiodło się: %s", exc)
     if reorder and ordered:
         try:
             rest = [ws for ws in sh.worksheets() if ws.title not in written]

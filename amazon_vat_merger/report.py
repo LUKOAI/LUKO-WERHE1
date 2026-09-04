@@ -319,18 +319,25 @@ def read_report(path: str | Path) -> list[Transaction]:
     return out
 
 
-def read_reports(paths: Iterable[str | Path]) -> list[Transaction]:
+def read_reports(paths: Iterable[str | Path], stats: dict | None = None) -> list[Transaction]:
+    """Wczytuje kilka raportów; identyczne wiersze (np. ten sam plik podany dwa razy) są pomijane.
+
+    `stats` (opcjonalny słownik) dostaje liczbę pominiętych duplikatów pod kluczem 'duplicates'.
+    """
     out: list[Transaction] = []
     seen: set[tuple] = set()
     dups = 0
     for p in paths:
         for tx in read_report(p):
-            key = (tx.invoice_number, tx.order_id, tx.asin, tx.transaction_type, tx.transaction_id, tx.total.gross)
+            key = (tx.invoice_number, tx.order_id, tx.asin, tx.transaction_type, tx.transaction_id,
+                   tx.shipment_id, tx.shipment_date, tx.quantity, tx.total.gross)
             if key in seen:
                 dups += 1
                 continue
             seen.add(key)
             out.append(tx)
     if dups:
-        log.warning("pominięto %d zduplikowanych wierszy CSV (te same faktura/zamówienie/ASIN/kwota)", dups)
+        log.warning("pominięto %d zduplikowanych wierszy CSV (identyczne faktura/zamówienie/ASIN/wysyłka/kwota)", dups)
+    if stats is not None:
+        stats["duplicates"] = dups
     return out

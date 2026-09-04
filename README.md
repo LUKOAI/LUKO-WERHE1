@@ -44,6 +44,16 @@ Opcje:
 | `--no-nbp` | nie pobieraj kursów z API NBP |
 | `--rate-basis invoice\|shipment\|order` | data bazowa kursu (domyślnie data faktury z PDF) |
 
+### Co sprawdza Diagnostyka
+
+* brakujące PDF-y i PDF-y bez wiersza w CSV, zduplikowane pliki, niejednoznaczne dopasowania
+  po numerze zamówienia (PDF bez czytelnego numeru faktury);
+* kwota faktury / VAT z PDF ≠ CSV (dla faktur wielopozycyjnych – suma pozycji), waluta PDF ≠ CSV,
+  numer zamówienia PDF ≠ CSV, typ dokumentu (nota kredytowa) ≠ typ transakcji (zwrot);
+* noty kredytowe do faktur spoza raportu (faktura pierwotna z wcześniejszego okresu) – kurs PLN
+  liczony wtedy z daty noty, co jest opisane w kolumnie `Uwaga do kursu`;
+* brak kursu PLN, pominięte duplikaty wierszy CSV.
+
 ### Łączenie danych
 
 * Klucz łączenia: kolumna CSV **VAT Invoice Number** = numer faktury z PDF (etykieta „Nr faktury” /
@@ -79,6 +89,14 @@ Bez dostępu do NBP i bez pliku kursów kolumny PLN pozostają puste, a `Diagnos
 2. Utwórz konto serwisowe, pobierz klucz JSON (nie wrzucać do repo – `.gitignore` już to blokuje).
 3. Udostępnij docelowy arkusz adresowi e-mail konta serwisowego (Edytor).
 4. `python -m amazon_vat_merger --csv … --pdf … --sheet-id <ID z URL> --credentials klucz.json`
+
+Każde uruchomienie nadpisuje zakładki o tych samych nazwach (wartości i formaty), inne zakładki
+zostają. Tekst trafia do komórek jako tekst (kody pocztowe `01234`, numery zamówień i SKU nie
+zamieniają się w liczby), daty jako daty, kwoty jako liczby z formatem `#,##0.00`. Formatowanie
+idzie jednym `batch_update`, klient ma backoff na limit 60 zapisów/min.
+
+Bez konta serwisowego: otwórz Google Sheets → **Plik → Importuj → Prześlij** plik `.xlsx` –
+wszystkie zakładki, formuły `RAZEM` i formaty wchodzą 1:1.
 
 ### Testy
 
