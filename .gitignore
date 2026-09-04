@@ -12,7 +12,9 @@ samples/
 *.csv
 *.xlsx
 # poświadczenia Google
-credentials/
+credentials/*
+!credentials/README.md
+!credentials/.gitkeep
 *service*account*.json
 .pytest_cache/
 # przykłady bez danych osobowych – wyjątek od *.csv
