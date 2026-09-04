@@ -17,3 +17,13 @@ credentials/
 .pytest_cache/
 # przykłady bez danych osobowych – wyjątek od *.csv
 !examples/*.csv
+
+# dane wejściowe demo
+dane/*
+!dane/README.md
+!dane/faktury/
+dane/faktury/*
+!dane/faktury/.gitkeep
+credentials/*
+!credentials/README.md
+!credentials/.gitkeep

@@ -1,0 +1,6 @@
+# zależności samego narzędzia amazon_vat_merger (bez GUI demo i pyinstallera)
+pdfplumber>=0.11
+openpyxl>=3.1
+gspread>=6.0
+google-auth>=2.0
+requests>=2.31

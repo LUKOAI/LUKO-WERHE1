@@ -16,19 +16,53 @@ Repozytorium narzędzi dla klienta WERHE / WERKON.
 
 Wynik zapisywany jest do `.xlsx` i opcjonalnie wypychany do **Google Sheets**.
 
-### Instalacja
+### Szybki start (demo)
+
+1. Sklonuj repo i przełącz się na gałąź z narzędziem:
+   `git clone https://github.com/LUKOAI/LUKO-WERHE1.git && cd LUKO-WERHE1 && git checkout claude/amazon-reports-merger-0mpcvu`
+2. Wrzuć dane wejściowe:
+   * `dane/` – raport(y) CSV **Amazon VAT Transactions Report** (Seller Central → Reports →
+     Tax Document Library → Amazon VAT Transactions Report → Download),
+   * `dane/faktury/` – faktury i noty kredytowe PDF (Tax Document Library / linki z kolumny
+     „Invoice Url" raportu),
+   * opcjonalnie `dane/kursy.csv` – własne kursy PLN (`waluta;data;kurs`).
+3. Uruchom:
+   * macOS / Linux: `./demo.sh`
+   * Windows: `demo.bat`
+
+   Skrypt sam tworzy `.venv`, instaluje `requirements-merger.txt`, zapisuje
+   `output/amazon_vat_<data>.xlsx` i otwiera plik. Kursy PLN pobiera z API NBP
+   (tabela A, ostatnia przed datą bazową).
+4. Do Google Sheets:
+   * ręcznie: Google Sheets → **Plik → Importuj → Prześlij** plik xlsx (wszystkie zakładki),
+   * automatycznie: `./demo.sh <ID_ARKUSZA>` (Windows: `demo.bat <ID_ARKUSZA>`) z kluczem
+     konta serwisowego w `credentials/service_account.json` – zakładki w arkuszu są nadpisywane
+     w miejscu, inne zakładki zostają. ID arkusza to fragment URL między `/d/` a `/edit`.
+
+### Instalacja ręczna
 
 ```bash
 python -m venv .venv
-.venv\Scripts\activate          # Windows
-pip install -r requirements.txt
-```
-
-### Uruchomienie
-
-```bash
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+pip install -r requirements-merger.txt
 python -m amazon_vat_merger --csv raport.csv --pdf faktury/ --out output/wynik.xlsx
 ```
+
+### Scenariusz demonstracji dla klienta (ok. 5 minut)
+
+1. Pokaż wejście: katalog `dane/` z raportem CSV z Seller Central i katalogiem faktur PDF
+   (różne rynki: DE/FR/IT/ES/NL/UK, faktury, noty kredytowe, B2B).
+2. Uruchom `./demo.sh <ID_ARKUSZA>` (albo `demo.bat …`) – w terminalu widać: liczbę transakcji,
+   liczbę PDF, ile dopasowano, listę zakładek.
+3. Odśwież arkusz Google: zakładka **Wszystko** (nazwisko i adres kupującego z PDF obok danych
+   z raportu, kwoty netto/VAT/brutto, EUR, PLN z kursem i datą kursu, opis produktu, kontrola
+   „Zgodność kwoty PDF/CSV").
+4. Pokaż zakładki per kraj/schemat (np. `DE OSS`, `FR Lokalna`, `CZ WDT`) – układ jak w arkuszu
+   próbnym, wiersz RAZEM.
+5. Pokaż **Diagnostykę**: co program sam wyłapał (brakujące PDF-y, noty do faktur z poprzedniego
+   okresu, rozbieżny numer zamówienia, brak kursu dla GBP).
+6. Pokaż notę kredytową (np. `DE60006WG6O6HC`): typ dokumentu, faktura pierwotna, kwoty ujemne,
+   uwaga do kursu.
 
 Opcje:
 
