@@ -206,3 +206,17 @@ def test_invoice_number_regex_with_underscores_and_vat_ids():
     assert INVOICE_NO_RE.search("PL600IIBG6O6HU_kopia".upper()).group(0) == "PL600IIBG6O6HU"
     assert INVOICE_NO_RE.search("faktura_PL600IIBG6O6HU.pdf".upper()).group(0) == "PL600IIBG6O6HU"
     assert NON_INVOICE_TOKEN_RE.match("NL123456789B01") and NON_INVOICE_TOKEN_RE.match("GB123456789012")
+
+
+def test_wrapped_company_name_is_recovered_from_header_block():
+    from amazon_vat_merger.invoice_pdf import _fix_wrapped_name
+    billing = parse_address(["Przedsiębiorstwo Wielobranżowe", "Kowalski Sp. z o.o.", "Wspólna 2b/206", "Rzeszów, 35-205", "PL"])
+    header = parse_address(["PRZEDSIĘBIORSTWO WIELOBRANŻOWE KOWALSKI SP. Z O.O.", "WSPÓLNA 2B/206", "RZESZÓW, 35-205", "PL"])
+    _fix_wrapped_name(billing, header)
+    assert billing.name == "Przedsiębiorstwo Wielobranżowe Kowalski Sp. z o.o."
+    assert billing.street == "Wspólna 2b/206"
+    # zwykły adres z dwiema liniami ulicy zostaje bez zmian
+    billing = parse_address(["Daniel legg", "WOODLANDS COTTAGE, MINSTEAD", "LYNDHURST, SO43 7FY", "GB"])
+    header = parse_address(["DANIEL LEGG", "WOODLANDS COTTAGE, MINSTEAD", "LYNDHURST, SO43 7FY", "GB"])
+    _fix_wrapped_name(billing, header)
+    assert billing.name == "Daniel legg" and billing.street == "WOODLANDS COTTAGE, MINSTEAD"

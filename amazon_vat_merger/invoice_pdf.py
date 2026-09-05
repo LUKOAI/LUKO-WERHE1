@@ -77,6 +77,7 @@ class Address:
     vat_id: str | None = None
     city_line: str | None = None
     lines: list[str] = field(default_factory=list)
+    street_lines: list[str] = field(default_factory=list)
 
     @property
     def empty(self) -> bool:
@@ -349,6 +350,7 @@ def parse_address(lines: list[str]) -> Address:
                 ln = ln[: m.start()].rstrip(" ,")
             if ln:
                 street_lines.append(ln)
+        addr.street_lines = street_lines
         addr.street = ", ".join(street_lines) if street_lines else None
         parts = [p.strip() for p in addr.city_line.split(",") if p.strip()]
         if parts:
@@ -438,8 +440,29 @@ def _parse_address_block(body: list[Line], inv: Invoice) -> None:
     inv.billing = parse_address(cols.get("billing", []))
     inv.shipping = parse_address(cols.get("shipping", []))
     inv.seller = parse_address(cols.get("seller", []))
+    _fix_wrapped_name(inv.billing, inv.buyer_header)
     if inv.billing.empty:
         inv.warnings.append("pusty adres rozliczeniowy")
+
+
+def _squash(text: str) -> str:
+    return re.sub(r"[\s,.]+", "", (text or "")).upper()
+
+
+def _fix_wrapped_name(addr: Address, header: Address) -> None:
+    """Kolumna adresowa ma ~40 znaków szerokości – długa nazwa firmy łamie się na 2 linie
+    i druga linia ląduje w ulicy. Blok nagłówka (WIELKIMI LITERAMI) jest szerszy, więc gdy jego
+    pierwsza linia == nazwa + pierwsza linia ulicy, sklejamy nazwę i skracamy ulicę."""
+    if not addr.name or not addr.street_lines or not header.name:
+        return
+    joined = ""
+    for k in range(1, len(addr.street_lines)):
+        joined = f"{addr.name} {' '.join(addr.street_lines[:k])}"
+        if _squash(joined) == _squash(header.name) and _squash(header.name) != _squash(addr.name):
+            addr.name = joined
+            addr.street_lines = addr.street_lines[k:]
+            addr.street = ", ".join(addr.street_lines) if addr.street_lines else None
+            return
 
 
 # ---------------------------------------------------------------------------
