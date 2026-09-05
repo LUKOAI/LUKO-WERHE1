@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Historia{% endblock %}
+{% block body %}
+<div class="card">
+  <h1>Historia wysyłek</h1>
+  <p class="small mut">{{ctx.history|length}} pozycji (w tym werdykty), {{st.n_shipments}} wysyłek od {{ctx.predictor.params.regime_start[:7]}}. Import nowych plików: <code>python -m fbaplan import-history --src KATALOG</code>, potem „Przeładuj dane”.</p>
+  <table>
+    <tr><th>SKU</th><th>Nazwa</th><th class="num">Szt. 12 mies.</th><th class="num">Pozycji</th><th class="num">Typowa ilość</th><th class="num">Mies. aktywnych</th><th>Ostatnia</th><th>Magazyny</th></tr>
+    {% for s in rows %}
+    <tr><td><a href="/katalog/{{s.sku}}">{{s.sku}}</a></td><td>{{ctx.products[s.sku].name if s.sku in ctx.products else '<span class="mut">brak w katalogu</span>'|safe}}</td>
+      <td class="num">{{s.units_12m}}</td><td class="num">{{s.lines_12m}}</td><td class="num">{{s.typical_qty}}</td><td class="num">{{s.months_active_12m}}</td><td>{{s.last_shipped}}</td>
+      <td>{% for fc, n in s.fc_counter.most_common(3) %}<span class="tag {{fc}}">{{fc}}</span> {{n}} {% endfor %}</td></tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}

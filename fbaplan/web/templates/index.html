@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Plany{% endblock %}
+{% block body %}
+<div class="grid">
+<div class="card">
+  <h1>Nowy plan wysyłki</h1>
+  <form method="post" action="/plan/nowy">
+    <label>Tryb
+      <select name="mode"><option value="pallet">paleta (Palety Amazon)</option><option value="parcel">paczki (Paczki FBA)</option></select></label>
+    <label>Magazyn docelowy
+      <select name="target_fc"><option value="">— wg produktów —</option>{% for fc in known_fcs %}<option value="{{fc}}">{{fc}}</option>{% endfor %}</select></label>
+    <label>Maks. palet <input type="number" name="max_pallets" value="1" min="1"></label>
+    <button>Utwórz plan</button>
+  </form>
+  <p class="mut small">Dodaj produkt główny, zobacz przewidywany magazyn i wypełnienie palety, dołóż proponowane dopełniacze, a po utworzeniu planu w Seller Central zapisz decyzję Amazona — narzędzie się uczy.</p>
+</div>
+<div class="card">
+  <h2>Stan danych</h2>
+  <div class="kpi">
+    <div><b>{{n_products}}</b><span class="mut">produktów w katalogu</span></div>
+    <div><b>{{n_history}}</b><span class="mut">pozycji historii</span></div>
+    <div><b>{{ctx.stats.n_shipments}}</b><span class="mut">wysyłek od {{ctx.predictor.params.regime_start[:7]}}</span></div>
+    <div><b>{{n_stock}}</b><span class="mut">SKU ze stanem FBA</span></div>
+  </div>
+  {% if no_dims %}<p class="warn">Brak wymiarów sztuki dla {{no_dims|length}} aktywnych produktów — bez nich nie policzę wypełnienia palety. <a href="/katalog?brak=wymiary">Uzupełnij w katalogu</a>.</p>{% endif %}
+  {% if not n_stock %}<p class="warn">Brak pliku <code>data/stock.csv</code> (stan FBA i sprzedaż) — propozycje dopełnienia będą oparte tylko na historii wysyłek.</p>{% endif %}
+</div>
+</div>
+
+<div class="card">
+<h2>Plany</h2>
+{% if not plans %}<p class="mut">Jeszcze nie ma planów.</p>{% else %}
+<table>
+<tr><th>Plan</th><th>Utworzony</th><th>Tryb</th><th>Magazyn</th><th class="num">Pozycji</th><th class="num">Sztuk</th><th>Status</th><th></th></tr>
+{% for p in plans %}
+<tr>
+  <td><a href="/plan/{{p.plan_id}}"><b>{{p.plan_id}}</b></a></td>
+  <td>{{p.created_at[:16].replace('T',' ')}}</td>
+  <td>{{'paleta' if p.mode=='pallet' else 'paczki'}}</td>
+  <td>{{p.target_fc or '—'}}</td>
+  <td class="num">{{p.lines|length}}</td>
+  <td class="num">{{p.lines|sum(attribute='qty')}}</td>
+  <td>{{ {'draft':'szkic','submitted':'złożony w SC','verdict':'werdykt zapisany','closed':'zamknięty'}[p.status] }}</td>
+  <td><form class="inline" method="post" action="/plan/{{p.plan_id}}/kopiuj"><button class="sm sec">kopiuj</button></form>
+      <form class="inline" method="post" action="/plan/{{p.plan_id}}/usun-plan" onsubmit="return confirm('Usunąć plan {{p.plan_id}}?')"><button class="sm danger">usuń</button></form></td>
+</tr>
+{% endfor %}
+</table>
+{% endif %}
+</div>
+{% endblock %}

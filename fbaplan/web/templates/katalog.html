@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Katalog{% endblock %}
+{% block body %}
+<div class="card">
+  <h1>Katalog produktów <span class="mut small">{{items|length}} pozycji</span></h1>
+  <form method="get" style="display:inline"><input name="q" value="{{q}}" placeholder="szukaj SKU / nazwy"> <button class="sec">Szukaj</button> <a class="btn sec" href="/katalog?brak=wymiary">tylko bez wymiarów</a></form>
+  <form method="post" action="/katalog-nowy" style="display:inline;margin-left:20px"><input name="sku" placeholder="nowy SKU" required> <input name="name" placeholder="nazwa"> <button>Dodaj produkt</button></form>
+  <p class="small mut">Plik: <code>data/products.csv</code> (można edytować w Excelu i kliknąć „Przeładuj dane”).</p>
+</div>
+<div class="card">
+<table>
+<tr><th>SKU</th><th>Nazwa</th><th>Rodzina</th><th>Sztuka (cm / kg)</th><th>Karton</th><th>Magazyn</th><th class="num">12 mies.</th><th>Grupa</th><th></th></tr>
+{% for p in items %}
+{% set pr = preds[p.sku] %}{% set st = stats.get(p.sku) %}
+<tr class="{{'' if p.active else 'mut'}}">
+  <td><a href="/katalog/{{p.sku}}"><b>{{p.sku}}</b></a></td>
+  <td>{{p.name}}{% if not p.active %} <span class="small">(nieaktywny)</span>{% endif %}</td>
+  <td class="small">{{p.family}}</td>
+  <td class="small">{% if p.unit_dims %}{{p.unit_dims.length_cm|num(1)}}×{{p.unit_dims.width_cm|num(1)}}×{{p.unit_dims.height_cm|num(1)}}{% else %}<span class="warn">brak</span>{% endif %}{% if p.unit_weight_kg %} / {{p.unit_weight_kg|num(2)}}{% endif %}</td>
+  <td class="small">{% if p.carton %}{{p.carton.units_per_carton}} szt.{% if p.carton.dims %} {{p.carton.dims.length_cm|num}}×{{p.carton.dims.width_cm|num}}×{{p.carton.dims.height_cm|num}}{% endif %}{% else %}<span class="warn">brak</span>{% endif %}</td>
+  <td><span class="tag {{pr.fc or 'q'}}">{{pr.fc or '?'}}</span> <span class="small mut">{{pr.prob(pr.fc)|pct}} · {{pr.source}}</span></td>
+  <td class="num">{{st.units_12m if st else 0}}</td>
+  <td class="small">{{p.pack_group}}</td>
+  <td><a class="btn sec sm" href="/katalog/{{p.sku}}">edytuj</a></td>
+</tr>
+{% endfor %}
+</table>
+</div>
+{% endblock %}

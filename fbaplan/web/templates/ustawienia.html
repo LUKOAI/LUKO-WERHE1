@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Ustawienia{% endblock %}
+{% block body %}
+<div class="card">
+  <h1>Ustawienia</h1>
+  <form method="post" action="/ustawienia">
+    <h3>Fracht (zł)</h3>
+    <label>paleta <input type="number" step="0.01" name="pallet_rate_pln" value="{{params.freight.pallet_rate_pln or ''}}"></label>
+    <label>paczka <input type="number" step="0.01" name="parcel_rate_pln" value="{{params.freight.parcel_rate_pln or ''}}"></label>
+    <h3>Wolny limit pojemności FBA (m³, z Capacity Monitor)</h3>
+    <label>standard (WRO5) <input type="number" step="0.01" name="standard_left_m3" value="{{params.capacity.standard_left_m3 or ''}}"></label>
+    <label>oversize (XPO1) <input type="number" step="0.01" name="oversize_left_m3" value="{{params.capacity.oversize_left_m3 or ''}}"></label>
+    <h3>Propozycje dopełnienia — wagi</h3>
+    {% set d = {'w_fc':3.0,'w_sales':1.5,'w_stock':2.0,'w_fit':1.0,'w_affinity':0.5,'min_fc_prob':0.8,'target_cover_days':60,'max_suggestions':25,'default_qty_cartons':1} %}
+    {% for k, label in [('w_fc','zgodność magazynu'),('w_sales','sprzedaż'),('w_stock','niski zapas'),('w_fit','pasuje na paletę'),('w_affinity','wysyłane razem'),('min_fc_prob','min. prawdopodobieństwo magazynu'),('target_cover_days','docelowy zapas (dni)'),('max_suggestions','maks. propozycji'),('default_qty_cartons','domyślnie kartonów w propozycji')] %}
+      <label style="display:inline-block;margin:3px 10px 3px 0">{{label}} <input type="number" step="0.1" name="{{k}}" value="{{filler.get(k, d[k])}}"></label>
+    {% endfor %}
+    <h3>Predyktor magazynu</h3>
+    <label>półokres świeżości (mies.) <input type="number" step="1" name="half_life_months" value="{{predictor.half_life_months}}"></label>
+    <label>min. waga historii <input type="number" step="0.1" name="min_weight" value="{{predictor.min_weight}}"></label>
+    <p><button>Zapisz</button></p>
+  </form>
+  <h3>Limity Amazon (z parametrów)</h3>
+  <p class="small">Karton: maks. bok {{A.BOX_MAX_SIDE_CM}} cm, maks. {{A.BOX_MAX_WEIGHT_KG|num}} kg (etykieta „ciężka” od {{A.BOX_HEAVY_LABEL_KG|num}} kg). Paleta: {{A.PALLET_LENGTH_CM|num}}×{{A.PALLET_WIDTH_CM|num}} cm, maks. {{A.PALLET_MAX_HEIGHT_CM|num}} cm z paletą, {{A.PALLET_MAX_GROSS_KG|num}} kg brutto. Zmiana: <code>data/planner_params.json</code> → <code>amazon</code>.</p>
+</div>
+{% endblock %}

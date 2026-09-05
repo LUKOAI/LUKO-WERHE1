@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}{{p.sku}}{% endblock %}
+{% block body %}
+<div class="grid">
+<div class="card">
+  <h1>{{p.sku}} <span class="mut small">{{p.name}}</span></h1>
+  <form method="post" action="/katalog/{{p.sku}}">
+    <table>
+      <tr><th>Nazwa</th><td><input name="name" value="{{p.name}}" size="50"></td></tr>
+      <tr><th>Rodzina</th><td><input name="family" value="{{p.family}}" list="families"><datalist id="families">{% for f in ['auger','drill_bit','chisel_flat','chisel_point','chisel_spade','chisel_gouge','chisel_bush','set_chisel','set_drill','adapter','set_adapter','extension','driver_rod','driver_pile','tamper','blade_jigsaw','blade_recip','saw_disc','grease','hole_saw','pin','handle','spring','string'] %}<option value="{{f}}">{% endfor %}</datalist></td></tr>
+      <tr><th>Marki</th><td><input name="brands" value="{{p.brands|join(';')}}" placeholder="WERHE;WERKON"></td></tr>
+      <tr><th>SKU sprzedawcy (Amazon)</th><td>WERHE <input name="msku_werhe" value="{{p.mskus.get('WERHE','')}}"> WERKON <input name="msku_werkon" value="{{p.mskus.get('WERKON','')}}"></td></tr>
+      <tr><th>Sztuka w opakowaniu (cm)</th><td>
+        <input type="number" step="0.1" name="unit_length_cm" value="{{p.unit_dims.length_cm if p.unit_dims else ''}}" placeholder="dł."> ×
+        <input type="number" step="0.1" name="unit_width_cm" value="{{p.unit_dims.width_cm if p.unit_dims else ''}}" placeholder="szer."> ×
+        <input type="number" step="0.1" name="unit_height_cm" value="{{p.unit_dims.height_cm if p.unit_dims else ''}}" placeholder="wys.">
+        waga kg <input type="number" step="0.01" name="unit_weight_kg" value="{{p.unit_weight_kg if p.unit_weight_kg is not none else ''}}"></td></tr>
+      <tr><th>Karton zbiorczy</th><td>
+        sztuk <input type="number" name="units_per_carton" value="{{p.carton.units_per_carton if p.carton else ''}}">
+        cm <input type="number" step="0.1" name="carton_length_cm" value="{{p.carton.dims.length_cm if p.carton and p.carton.dims else ''}}" placeholder="dł."> ×
+        <input type="number" step="0.1" name="carton_width_cm" value="{{p.carton.dims.width_cm if p.carton and p.carton.dims else ''}}" placeholder="szer."> ×
+        <input type="number" step="0.1" name="carton_height_cm" value="{{p.carton.dims.height_cm if p.carton and p.carton.dims else ''}}" placeholder="wys.">
+        kg <input type="number" step="0.01" name="carton_weight_kg" value="{{p.carton.weight_kg if p.carton and p.carton.weight_kg is not none else ''}}">
+        <div class="small mut">Bez wymiarów kartonu narzędzie oszacuje je z wymiarów sztuki.</div></td></tr>
+      <tr><th>Magazyn (ręcznie)</th><td><input name="fc_override" value="{{p.fc_override or ''}}" list="fcs" size="8"><datalist id="fcs">{% for fc in known_fcs %}<option value="{{fc}}">{% endfor %}</datalist> <span class="small mut">puste = przewiduj automatycznie</span></td></tr>
+      <tr><th>Grupa pakowania</th><td><input name="pack_group" value="{{p.pack_group}}" placeholder="np. dlugie / male"> <span class="small mut">produkty z różnych grup nie są proponowane razem</span></td></tr>
+      <tr><th>Maks. ilość w planie</th><td><input type="number" name="max_qty_per_plan" value="{{p.max_qty_per_plan if p.max_qty_per_plan is not none else ''}}"></td></tr>
+      <tr><th>Aktywny</th><td><select name="active"><option value="1" {{'selected' if p.active}}>tak</option><option value="0" {{'selected' if not p.active}}>nie</option></select></td></tr>
+      <tr><th>Uwagi</th><td><textarea name="notes" rows="2" cols="60">{{p.notes}}</textarea></td></tr>
+    </table>
+    <button>Zapisz</button> <a class="btn sec" href="/katalog">← katalog</a>
+  </form>
+</div>
+<div class="card">
+  <h2>Przewidywanie magazynu</h2>
+  <p><span class="tag {{pred.fc or 'q'}}">{{pred.fc or '?'}}</span> {{pred.prob(pred.fc)|pct}} · pewność {{pred.confidence|pct}} · źródło: {{pred.source}}<br><span class="mut">{{pred.explanation}}</span></p>
+  {% if pred.probs %}<p class="small">{% for fc, v in pred.probs.items() %}{{fc}}: {{v|pct}}{{' · ' if not loop.last}}{% endfor %}</p>{% endif %}
+  <p class="small">Klasa rozmiaru: <b>{{tier.name_pl if tier else 'nieznana (brak wymiarów)'}}</b>{% if tier %} — {{'standard (sortable)' if tier.standard_size else 'oversize (non-sortable)'}}{% endif %}</p>
+  {% if st %}<h3>Historia (12 mies.)</h3><p class="small">{{st.units_12m}} szt. w {{st.lines_12m}} pozycjach, aktywny {{st.months_active_12m}} mies., typowa ilość w pozycji {{st.typical_qty}}, ostatnia wysyłka {{st.last_shipped}}.</p>{% endif %}
+  {% if stock %}<h3>Stan FBA</h3><p class="small">dostępne {{stock.fba_available}}, w drodze {{stock.fba_inbound}}, sprzedaż 30 dni {{stock.sales_30d}}, 90 dni {{stock.sales_90d}}{% if stock.cover_days is not none %}, zapas na {{stock.cover_days|num}} dni{% endif %}{% if stock.local_stock is not none %}, stan własny {{stock.local_stock}}{% endif %}.</p>{% endif %}
+  <h3>Dowody ({{evidence|length}} ostatnich)</h3>
+  <table class="small"><tr><th>Data</th><th>FC</th><th class="num">Szt.</th><th>Rodzaj</th><th>Źródło</th></tr>
+  {% for h in evidence %}<tr><td>{{h.when}}</td><td><span class="tag {{h.fc}}">{{h.fc}}</span></td><td class="num">{{h.qty}}</td><td>{{h.kind}}</td><td>{{h.source}}</td></tr>{% endfor %}</table>
+  {% if aliases %}<details><summary class="small">Nazwy historyczne ({{aliases|length}})</summary><ul class="small">{% for a in aliases %}<li>{{a.name}} <span class="mut">({{a.brand}} {{a.confidence}})</span></li>{% endfor %}</ul></details>{% endif %}
+</div>
+</div>
+{% endblock %}

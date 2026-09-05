@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% block title %}Plan {{plan.plan_id}}{% endblock %}
+{% block body %}
+<div class="card">
+  <h1>Plan {{plan.plan_id}} <span class="mut small">{{plan.created_at[:16].replace('T',' ')}}</span></h1>
+  <form method="post" action="/plan/{{plan.plan_id}}/ustaw" style="display:flex;gap:12px;flex-wrap:wrap;align-items:end">
+    <label>Tryb <select name="mode"><option value="pallet" {{'selected' if plan.mode=='pallet'}}>paleta</option><option value="parcel" {{'selected' if plan.mode=='parcel'}}>paczki</option></select></label>
+    <label>Magazyn docelowy <select name="target_fc"><option value="">— wg produktów —</option>{% for fc in known_fcs %}<option value="{{fc}}" {{'selected' if plan.target_fc==fc}}>{{fc}}</option>{% endfor %}</select></label>
+    <label>Maks. palet <input type="number" name="max_pallets" value="{{plan.max_pallets}}" min="1"></label>
+    <label>Status <select name="status">{% for k,v in [('draft','szkic'),('submitted','złożony w SC'),('verdict','werdykt zapisany'),('closed','zamknięty')] %}<option value="{{k}}" {{'selected' if plan.status==k}}>{{v}}</option>{% endfor %}</select></label>
+    <label>Notatka <input name="notes" value="{{plan.notes}}" size="30"></label>
+    <button class="sec">Zapisz</button>
+  </form>
+</div>
+
+<div class="grid">
+  <div class="card">
+    <h2>Podsumowanie</h2>
+    <div class="kpi">
+      <div><b>{{ev.units}}</b><span class="mut">sztuk</span></div>
+      <div><b>{{ev.volume_m3|num(2)}} m³</b><span class="mut">objętość kartonów</span></div>
+      <div><b><span class="tag {{ev.anchor_fc or 'q'}}">{{ev.anchor_fc or '?'}}</span></b><span class="mut">magazyn główny</span></div>
+      {% if ev.capacity_left_m3 is not none %}<div><b>{{ev.capacity_left_m3|num(2)}} m³</b><span class="mut">wolny limit pojemności</span></div>{% endif %}
+    </div>
+    {% for fc, g in ev.groups.items() %}
+      <h3><span class="tag {{fc}}">{{fc}}</span> {{g.units}} szt., {{g.cartons}} kart., {{g.weight_kg|num}} kg, {{g.volume_m3|num(2)}} m³{% if cost.get(fc) %}, ≈ {{cost[fc]|num(2)}} zł/szt. frachtu{% endif %}</h3>
+      {% if plan.mode == 'pallet' %}
+        {% for pal in g.pallets %}
+        <div style="margin:4px 0 8px">
+          <div class="small">Paleta {{loop.index}}: {{pal.cartons|length}} kart., {{pal.units}} szt., wys. ładunku {{pal.load_height_cm|num}} cm z {{A.PALLET_MAX_LOAD_HEIGHT_CM|num}}, {{pal.gross_weight_kg|num}} kg brutto
+            {% for i in pal.issues %}<span class="bad"> · {{i}}</span>{% endfor %}</div>
+          <div style="display:flex;gap:10px;align-items:center"><span class="small mut" style="width:90px">objętość</span><div class="bar {{'full' if pal.fill_ratio>=0.85}}"><i style="width:{{ (pal.fill_ratio*100)|round|int }}%"></i></div><span class="small">{{pal.fill_ratio|pct}}</span></div>
+          <div style="display:flex;gap:10px;align-items:center"><span class="small mut" style="width:90px">wysokość</span><div class="bar {{'full' if pal.height_ratio>=0.85}}"><i style="width:{{ (pal.height_ratio*100)|round|int }}%"></i></div><span class="small">{{pal.height_ratio|pct}}</span></div>
+          <details><summary class="small">warstwy ({{pal.layers|length}})</summary>
+            {% for l in pal.layers %}<div class="layer"><span class="small mut" style="width:120px">{{loop.index}}: {{l.footprint[0]|num}}×{{l.footprint[1]|num}}×{{l.height_cm|num}} cm, {{l.cartons|length}}/{{l.capacity}}</span>
+              {% for c in l.cartons %}<span class="box {{'partial' if not c.full}}" title="{{c.contents}}">{{c.sku}} ×{{c.units}}</span>{% endfor %}
+              {% if l.free_slots %}<span class="small mut">+{{l.free_slots}} wolnych miejsc</span>{% endif %}</div>{% endfor %}
+          </details>
+        </div>
+        {% endfor %}
+        {% if g.pack.unplaceable %}<p class="warn small">Kartony bez wymiarów (nie ułożone): {{ g.pack.unplaceable|map(attribute='sku')|unique|join(', ') }}</p>{% endif %}
+      {% else %}
+        <p class="small">{{g.cartons}} paczek; pełnych {{ g.pack.all_cartons|selectattr('full')|list|length }}, niepełnych {{ g.pack.all_cartons|rejectattr('full')|list|length }}.</p>
+      {% endif %}
+    {% endfor %}
+    {% if ev.warnings %}<h3 class="warn">Ostrzeżenia</h3><ul class="warnings">{% for w in ev.warnings %}<li class="{{'bad' if 'podzielony' in w else 'warn'}}">{{w}}</li>{% endfor %}</ul>{% endif %}
+    <p>
+      <a class="btn sec" href="/plan/{{plan.plan_id}}/send_to_amazon.csv">CSV do Send to Amazon</a>
+      {% if ev.split %}{% for fc in ev.groups %}{% if fc != '?' %}<a class="btn sec" href="/plan/{{plan.plan_id}}/send_to_amazon.csv?fc={{fc}}">CSV tylko {{fc}}</a>{% endif %}{% endfor %}{% endif %}
+      <a class="btn sec" href="/plan/{{plan.plan_id}}/plan.xlsx">XLSX (pozycje, pakowanie, palety)</a>
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>Pozycje</h2>
+    <form method="post" action="/plan/{{plan.plan_id}}/dodaj" style="display:flex;gap:8px;flex-wrap:wrap;align-items:end;margin-bottom:8px">
+      <label>Produkt <input name="sku" list="skus" placeholder="SKU lub nazwa" size="34" required></label>
+      <datalist id="skus">{% for p in products %}<option value="{{p.sku}}">{{p.name}}</option>{% endfor %}</datalist>
+      <label>Ilość <input type="number" name="qty" min="1" value="{{ products[0].units_per_carton if products else 1 }}" required></label>
+      <label>Marka <select name="brand"><option value="">—</option><option>WERHE</option><option>WERKON</option></select></label>
+      <button>Dodaj</button>
+    </form>
+    <table>
+      <tr><th>SKU</th><th>Nazwa</th><th class="num">Ilość</th><th class="num">Kartony</th><th>Magazyn</th><th>Dlaczego</th><th></th></tr>
+      {% for le in ev.lines %}
+      <tr>
+        <td><a href="/katalog/{{le.line.sku}}">{{le.line.sku}}</a>{% if le.line.brand %} <span class="small mut">{{le.line.brand}}</span>{% endif %}</td>
+        <td>{{le.product.name if le.product else '<span class="bad">brak w katalogu</span>'|safe}}</td>
+        <td class="num"><form class="inline" method="post" action="/plan/{{plan.plan_id}}/ilosc"><input type="hidden" name="sku" value="{{le.line.sku}}"><input type="number" name="qty" value="{{le.qty}}" min="0" style="width:70px" onchange="this.form.submit()"></form>
+          {% if le.product and le.product.units_per_carton>1 %}<div class="small mut">karton {{le.product.units_per_carton}}</div>{% endif %}</td>
+        <td class="num">{{le.full_cartons}}{% if le.partial_units %} + {{le.partial_units}} szt.{% endif %}</td>
+        <td><span class="tag {{le.prediction.fc or 'q'}}">{{le.prediction.fc or '?'}}</span> <span class="small">{{le.prediction.prob(le.prediction.fc)|pct}}</span>
+          {% if le.prediction.fc and le.prediction.fc != ev.anchor_fc %}<div class="bad small">poza magazynem głównym</div>{% endif %}</td>
+        <td class="small mut">{{le.prediction.explanation}}{% for pr in le.problems %}<div class="warn">{{pr}}</div>{% endfor %}</td>
+        <td><form class="inline" method="post" action="/plan/{{plan.plan_id}}/usun"><input type="hidden" name="sku" value="{{le.line.sku}}"><button class="sm danger" title="usuń z planu">×</button></form></td>
+      </tr>
+      {% endfor %}
+    </table>
+    {% if plan.excluded_skus %}<p class="small mut">Wykluczone z propozycji: {{plan.excluded_skus|join(', ')}}</p>{% endif %}
+  </div>
+</div>
+
+{% if plan.lines %}
+<div class="card">
+  <h2>Propozycje dopełnienia do <span class="tag {{ev.anchor_fc or 'q'}}">{{ev.anchor_fc or '?'}}</span></h2>
+  {% if not sug %}<p class="mut">Brak kandydatów (za mało danych o produktach lub wszystkie już w planie).</p>{% else %}
+  <table>
+    <tr><th>SKU</th><th>Nazwa</th><th class="num">Propozycja</th><th>Magazyn</th><th class="num">Sprzedaż/mies.</th><th class="num">Zapas (dni)</th><th class="num">Zmieści się kart.</th><th>Uzasadnienie</th><th class="num">Ocena</th><th></th></tr>
+    {% for s in sug %}
+    <tr>
+      <td><a href="/katalog/{{s.sku}}">{{s.sku}}</a></td><td>{{s.name}}</td>
+      <td class="num"><form class="inline" method="post" action="/plan/{{plan.plan_id}}/dodaj"><input type="hidden" name="sku" value="{{s.sku}}"><input type="number" name="qty" value="{{s.qty}}" min="0" style="width:70px"> <button class="sm">dodaj</button></form><div class="small mut">{{s.cartons}} kart.</div></td>
+      <td><span class="tag {{s.fc}}">{{s.fc}}</span> <span class="small">{{s.p_fc|pct}}</span></td>
+      <td class="num">{{s.velocity_month|num}}</td>
+      <td class="num">{{ s.cover_days|num if s.cover_days is not none else '—' }}</td>
+      <td class="num">{{ s.fits_cartons if s.fits_cartons is not none else '—' }}</td>
+      <td class="small mut">{{s.reasons|join('; ')}}{% for pr in s.problems %}<div class="warn">{{pr}}</div>{% endfor %}</td>
+      <td class="num">{{s.score|num(2)}}</td>
+      <td><form class="inline" method="post" action="/plan/{{plan.plan_id}}/wyklucz"><input type="hidden" name="sku" value="{{s.sku}}"><button class="sm sec" title="nie proponuj w tym planie">ukryj</button></form></td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% endif %}
+</div>
+
+<div class="card">
+  <h2>Decyzja Amazona (po utworzeniu planu w Seller Central)</h2>
+  <p class="small mut">Wpisz, do którego magazynu Amazon skierował każdą pozycję. Zapis trafia do <code>data/verdicts.csv</code> i od razu poprawia przewidywania.</p>
+  <form method="post" action="/plan/{{plan.plan_id}}/werdykt">
+    <label>Data <input type="date" name="date" value="{{plan.verdict_date or today}}"></label>
+    <table>
+      <tr><th>SKU</th><th>Przewidywany</th><th>Faktyczny</th></tr>
+      {% for le in ev.lines %}
+      <tr><td>{{le.line.sku}}</td><td><span class="tag {{le.prediction.fc or 'q'}}">{{le.prediction.fc or '?'}}</span></td>
+        <td><input name="fc_{{le.line.sku}}" value="{{plan.verdicts.get(le.line.sku,'')}}" list="fcs" size="8"></td></tr>
+      {% endfor %}
+    </table>
+    <datalist id="fcs">{% for fc in known_fcs %}<option value="{{fc}}">{% endfor %}</datalist>
+    <button>Zapisz werdykt</button>
+  </form>
+  {% if diff %}<p class="warn">Amazon zdecydował inaczej niż przewidywano: {% for s,p,a in diff %}{{s}} ({{p}} → {{a}}){{', ' if not loop.last}}{% endfor %}. Rozważ przeniesienie tych pozycji do osobnego planu lub dopełnienie drugiej palety.</p>{% endif %}
+</div>
+{% endif %}
+{% endblock %}

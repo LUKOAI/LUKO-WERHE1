@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}FBA Plan{% endblock %} — WERHE</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--ink:#1d2430;--mut:#6b7280;--line:#e5e7eb;--acc:#0b63c5;--ok:#15803d;--warn:#b45309;--bad:#b91c1c;--wro:#0b63c5;--xpo:#7c3aed}
+*{box-sizing:border-box}body{margin:0;font:14px/1.45 system-ui,Segoe UI,Roboto,sans-serif;color:var(--ink);background:var(--bg)}
+header{background:#111827;color:#fff;padding:10px 20px;display:flex;gap:22px;align-items:center}
+header a{color:#e5e7eb;text-decoration:none;font-weight:600}header a:hover{color:#fff}header .brand{font-size:16px;color:#fff}
+main{max-width:1280px;margin:18px auto;padding:0 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:14px}
+h1{font-size:20px;margin:0 0 10px}h2{font-size:16px;margin:0 0 8px}h3{font-size:14px;margin:12px 0 6px}
+table{border-collapse:collapse;width:100%}th,td{padding:5px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{font-size:12px;color:var(--mut);text-transform:uppercase;letter-spacing:.03em}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+.mut{color:var(--mut)}.small{font-size:12px}.ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+.tag{display:inline-block;padding:1px 7px;border-radius:999px;font-size:12px;font-weight:600;color:#fff;background:#6b7280}
+.tag.WRO5{background:var(--wro)}.tag.XPO1{background:var(--xpo)}.tag.q{background:#9ca3af}
+.bar{background:#e5e7eb;border-radius:6px;height:12px;overflow:hidden;min-width:120px}.bar>i{display:block;height:100%;background:linear-gradient(90deg,#60a5fa,#2563eb)}
+.bar.full>i{background:linear-gradient(90deg,#4ade80,#16a34a)}
+form.inline{display:inline}input,select,textarea{font:inherit;padding:4px 6px;border:1px solid #cbd5e1;border-radius:6px}input[type=number]{width:80px}
+button,.btn{font:inherit;padding:5px 10px;border:1px solid var(--acc);background:var(--acc);color:#fff;border-radius:6px;cursor:pointer;text-decoration:none}
+button.sec,.btn.sec{background:#fff;color:var(--acc)}button.danger{background:#fff;border-color:var(--bad);color:var(--bad)}button.sm{padding:2px 7px;font-size:12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px}
+.warnings li{margin:2px 0}.kpi{display:flex;gap:18px;flex-wrap:wrap}.kpi div{min-width:120px}.kpi b{font-size:20px;display:block}
+details summary{cursor:pointer;color:var(--acc)}
+.layer{display:flex;gap:4px;flex-wrap:wrap;margin:2px 0}.box{border:1px solid #cbd5e1;border-radius:4px;padding:1px 5px;font-size:11px;background:#f8fafc}.box.partial{border-style:dashed}
+</style>
+</head>
+<body>
+<header>
+  <a class="brand" href="/">FBA Plan · WERHE</a>
+  <a href="/">Plany</a>
+  <a href="/katalog">Katalog</a>
+  <a href="/historia">Historia</a>
+  <a href="/ustawienia">Ustawienia</a>
+  <form class="inline" method="post" action="/przeladuj" style="margin-left:auto"><button class="sm sec" title="wczytaj ponownie pliki CSV z katalogu data/">Przeładuj dane</button></form>
+</header>
+<main>
+{% block body %}{% endblock %}
+</main>
+</body>
+</html>
