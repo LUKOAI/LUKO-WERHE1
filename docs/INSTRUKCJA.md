@@ -23,6 +23,14 @@ Wiersz poleceń (alternatywa): `python -m fbaplan serve --open`, `python -m fbap
 
 Bez wymiarów sztuki narzędzie przewidzi magazyn (z historii i z nazwy), ale nie policzy wypełnienia palety. Bez `stock.csv` propozycje dopełnienia opierają się tylko na historii wysyłek.
 
+### Import raportów (zakładka **Import**)
+
+1. **Katalog XLSX** — „Pobierz katalog do uzupełnienia” daje arkusz posortowany od najczęściej wysyłanych produktów (żółte pola = brak wymiarów, niebieskie = liczba sztuk w kartonie odgadnięta z historii). Po wypełnieniu w Excelu wczytaj go z powrotem.
+2. **„Podgląd opłat” (Fee preview)** — raport z Seller Central (Raporty → Realizacja → Podgląd opłat); wczytuje wymiary, wagę, klasę rozmiaru i SKU Amazon. Produkty rozpoznawane po SKU Amazon lub po tytule listingu (1 354 znane tytuły).
+3. **Stan FBA i sprzedaż** — raporty „Zarządzaj zapasami FBA” i „Uzupełnij zapasy”; można wczytać oba po kolei, dane są łączone per SKU Amazon.
+
+Nierozpoznane wiersze są wypisane po imporcie — dodaj produkt w Katalogu albo wpisz mu SKU Amazon i wczytaj raport ponownie. To samo z wiersza poleceń: `python -m fbaplan import-fee-preview PLIK`, `import-stock PLIK...`, `export-catalog`, `import-catalog PLIK.xlsx`.
+
 ## 3. Praca z planem
 
 1. **Plany → Nowy plan**: tryb *paleta* lub *paczki*, opcjonalnie magazyn docelowy i maks. liczba palet.
@@ -31,11 +39,12 @@ Bez wymiarów sztuki narzędzie przewidzi magazyn (z historii i z nazwy), ale ni
    * **magazyn główny** planu (ten, który zajmuje najwięcej miejsca) i ostrzeżenie, jeśli plan zostanie podzielony,
    * dla trybu paleta: liczbę palet, wysokość ładunku, masę, wypełnienie objętości i wysokości, układ warstw,
    * ostrzeżenia: karton ponad limit Amazon (63,5 cm / 23 kg), paleta ponad 180 cm / 500 kg, ilość poza pełnym kartonem, brak wymiarów, przekroczony limit pojemności.
-3. **Propozycje dopełnienia**: lista produktów, które (a) prawie na pewno trafią do tego samego magazynu, (b) sprzedają się i mają niski zapas w FBA, (c) mieszczą się na ostatniej palecie (pełne kartony). Kliknij **dodaj** (ilość można zmienić) albo **ukryj**, jeśli danego produktu nie chcesz wysyłać. Ocena = suma wag z Ustawień; kolumna „Uzasadnienie” mówi dlaczego.
-4. **Eksport**: „CSV do Send to Amazon” (SKU sprzedawcy + ilość; przy planie dzielonym osobny CSV per magazyn) i XLSX (pozycje, lista pakowania per karton/warstwa/paleta, podsumowanie palet).
-5. **Utwórz plan w Seller Central** tak jak dotąd. Zobacz, jak Amazon podzielił wysyłkę.
-6. **Zapisz decyzję Amazona** (sekcja „Decyzja Amazona”): wpisz faktyczny magazyn dla każdej pozycji. Narzędzie zapisuje to w `data/verdicts.csv` i od razu poprawia przewidywania. Jeśli Amazon zdecydował inaczej niż przewidziano, pokaże, które pozycje przenieść do osobnego planu.
-7. Status planu: szkic → złożony w SC → werdykt zapisany → zamknięty. „Kopiuj” tworzy nowy plan z tymi samymi pozycjami.
+3. **Dopełnij automatycznie** (przycisk pod podsumowaniem): narzędzie dokłada pełne kartony — najpierw do 8 nowych dopełniaczy z tego samego magazynu, potem uzupełnia produkty już w planie — aż ostatnia paleta osiągnie zadane wypełnienie (domyślnie 90 %) albo, gdy brak wymiarów, zadaną liczbę sztuk (domyślnie 150 dla palety, 40 dla paczek). Nigdy nie dodaje produktów z drugiego magazynu ani nie przekracza limitu palet, limitów ilości i stanu własnego. Wynik zawsze można ręcznie poprawić.
+4. **Propozycje dopełnienia** (lista pod planem): lista produktów, które (a) prawie na pewno trafią do tego samego magazynu, (b) sprzedają się i mają niski zapas w FBA, (c) mieszczą się na ostatniej palecie (pełne kartony). Kliknij **dodaj** (ilość można zmienić) albo **ukryj**, jeśli danego produktu nie chcesz wysyłać. Ocena = suma wag z Ustawień; kolumna „Uzasadnienie” mówi dlaczego.
+5. **Eksport**: „CSV do Send to Amazon” (SKU sprzedawcy + ilość; przy planie dzielonym osobny CSV per magazyn) i XLSX (pozycje, lista pakowania per karton/warstwa/paleta, podsumowanie palet).
+6. **Utwórz plan w Seller Central** tak jak dotąd. Zobacz, jak Amazon podzielił wysyłkę.
+7. **Zapisz decyzję Amazona** (sekcja „Decyzja Amazona”): wpisz faktyczny magazyn dla każdej pozycji. Narzędzie zapisuje to w `data/verdicts.csv` i od razu poprawia przewidywania. Jeśli Amazon zdecydował inaczej niż przewidziano, pokaże, które pozycje przenieść do osobnego planu.
+8. Status planu: szkic → złożony w SC → werdykt zapisany → zamknięty. „Kopiuj” tworzy nowy plan z tymi samymi pozycjami.
 
 ## 4. Zasady, które narzędzie stosuje (z historii 2024–2026)
 

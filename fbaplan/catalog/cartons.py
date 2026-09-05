@@ -22,19 +22,18 @@ _EXT_SKU = re.compile(r"^5PR(?P<l>\d{3,4})(?P<rest>[A-Za-z-]*)$")
 _DIM_SKU = re.compile(r"^(?P<pre>[23][A-Za-z]+)(?P<d>\d{1,3}(?:,\d)?)x(?P<l>\d{3,4})(?P<rest>[A-Za-z0-9]*)$")
 
 
-def infer_module_from_qtys(qty_counter: Counter, min_share: float = 0.6, min_lines: int = 3) -> Optional[int]:
+def infer_module_from_qtys(qty_counter: Counter, min_share: float = 0.8, min_lines: int = 3) -> Optional[int]:
     """Largest quantity module m (appearing itself as a line quantity) such that at least
-    ``min_share`` of the lines are multiples of m. Example: 33×17, 11×11, 66×6, 22×3 -> 11."""
+    ``min_share`` of the lines are multiples of m. Example: 33×17, 11×11, 66×6, 22×3 -> 11
+    (39 is rejected because 26 and 13 are not multiples of it; 13 divides everything)."""
     total = sum(qty_counter.values())
     if total < min_lines:
         return None
-    best: Optional[int] = None
     for m in sorted((q for q in qty_counter if q >= 2), reverse=True):
         share = sum(n for q, n in qty_counter.items() if q % m == 0) / total
-        if share >= min_share and qty_counter[m] >= 1:
-            best = m
-            break
-    return best
+        if share >= min_share:
+            return m
+    return None
 
 
 def module_from_analysis(product: Product) -> Optional[int]:

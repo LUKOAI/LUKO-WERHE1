@@ -43,6 +43,14 @@
         <p class="small">{{g.cartons}} paczek; pełnych {{ g.pack.all_cartons|selectattr('full')|list|length }}, niepełnych {{ g.pack.all_cartons|rejectattr('full')|list|length }}.</p>
       {% endif %}
     {% endfor %}
+    {% if plan.lines %}
+    <form method="post" action="/plan/{{plan.plan_id}}/dopelnij" style="margin:8px 0;display:flex;gap:8px;align-items:end;flex-wrap:wrap">
+      <label>Dopełnij do wypełnienia <input type="number" name="target_fill" step="0.05" min="0.3" max="1" value="0.9" style="width:70px"></label>
+      <label>lub do sztuk (gdy brak wymiarów) <input type="number" name="target_units" value="{{ 150 if plan.mode=='pallet' else 40 }}" style="width:80px"></label>
+      <button>Dopełnij automatycznie</button>
+      <span class="small mut">dokłada najlepsze dopełniacze pełnymi kartonami, tylko do magazynu głównego</span>
+    </form>
+    {% endif %}
     {% if ev.warnings %}<h3 class="warn">Ostrzeżenia</h3><ul class="warnings">{% for w in ev.warnings %}<li class="{{'bad' if 'podzielony' in w else 'warn'}}">{{w}}</li>{% endfor %}</ul>{% endif %}
     <p>
       <a class="btn sec" href="/plan/{{plan.plan_id}}/send_to_amazon.csv">CSV do Send to Amazon</a>

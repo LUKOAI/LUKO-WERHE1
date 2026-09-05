@@ -66,6 +66,13 @@ def cmd_plan(a: argparse.Namespace) -> int:
     plan = ctx.new_plan(mode=a.mode, target_fc=a.fc or "", max_pallets=a.pallets)
     plan.lines = [PlanLine(s, q) for s, q in _parse_lines(a.items)]
     ev = evaluate(plan, ctx.products, ctx.predictor, ctx.stock, ctx.capacity_left(plan.target_fc or ""))
+    if a.autofill:
+        from .planner.autofill import autofill
+
+        res = autofill(plan, ctx.products, ctx.predictor, ctx.stock, ctx.stats, ctx.params.get("filler"),
+                       target_fill=a.autofill, capacity_left_m3=ctx.capacity_left(plan.target_fc or ""))
+        ev = res.final or ev
+        print("Dopełniono automatycznie:", ", ".join(f"{s} +{q}" for s, q in res.added) or "nic", "—", res.stopped_because)
     ctx.save_plan(plan)
     print(f"Plan {plan.plan_id} ({plan.mode}), magazyn główny: {ev.anchor_fc or '?'}, {ev.units} szt., {ev.volume_m3:.2f} m³")
     for fc, g in ev.groups.items():
@@ -99,6 +106,50 @@ def cmd_verdict(a: argparse.Namespace) -> int:
     ctx.save_plan(plan)
     ctx.record_verdict_rows(rows)
     print(f"Zapisano werdykt dla {len(rows)} pozycji planu {plan.plan_id} → {PATHS['verdicts']}")
+    return 0
+
+
+def cmd_import_fee_preview(a: argparse.Namespace) -> int:
+    from .imports import import_fee_preview
+
+    ctx = Context.load()
+    rep = import_fee_preview(a.file, ctx.products, ctx.resolver(), PATHS["products"], overwrite=a.overwrite)
+    print("Podgląd opłat:", rep.summary())
+    for u in rep.unmatched[:30]:
+        print("  nierozpoznane:", u)
+    return 0
+
+
+def cmd_import_stock(a: argparse.Namespace) -> int:
+    from .imports import import_inventory_report
+
+    ctx = Context.load()
+    for f in a.files:
+        rep = import_inventory_report(f, ctx.products, ctx.resolver(), PATHS["stock"], PATHS["products"], merge=not a.replace)
+        print(f"{f}: {rep.summary()}")
+        for u in rep.unmatched[:30]:
+            print("  nierozpoznane:", u)
+    return 0
+
+
+def cmd_export_catalog(a: argparse.Namespace) -> int:
+    from .imports import export_catalog_xlsx
+
+    ctx = Context.load()
+    prio = {s: st.units_12m for s, st in ctx.stats.by_sku.items()}
+    fc = {s: ctx.predictor.predict(p).fc for s, p in ctx.products.items()}
+    out = a.out or str(PATHS["products"].parent / "katalog_do_uzupelnienia.xlsx")
+    n = export_catalog_xlsx(out, ctx.products.values(), prio, fc)
+    print(f"Zapisano {n} produktów do {out}")
+    return 0
+
+
+def cmd_import_catalog(a: argparse.Namespace) -> int:
+    from .imports import import_catalog_xlsx
+
+    ctx = Context.load()
+    rep = import_catalog_xlsx(a.file, ctx.products, PATHS["products"])
+    print("Katalog:", rep.summary())
     return 0
 
 
@@ -150,7 +201,26 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("--pallets", type=int, default=1)
     s.add_argument("--suggest", type=int, default=10, help="ile propozycji dopełnienia pokazać (0 = brak)")
     s.add_argument("--export", help="katalog na eksport (csv + xlsx)")
+    s.add_argument("--autofill", type=float, nargs="?", const=0.9, help="dopełnij automatycznie do zadanego wypełnienia palety (domyślnie 0.9)")
     s.set_defaults(fn=cmd_plan)
+
+    s = sub.add_parser("import-fee-preview", help="wczytaj raport „Podgląd opłat” (wymiary, wagi, SKU Amazon) do katalogu")
+    s.add_argument("file")
+    s.add_argument("--overwrite", action="store_true", help="nadpisz wymiary już wpisane w katalogu")
+    s.set_defaults(fn=cmd_import_fee_preview)
+
+    s = sub.add_parser("import-stock", help="wczytaj raporty zapasów FBA / uzupełnienia zapasów do data/stock.csv")
+    s.add_argument("files", nargs="+")
+    s.add_argument("--replace", action="store_true", help="zacznij od pustego stock.csv")
+    s.set_defaults(fn=cmd_import_stock)
+
+    s = sub.add_parser("export-catalog", help="zapisz katalog jako XLSX do uzupełnienia w Excelu")
+    s.add_argument("--out")
+    s.set_defaults(fn=cmd_export_catalog)
+
+    s = sub.add_parser("import-catalog", help="wczytaj uzupełniony katalog XLSX")
+    s.add_argument("file")
+    s.set_defaults(fn=cmd_import_catalog)
 
     s = sub.add_parser("verdict", help="zapisz decyzję Amazona: PLAN_ID SKU=FC ...")
     s.add_argument("plan_id")

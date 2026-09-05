@@ -6,11 +6,14 @@ from datetime import date
 from pathlib import Path
 from typing import Optional
 
-from fastapi import FastAPI, Form, Request
+from fastapi import FastAPI, File, Form, Request, UploadFile
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from fastapi.templating import Jinja2Templates
 
+from urllib.parse import quote as _q
+
 from ..catalog.store import save_products
+from ..stock import load_stock
 from ..context import Context
 from ..export import packing_rows, send_to_amazon_rows, summary_rows, to_csv, write_xlsx
 from ..models import CartonSpec, Dims, PlanLine, Product
@@ -147,6 +150,18 @@ def create_app(ctx: Context) -> FastAPI:
             ctx.record_verdict_rows(rows)
         return RedirectResponse(f"/plan/{plan_id}", status_code=303)
 
+    @app.post("/plan/{plan_id}/dopelnij")
+    def plan_autofill(plan_id: str, target_fill: float = Form(0.9), target_units: int = Form(150)):
+        from ..planner.autofill import autofill
+
+        plan = ctx.get_plan(plan_id)
+        if plan:
+            res = autofill(plan, ctx.products, ctx.predictor, ctx.stock, ctx.stats, ctx.params.get("filler"),
+                           target_fill=target_fill, target_units=target_units, capacity_left_m3=ctx.capacity_left(plan.target_fc))
+            plan.notes = (plan.notes + " | " if plan.notes else "") + "autofill: " + (", ".join(f"{s} +{q}" for s, q in res.added) or "nic") + f" ({res.stopped_because})"
+            ctx.save_plan(plan)
+        return RedirectResponse(f"/plan/{plan_id}", status_code=303)
+
     @app.post("/plan/{plan_id}/usun-plan")
     def plan_delete(plan_id: str):
         ctx.delete_plan(plan_id)
@@ -278,6 +293,53 @@ def create_app(ctx: Context) -> FastAPI:
                 ctx.predictor.params[k] = v
         save_params(ctx.params, ctx.paths["params"])
         return RedirectResponse("/ustawienia", status_code=303)
+
+    # -- imports --------------------------------------------------------- #
+    @app.get("/import", response_class=HTMLResponse)
+    def import_page(request: Request, msg: str = ""):
+        return render(request, "import.html", msg=msg)
+
+    @app.post("/import/fee-preview")
+    async def import_fee(file: UploadFile = File(...), overwrite: int = Form(0)):
+        from ..imports import import_fee_preview
+
+        data = await file.read()
+        rep = import_fee_preview(file.filename or "fee.txt", ctx.products, ctx.resolver(), ctx.paths["products"], data=data, overwrite=bool(overwrite))
+        msg = "Podgląd opłat: " + rep.summary() + ("; nierozpoznane: " + "; ".join(rep.unmatched[:15]) if rep.unmatched else "")
+        return RedirectResponse("/import?msg=" + _q(msg), status_code=303)
+
+    @app.post("/import/stock")
+    async def import_stock(file: UploadFile = File(...), replace: int = Form(0)):
+        from ..imports import import_inventory_report
+
+        data = await file.read()
+        rep = import_inventory_report(file.filename or "stock.txt", ctx.products, ctx.resolver(), ctx.paths["stock"], ctx.paths["products"], data=data, merge=not replace)
+        ctx.stock = load_stock(ctx.paths["stock"], ctx.products)
+        msg = "Zapasy: " + rep.summary() + ("; nierozpoznane: " + "; ".join(rep.unmatched[:15]) if rep.unmatched else "")
+        return RedirectResponse("/import?msg=" + _q(msg), status_code=303)
+
+    @app.post("/import/catalog")
+    async def import_catalog(file: UploadFile = File(...)):
+        from ..imports import import_catalog_xlsx
+
+        data = await file.read()
+        rep = import_catalog_xlsx(file.filename or "katalog.xlsx", ctx.products, ctx.paths["products"], data=data)
+        return RedirectResponse("/import?msg=" + _q("Katalog: " + rep.summary()), status_code=303)
+
+    @app.get("/import/katalog.xlsx")
+    def export_catalog():
+        import tempfile
+
+        from ..imports import export_catalog_xlsx
+
+        prio = {s: st.units_12m for s, st in ctx.stats.by_sku.items()}
+        fc = {s: ctx.predictor.predict(p).fc for s, p in ctx.products.items()}
+        with tempfile.NamedTemporaryFile(suffix=".xlsx", delete=False) as tmp:
+            export_catalog_xlsx(tmp.name, ctx.products.values(), prio, fc)
+            body = Path(tmp.name).read_bytes()
+        Path(tmp.name).unlink(missing_ok=True)
+        return Response(body, media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        headers={"Content-Disposition": 'attachment; filename="katalog_do_uzupelnienia.xlsx"'})
 
     @app.post("/przeladuj")
     def reload():

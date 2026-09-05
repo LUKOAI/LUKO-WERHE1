@@ -92,7 +92,11 @@ Kandydat = aktywny produkt, którego przewidywany FC zgadza się z FC kotwicy pl
 
 Ocena: `score = w_fc·p(FC) + w_sales·rotacja + w_stock·(1 − pokrycie/cel) + w_fit·dopasowanie_do_wolnego_miejsca`, gdzie rotacja i pokrycie z `stock.csv` (sprzedaż 30/90 dni, stan FBA + w drodze), a dopasowanie premiuje produkty, których pełne kartony domykają warstwę palety. Sugerowana ilość = wielokrotność kartonu, maks. do `max_qty_per_plan` i do wolnej pojemności (m³) konta.
 
-### 5.4 Pętla z werdyktem Amazona
+### 5.4 Automatyczne dopełnianie
+
+`planner/autofill.py`: pętla „oceń plan → dodaj pełny karton najlepszego kandydata → oceń ponownie”. Najpierw do 8 nowych dopełniaczy (różnorodność, wg oceny rekomendatora), potem uzupełnianie produktów już w planie (wg rotacji), aż ostatnia paleta magazynu głównego osiągnie zadane wypełnienie objętości (domyślnie 90 %) lub, bez wymiarów, zadaną liczbę sztuk. Dodanie, które przelewa paletę poza limit, jest cofane. Wynik jest zwykłym planem — użytkownik może go dowolnie poprawić.
+
+### 5.5 Pętla z werdyktem Amazona
 
 1. Użytkownik składa plan w narzędziu → widzi przewidywany podział na FC, wypełnienie, listę pakowania.
 2. Tworzy plan w Seller Central (lub, docelowo, narzędzie robi to przez SP-API i czyta `PlacementOption` bez potwierdzania).
@@ -109,7 +113,8 @@ fbaplan/
   history/         parsers.py (docx/xlsx/pdf), store.py (import, statystyki)
   predict/fc.py    predyktor FC
   packing/fill.py  kartony, palety, wypełnienie
-  planner/         session.py (plan, werdykty), filler.py (rekomendacje)
+  planner/         session.py (plan, werdykty), filler.py (rekomendacje), autofill.py
+  imports.py       raporty Seller Central (Podgląd opłat, zapasy FBA, Uzupełnij zapasy), katalog XLSX
   export.py        CSV / XLSX / HTML do druku
   cli.py           polecenia: import-history, build-catalog, predict, plan, suggest, serve
   web/             FastAPI + szablony (PL), lokalnie na http://127.0.0.1:8765

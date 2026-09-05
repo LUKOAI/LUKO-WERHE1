@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Import danych{% endblock %}
+{% block body %}
+{% if msg %}<div class="card"><b>Wynik:</b> {{msg}}</div>{% endif %}
+<div class="grid">
+<div class="card">
+  <h2>1. Katalog produktów (XLSX)</h2>
+  <p class="small">Pobierz arkusz z produktami posortowanymi wg wysyłanych ilości, uzupełnij żółte pola (wymiary i waga sztuki, kartony zbiorcze) w Excelu i wczytaj z powrotem.</p>
+  <p><a class="btn sec" href="/import/katalog.xlsx">Pobierz katalog do uzupełnienia</a></p>
+  <form method="post" action="/import/catalog" enctype="multipart/form-data"><input type="file" name="file" accept=".xlsx" required> <button>Wczytaj katalog</button></form>
+</div>
+<div class="card">
+  <h2>2. Raport „Podgląd opłat” (Fee preview)</h2>
+  <p class="small">Seller Central → Raporty → Realizacja (Fulfillment) → „Podgląd opłat” → Pobierz (plik .txt/.csv). Zawiera wymiary i wagę opakowania oraz klasę rozmiaru per SKU Amazon. Produkty rozpoznawane po SKU Amazon lub po tytule listingu.</p>
+  <form method="post" action="/import/fee-preview" enctype="multipart/form-data"><input type="file" name="file" required> <label><input type="checkbox" name="overwrite" value="1"> nadpisz wpisane wymiary</label> <button>Wczytaj</button></form>
+</div>
+<div class="card">
+  <h2>3. Stan FBA i sprzedaż</h2>
+  <p class="small">Raport „Zarządzaj zapasami FBA” (Manage FBA Inventory: dostępne, w drodze) i/lub „Uzupełnij zapasy” (Restock Inventory: sprzedaż 30 dni). Można wczytać oba po kolei — dane per SKU Amazon są łączone.</p>
+  <form method="post" action="/import/stock" enctype="multipart/form-data"><input type="file" name="file" required> <label><input type="checkbox" name="replace" value="1"> zacznij od pustego stanu</label> <button>Wczytaj</button></form>
+</div>
+</div>
+<div class="card small mut">Obsługiwane formaty: TSV/CSV (UTF-8, cp1250) i XLSX; nagłówki angielskie z Seller Central (np. <code>afn-fulfillable-quantity</code>, <code>longest-side</code>) lub polskie etykiety. Nierozpoznane produkty są wypisywane po imporcie — dodaj je w Katalogu lub uzupełnij SKU Amazon.</div>
+{% endblock %}
