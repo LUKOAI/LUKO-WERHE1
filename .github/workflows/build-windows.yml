@@ -27,16 +27,16 @@ jobs:
           python -m pytest -q
       - name: Budowa AmazonVAT.exe (okienko)
         run: >
-          pyinstaller --noconfirm --clean --onefile --windowed --name AmazonVAT
+          pyinstaller --noconfirm --clean --onefile --windowed --name AmazonVAT --paths .
           --collect-all pdfplumber --collect-all pdfminer --collect-all pypdfium2 --collect-all pypdfium2_raw
           --collect-all openpyxl --collect-all gspread --collect-all google.auth --collect-all charset_normalizer
           amazon_vat_merger/gui_main.py
       - name: Budowa AmazonVAT-cli.exe (wiersz poleceń)
         run: >
-          pyinstaller --noconfirm --clean --onefile --console --name AmazonVAT-cli
+          pyinstaller --noconfirm --clean --onefile --console --name AmazonVAT-cli --paths .
           --collect-all pdfplumber --collect-all pdfminer --collect-all pypdfium2 --collect-all pypdfium2_raw
           --collect-all openpyxl --collect-all gspread --collect-all google.auth --collect-all charset_normalizer
-          amazon_vat_merger/__main__.py
+          amazon_vat_merger/cli_main.py
       - name: Test zbudowanego CLI
         run: |
           dist\AmazonVAT-cli.exe --version
