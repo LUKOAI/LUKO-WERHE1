@@ -50,7 +50,7 @@ def test_evaluate_split_and_fill():
     assert any("4APlus" in l.line.sku for l in ev.minority_lines())
     # NODIMS predicted by family rule (auger -> XPO1), cartons without dims are unplaceable
     nod = next(l for l in ev.lines if l.line.sku == "NODIMS")
-    assert nod.prediction.fc == "XPO1" and nod.prediction.source == "rule_family"
+    assert nod.prediction.fc == "XPO1" and nod.prediction.source == "rule_name"
     assert any("7 szt. poza pełnym kartonem" not in p and "poza pełnym kartonem" in p for p in nod.problems)
 
 

@@ -1,4 +1,14 @@
+# FBA Plan (fbaplan) — narzędzie planowania wysyłek FBA
+fastapi>=0.110
+uvicorn>=0.27
+jinja2>=3.1
+python-multipart>=0.0.9
+openpyxl>=3.1
+python-docx>=1.1
+pdfplumber>=0.11
+pytest>=8.0
+
+# Demo aplikacji desktopowej (main.py) — opcjonalne
 customtkinter==5.2.2
 reportlab==4.2.2
 Pillow==10.4.0
-pyinstaller==6.10.0

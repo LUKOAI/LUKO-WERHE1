@@ -1,0 +1,8 @@
+{
+ "amazon": {},
+ "predictor": {"regime_start": "2024-06-01", "half_life_months": 12, "min_weight": 1.5},
+ "filler": {"w_fc": 3.0, "w_sales": 1.5, "w_stock": 2.0, "w_fit": 1.0, "w_affinity": 0.5, "min_fc_prob": 0.8, "target_cover_days": 60, "max_suggestions": 25, "default_qty_cartons": 1},
+ "freight": {"pallet_rate_pln": null, "parcel_rate_pln": null},
+ "capacity": {"standard_left_m3": null, "oversize_left_m3": null},
+ "ui": {"port": 8765}
+}

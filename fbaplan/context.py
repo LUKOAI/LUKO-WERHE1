@@ -41,6 +41,12 @@ class Context:
         predictor = FCPredictor(history, params.get("predictor"), as_of=as_of)
         stats = compute_stats(history, as_of=as_of, regime_start=predictor.params["regime_start"])
         stock = load_stock(paths["stock"], products)
+        from .catalog.cartons import infer_carton
+
+        for p in products.values():
+            spec = infer_carton(p, stats.by_sku.get(p.sku))
+            if spec:
+                p.carton = spec
         return cls(params, products, aliases, history, stock, predictor, stats, paths, as_of)
 
     def resolver(self) -> Resolver:
@@ -69,7 +75,12 @@ class Context:
         (self.plans_dir() / f"{plan.plan_id}.json").write_text(plan.to_json(), encoding="utf-8")
 
     def new_plan(self, mode: str = "pallet", target_fc: str = "", max_pallets: int = 1) -> Plan:
-        p = Plan(new_plan_id(), datetime.now().isoformat(timespec="seconds"), mode=mode, target_fc=target_fc, max_pallets=max_pallets)
+        base = new_plan_id()
+        pid, n = base, 1
+        while (self.plans_dir() / f"{pid}.json").exists():
+            n += 1
+            pid = f"{base}-{n}"
+        p = Plan(pid, datetime.now().isoformat(timespec="seconds"), mode=mode, target_fc=target_fc, max_pallets=max_pallets)
         self.save_plan(p)
         return p
 

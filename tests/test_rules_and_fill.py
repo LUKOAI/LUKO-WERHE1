@@ -80,11 +80,20 @@ def test_predictor_history_and_rules():
     b = pr.predict(None, sku="4APlus")
     assert b.fc == "WRO5" and b.probs["WRO5"] > 0.8
     old = pr.predict(Product("OLD", "Adapter SDS Plus"), sku="OLD")
-    assert old.source == "rule_family" and old.fc == "WRO5"  # pre-regime evidence ignored
+    assert old.source == "rule_name" and old.fc == "WRO5"  # pre-regime evidence ignored
     dims = pr.predict(Product("X", "coś", unit_dims=Dims(80, 10, 10), unit_weight_kg=2.0))
     assert dims.fc == "XPO1" and dims.source == "rule_dims"
     fam = pr.predict(Product("Y", "Świder glebowy 150 x 800 mm SDS Max"))
-    assert fam.fc == "XPO1" and fam.source == "rule_family"
+    assert fam.fc == "XPO1" and fam.source == "rule_name" and not fam.uncertain
+    # grey zone sub-rules (docs/analiza/fc_rules.md)
+    assert pr.predict(Product("G1", "Przedłużka do świdra 400 mm")).fc == "WRO5"
+    assert pr.predict(Product("G2", "Dłuto płaskie 75 x 400 mm HEX28")).fc == "WRO5"
+    assert pr.predict(Product("G3", "Szypa 135 x 410 mm HEX30")).fc == "XPO1"
+    assert pr.predict(Product("G4", "Świder glebowy 80 mm Ø, 450 mm długości")).fc == "WRO5"
+    assert pr.predict(Product("G5", "Świder glebowy 60 mm Ø, 450 mm długości")).fc == "XPO1"
+    g6 = pr.predict(Product("G6", "Dłuto szpic 410 mm HEX30"))
+    assert g6.fc == "XPO1" and g6.uncertain
+    assert pr.predict(Product("G7", "WERHE Wiertło do ziemi 80 mm z SDS Plus do runa")).fc == "XPO1"  # auger, default 800 mm
     short = pr.predict(Product("Z", "Dłuto płaskie 25 x 250 mm SDS Plus"))
     assert short.fc == "WRO5"
     long_ = pr.predict(Product("Z2", "Dłuto płaskie 75 x 600 mm SDS Max"))

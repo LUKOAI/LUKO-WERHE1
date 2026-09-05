@@ -4,10 +4,13 @@ Three sources, in order of trust:
 
 1. manual override on the product (``fc_override``),
 2. history (imported shipments + recorded Amazon verdicts) with recency
-   weighting, restricted to the current FC regime,
-3. physical rule: standard-size units -> sortable FC (WRO5), oversize units ->
-   non-sortable FC (XPO1); when no dimensions are known, a family/length rule
-   derived from the product name.
+   weighting, restricted to the current FC regime (Polish FCs since 06.2024),
+3. physical rule: the longest side of the packaged unit decides —
+   ≥ 460 mm -> non-sortable (XPO1), < 400 mm -> sortable (WRO5), 400-459 mm
+   is a grey zone decided by sub-rules learned from history (accuracy of the
+   full rule on 2024-06..2026-08 history: 99.3 % of lines, see
+   docs/analiza/fc_rules.md). Dimensions come from the catalog when known,
+   otherwise the length is estimated from the product name.
 """
 from __future__ import annotations
 
@@ -15,7 +18,7 @@ from dataclasses import dataclass, field
 from datetime import date
 from typing import Iterable, Optional
 
-from ..catalog.normalize import Features, extract
+from ..catalog.normalize import Features, estimate_length_mm, extract
 from ..models import HistoryLine, Product
 from ..rules import amazon as A
 
@@ -27,18 +30,9 @@ DEFAULT_PARAMS = {
     "nonsortable_fc": "XPO1",
     "known_fcs": ["WRO5", "XPO1"],
     "verdict_weight": 2.0,              # a recorded verdict counts as this many history lines
-    # family rule when dimensions are unknown: family -> (fc, threshold on length_mm or None)
-    "family_rule": {
-        "auger": ["XPO1", None], "set_chisel": ["XPO1", None], "set_drill": ["XPO1", None],
-        "chisel_flat": ["XPO1", 450], "chisel_point": ["XPO1", 450], "chisel_spade": ["XPO1", 450],
-        "chisel_gouge": ["XPO1", 450], "chisel_bush": ["WRO5", None], "drill_bit": ["WRO5", 450],
-        "extension": ["WRO5", 450], "driver_rod": ["WRO5", None], "driver_pile": ["WRO5", None],
-        "tamper": ["WRO5", None], "adapter": ["WRO5", None], "set_adapter": ["WRO5", None],
-        "blade_jigsaw": ["WRO5", None], "blade_recip": ["WRO5", None], "saw_disc": ["WRO5", None],
-        "grease": ["WRO5", None], "hole_saw": ["WRO5", None], "pin": ["WRO5", None],
-        "handle": ["WRO5", None], "spring": ["WRO5", None], "string": ["WRO5", None],
-    },
-    "length_threshold_mm": 450,         # longest side above this -> non-sortable (used with family rule)
+    "threshold_mm": 460,                # longest side >= this -> non-sortable
+    "gray_lo_mm": 400,                  # 400..459 mm: grey zone (per-ASIN packaging decides)
+    "gray_zone_p_nonsortable": 0.63,    # base rate in the grey zone when no sub-rule matches
 }
 
 
@@ -48,9 +42,10 @@ class FCPrediction:
     probs: dict[str, float]
     fc: str
     confidence: float           # 0..1
-    source: str                 # override | history | rule_dims | rule_family | unknown
+    source: str                 # override | history | rule_dims | rule_name | ...+history | unknown
     evidence: dict = field(default_factory=dict)
     explanation: str = ""
+    uncertain: bool = False     # grey-zone product without history: do not use as filler
 
     def prob(self, fc: str) -> float:
         return self.probs.get(fc, 0.0)
@@ -101,28 +96,55 @@ class FCPredictor:
 
     # -- rules -------------------------------------------------------------- #
     def rule_from_dims(self, product: Product) -> Optional[str]:
+        """Size-tier rule from catalog dimensions (standard size -> sortable)."""
         std = A.is_standard_size(product.unit_dims, product.unit_weight_kg)
         if std is None:
             return None
         return self.params["sortable_fc"] if std else self.params["nonsortable_fc"]
 
-    def rule_from_name(self, name: str, family: str = "") -> tuple[Optional[str], Features]:
+    def rule_from_name(self, name: str, family: str = "") -> tuple[Optional[str], Features, bool, str]:
+        """Length rule with grey-zone sub-rules. Returns (fc, features, certain, why)."""
+        S, N = self.params["sortable_fc"], self.params["nonsortable_fc"]
         ft = extract(name or "")
-        fam = family or ft.family
-        rule = self.params["family_rule"].get(fam)
-        if not rule:
-            return None, ft
-        fc, thr = rule
-        if thr is not None and ft.length_mm:
-            thr_len = float(self.params.get("length_threshold_mm", thr))
-            return (self.params["nonsortable_fc"] if ft.length_mm >= thr_len else self.params["sortable_fc"]), ft
-        return fc, ft
+        fam = family or ft.family or ""
+        L, is_default = estimate_length_mm(name or "", ft)
+        n = (name or "").lower()
+        thr, lo = float(self.params["threshold_mm"]), float(self.params["gray_lo_mm"])
+        if is_default and fam in ("", "other"):
+            return None, ft, False, "nierozpoznana rodzina produktu i brak wymiaru"
+        if L is None:
+            if fam in ("auger", "handle"):
+                return N, ft, False, f"rodzina „{fam}” bez wymiaru → domyślnie {N}"
+            if fam:
+                return S, ft, False, f"rodzina „{fam}” bez wymiaru → domyślnie {S}"
+            return None, ft, False, "nierozpoznana rodzina i brak wymiaru"
+        src = "długość domyślna dla rodziny" if is_default else "długość z nazwy"
+        if L >= thr:
+            return N, ft, not is_default, f"{src} {L:g} mm ≥ {thr:g} → {N}"
+        if L < lo:
+            return S, ft, not is_default, f"{src} {L:g} mm < {lo:g} → {S}"
+        # grey zone 400–459 mm: packaging registered per ASIN decides; sub-rules from history
+        d = ft.diameter_mm
+        if fam in ("blade_recip", "blade_jigsaw"):
+            return S, ft, True, f"brzeszczot {L:g} mm → {S}"
+        if fam == "extension" or "przedłuż" in n or "przedluz" in n or "słupek" in n:
+            return S, ft, True, f"przedłużka {L:g} mm → {S}"
+        if fam.startswith("chisel") and d and d >= 105:
+            return N, ft, True, f"szerokie dłuto/szypa {d:g}×{L:g} mm (walizka) → {N}"
+        if ft.shank == "hex28":
+            return S, ft, True, f"dłuto HEX28 {L:g} mm → {S}"
+        if fam == "auger":
+            if d == 80:
+                return S, ft, True, f"świder 80×{L:g} → {S} (wyjątek per ASIN)"
+            return N, ft, True, f"świder {L:g} mm → {N}"
+        if fam in ("chisel_spade", "chisel_flat") and ft.shank == "hex30" and d == 75:
+            return S, ft, True, f"szpadel 75×{L:g} HEX30 → {S}"
+        return N, ft, False, f"szara strefa {L:g} mm (dłuta SDS 400–410, HEX30 410, zestawy) → zwykle {N}, niepewne"
 
     # -- main --------------------------------------------------------------- #
     def predict(self, product: Optional[Product], sku: str = "", name: str = "") -> FCPrediction:
         sku = sku or (product.sku if product else "")
         name = name or (product.name if product else "")
-        known = list(self.params["known_fcs"])
         if product and product.fc_override:
             fc = product.fc_override
             return FCPrediction(sku, {fc: 1.0}, fc, 1.0, "override", {}, f"ręczne przypisanie do {fc}")
@@ -135,33 +157,36 @@ class FCPredictor:
             expl = f"historia: {ev['lines']} wysyłek od {self.params['regime_start'][:7]}, ostatnia {ev['last']}, udział {fc} = {probs[fc]:.0%}"
             return FCPrediction(sku, probs, fc, conf, "history", ev, expl)
 
-        # weak history + rule: blend
+        # rule (dims from catalog, else name) + weak history blended in
         rule_fc = self.rule_from_dims(product) if product else None
-        src = "rule_dims"
-        ft = None
-        if rule_fc is None:
-            rule_fc, ft = self.rule_from_name(name, product.family if product else "")
-            src = "rule_family"
+        certain, why = True, ""
+        if rule_fc is not None and product is not None:
+            src = "rule_dims"
+            tier = A.size_tier(product.unit_dims, product.unit_weight_kg)
+            why = f"wymiary {product.unit_dims.longest:.0f} cm / {product.unit_weight_kg or 0:.2f} kg → klasa „{tier.name_pl if tier else '?'}” → {rule_fc}"
+        else:
+            src = "rule_name"
+            rule_fc, _ft, certain, why = self.rule_from_name(name, product.family if product else "")
         if rule_fc is None and not probs:
             return FCPrediction(sku, {}, "", 0.0, "unknown", ev, "brak historii, wymiarów i rozpoznanej rodziny produktu")
 
-        rp = {rule_fc: 1.0} if rule_fc else {}
+        S, N = self.params["sortable_fc"], self.params["nonsortable_fc"]
+        if rule_fc:
+            p_rule = 0.9 if certain else float(self.params["gray_zone_p_nonsortable"])
+            other = S if rule_fc == N else N
+            rp = {rule_fc: p_rule, other: 1.0 - p_rule}
+        else:
+            rp = {}
         if probs:
-            # history has some weight; blend proportionally
             a = min(1.0, total / min_w) * 0.6
             keys = set(rp) | set(probs)
             blended = {k: (1 - a) * rp.get(k, 0.0) + a * probs.get(k, 0.0) for k in keys}
             fc = max(blended, key=blended.get)
             conf = blended[fc] * 0.7
-            expl = f"reguła ({'wymiary' if src == 'rule_dims' else 'rodzina'}) → {rule_fc or '?'}, słaba historia ({ev['lines']} wysyłek) → mieszane"
-            return FCPrediction(sku, blended, fc, conf, src + "+history", ev, expl)
-        conf = 0.75 if src == "rule_dims" else 0.6
-        if src == "rule_dims" and product is not None:
-            tier = A.size_tier(product.unit_dims, product.unit_weight_kg)
-            expl = f"wymiary {product.unit_dims.longest:.0f} cm / {product.unit_weight_kg or 0:.2f} kg → klasa „{tier.name_pl if tier else '?'}” → {rule_fc}"
-        else:
-            expl = f"rodzina „{(ft.family if ft else '?')}”" + (f", długość {ft.length_mm} mm" if ft and ft.length_mm else "") + f" → {rule_fc}"
-        return FCPrediction(sku, rp, rule_fc or "", conf, src, ev, expl)
+            expl = f"reguła: {why}; słaba historia ({ev['lines']} wysyłek) → mieszane"
+            return FCPrediction(sku, blended, fc, conf, src + "+history", ev, expl, uncertain=not certain and conf < 0.6)
+        conf = (0.8 if src == "rule_dims" else 0.7) if certain else 0.4
+        return FCPrediction(sku, rp, rule_fc or "", conf, src, ev, why, uncertain=not certain)
 
     def predict_many(self, products: dict[str, Product], skus: Iterable[str]) -> dict[str, FCPrediction]:
         return {s: self.predict(products.get(s), sku=s) for s in skus}

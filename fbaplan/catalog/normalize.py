@@ -239,3 +239,70 @@ def extract(name: str) -> Features:
     if re.search(r"premium", low):
         f.premium = True
     return f
+
+
+# --------------------------------------------------------------------------- #
+# Length estimation (longest side) — used by the FC rule when the catalog has no
+# dimensions. Ported from the historical analysis (docs/analiza/fc_rules.md).
+# --------------------------------------------------------------------------- #
+SHORT_FAMILIES = {"adapter", "driver_rod", "driver_pile", "blade_jigsaw", "blade_recip", "chisel_bush", "grease", "pin",
+                  "spring", "string", "set_adapter", "set_drill", "tamper", "saw_disc", "hole_saw"}
+_AUGER_KW = re.compile(r"(świder|swider|ziemn|uziemiaj|wiertnic|gruntow|runo|do ziemi|erdbohrer|ślimak|slimak|auger|"
+                       r"earthmover|wiertło do pali|do gleby|lodu|pflanzbohrer)", re.I)
+_NOT_AUGER = re.compile(r"przedłuż|przedluz|słupek|slupek|drążek|drazek|uchwyt do|adapter|bolzen|sworz", re.I)
+_ADAPTER_IS_AUGER = re.compile(r"^(WERHE\s*®?\s*)?(Wiert|Zestaw świdr)", re.I)
+_NUMF = r"(\d+(?:[.,]\d+)?)"
+
+
+def auger_like(name: str, family: str) -> bool:
+    if family == "auger":
+        return True
+    if family == "other" and _AUGER_KW.search(name) and not _NOT_AUGER.search(name):
+        return True
+    if family == "adapter" and _ADAPTER_IS_AUGER.search(name):
+        return True
+    return False
+
+
+def parse_length_mm(name: str, auger: bool = False) -> Optional[float]:
+    """Longest dimension mentioned in a product title, in mm (None when nothing found)."""
+    n = name
+    cands: list[float] = []
+    for m in re.finditer(_NUMF + r"\s*mm\s*d[łl]ugo", n, re.I):
+        cands.append(float(m.group(1).replace(",", ".")))
+    for m in re.finditer(r"d[łl]\.?\s*" + _NUMF + r"\s*cm", n, re.I):
+        cands.append(10 * float(m.group(1).replace(",", ".")))
+    for m in re.finditer(r"(?<![\d.,])(\d{2,3})\s*cm\b", n, re.I):
+        cands.append(10 * float(m.group(1)))
+    for m in re.finditer(_NUMF + r"\s*[xX×]\s*" + _NUMF + r"\s*[xX×]\s*" + _NUMF, n):
+        cands.append(float(m.group(3).replace(",", ".")))
+    for m in re.finditer(_NUMF + r"\s*[xX×]\s*" + _NUMF + r"\s*(?:mm|$|\b)", n):
+        b = float(m.group(2).replace(",", "."))
+        if b >= 40:
+            cands.append(b)
+    if not auger:
+        for m in re.finditer(r"(?<![\d.,xX×/])(\d{3,4})\s*mm\b", n):
+            pre = n[max(0, m.start() - 6):m.start()]
+            if re.search(r"[ØÖ⌀]|-\s*$|–\s*$", pre):
+                continue
+            cands.append(float(m.group(1)))
+    return max(cands) if cands else None
+
+
+def estimate_length_mm(name: str, features: Optional[Features] = None) -> tuple[Optional[float], bool]:
+    """(length_mm, is_default). Family defaults: earth augers without a stated length ≈ 800 mm,
+    handles 560 mm, small hardware 150 mm."""
+    f = features or extract(name)
+    if f.length_mm is not None:
+        return f.length_mm, False
+    aug = auger_like(name, f.family or "")
+    p = parse_length_mm(name, auger=aug)
+    if p is not None:
+        return p, False
+    if aug:
+        return 800.0, True
+    if f.family == "handle":
+        return 560.0, True
+    if f.family in SHORT_FAMILIES or f.family == "other":
+        return 150.0, True
+    return None, True
