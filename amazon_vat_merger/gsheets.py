@@ -76,6 +76,12 @@ def _format_requests(sheet_id: int, sheet: Sheet, nrows: int, reset: bool) -> li
                           "startColumnIndex": c - 1, "endColumnIndex": c},
                 "cell": {"userEnteredFormat": {"numberFormat": {"type": "NUMBER", "pattern": "#,##0.00"}}},
                 "fields": "userEnteredFormat.numberFormat"}})
+        for c in sheet.pct_cols:
+            reqs.append({"repeatCell": {
+                "range": {"sheetId": sheet_id, "startRowIndex": sheet.header_row, "endRowIndex": nrows,
+                          "startColumnIndex": c - 1, "endColumnIndex": c},
+                "cell": {"userEnteredFormat": {"numberFormat": {"type": "PERCENT", "pattern": "0%"}}},
+                "fields": "userEnteredFormat.numberFormat"}})
         for c in sheet.date_cols:
             reqs.append({"repeatCell": {
                 "range": {"sheetId": sheet_id, "startRowIndex": sheet.header_row, "endRowIndex": nrows,

@@ -53,12 +53,13 @@ def write_xlsx(path: str | Path, sheets: list[Sheet]) -> Path:
                     if ci in sheet.money_cols and isinstance(val, (int, float, Formula)):
                         cell.number_format = "#,##0.00"
                     elif ci in sheet.pct_cols and isinstance(val, (int, float)):
-                        cell.number_format = "0.00"
+                        cell.number_format = "0%"
         # nagłówek
+        fill_extra = PatternFill("solid", fgColor="EDEDED")
         for ci in range(1, len(sheet.rows[sheet.header_row - 1]) + 1 if sheet.rows else 1):
             c = ws.cell(row=sheet.header_row, column=ci)
             c.font = bold
-            c.fill = fill
+            c.fill = fill_extra if (sheet.extras_from and ci >= sheet.extras_from) else fill
             c.alignment = Alignment(wrap_text=True, vertical="top")
         if sheet.header_row > 1:
             for ci in range(1, len(sheet.rows[0]) + 1):

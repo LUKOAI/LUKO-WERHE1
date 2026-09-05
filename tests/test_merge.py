@@ -103,14 +103,22 @@ def test_build_sheets_structure():
     master = sheets[0]
     assert master.rows[0][0] == "Zakładka" and len(master.rows) == 3
     se = sheets[2]
-    assert se.rows[0][0] == "Szwecja" and se.rows[0][1] == "OSS"
+    assert se.rows[0] == ["", "Szwecja", "OSS"] and se.rows[2] == []      # wiersz 1 i pusty wiersz 3 jak u klienta
     header = se.rows[1]
-    assert "Kwota netto SEK" in header and "Kwota VAT SEK" in header
-    data = se.rows[2]
+    assert header[:14] == ["Numer faktury VAT", "Data zamówienia", "Data wysyłki", "Imię i nazwisko Kupującego", "Ulica",
+                           "Miasto i kod pocztowy", "Kwota netto PLN", "Kwota netto EUR", "Kwota VAT EUR", "Kwota netto SEK",
+                           "Kwota VAT SEK", "Stawka VAT", "Numer zamówienia", "System sprawozdawczości podatkowej"]
+    assert se.extras_from == 15 and header[14] == "Kwota VAT PLN"
+    data = se.rows[3]
     assert data[header.index("Kwota netto SEK")] == 279.12 and data[header.index("Kwota netto EUR")] is None
+    assert data[header.index("Stawka VAT")] == 0.25
     total = se.rows[-1]
     assert total[0] == "RAZEM" and isinstance(total[header.index("Kwota netto PLN")], Formula)
-    assert total[header.index("Kwota netto PLN")].startswith("=SUM(")
+    assert total[header.index("Kwota netto PLN")] == "=SUM(G4:G4)"
+    de = sheets[1]
+    assert de.rows[1][:12] == ["Numer faktury VAT", "Data zamówienia", "Data wysyłki", "Imię i nazwisko Kupującego", "Ulica",
+                               "Miasto i kod pocztowy", "Kwota netto PLN", "Kwota netto EUR", "Stawka VAT", "Kwota należnego Vat'u",
+                               "Numer zamówienia", "System sprawozdawczości podatkowej"]
     diag = sheets[-1]
     assert any(row[0] == "Brak PDF" for row in diag.rows)
 
@@ -122,7 +130,7 @@ def test_pln_transactions_do_not_duplicate_pln_columns():
     sheet = [s for s in build_sheets(res) if s.name == "PL Lokalna"][0]
     header = sheet.rows[1]
     assert header.count("Kwota netto PLN") == 1 and header.count("Kwota VAT PLN") == 1
-    assert sheet.rows[2][header.index("Kwota netto PLN")] == 12.60
+    assert sheet.rows[3][header.index("Kwota netto PLN")] == 12.60
 
 
 def test_pln_rounding_half_up_and_gross_consistency():

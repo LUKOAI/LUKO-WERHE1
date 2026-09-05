@@ -31,11 +31,13 @@ def test_cli_end_to_end(tmp_path, capsys):
     # zakładki grup
     assert "DE OSS" in wb.sheetnames and "CZ WDT" in wb.sheetnames and "FR Marketplace" in wb.sheetnames
     de = wb["DE OSS"]
-    assert de["A1"].value == "Niemcy" and de["B1"].value == "OSS"
+    assert de["A1"].value is None and de["B1"].value == "Niemcy" and de["C1"].value == "OSS"
+    assert all(c.value is None for c in de[3])           # pusty wiersz 3 jak w arkuszu klienta
     last = de.max_row
     assert de.cell(last, 1).value == "RAZEM"
     hdr = [c.value for c in de[2]]
     ci = hdr.index("Kwota netto EUR") + 1
     assert str(de.cell(last, ci).value).startswith("=SUM(")
+    assert de.cell(4, hdr.index("Stawka VAT") + 1).number_format == "0%"
     printed = capsys.readouterr().out
     assert f"dopasowane: {matched}" in printed

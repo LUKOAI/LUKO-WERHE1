@@ -264,6 +264,7 @@ class Sheet:
     date_cols: list[int] = field(default_factory=list)
     pct_cols: list[int] = field(default_factory=list)
     widths: dict[int, float] = field(default_factory=dict)
+    extras_from: int | None = None            # 1-based: od tej kolumny zaczynają się kolumny dodatkowe narzędzia
 
 
 def _pdf_addr_line(inv: Invoice | None) -> str | None:
@@ -316,7 +317,7 @@ MASTER_COLUMNS: list[tuple[str, Callable[[MergedRow], Any], str]] = [
     ("Odpowiedzialność za VAT", lambda r: r.tx.collection_responsibility, "s"),
     ("Eksport poza UE (CSV)", lambda r: "TAK" if r.tx.export_outside_eu else "", "s"),
     ("Waluta", lambda r: r.tx.currency, "s"),
-    ("Stawka VAT %", lambda r: r.tx.tax_rate_pct, "p"),
+    ("Stawka VAT", lambda r: r.tx.tax_rate, "p"),
     ("Kwota netto", lambda r: r.tx.total.net, "m"),
     ("Kwota VAT", lambda r: r.tx.total.vat, "m"),
     ("Kwota brutto", lambda r: r.tx.total.gross, "m"),
@@ -397,6 +398,13 @@ def _col_letter(idx: int) -> str:
 
 
 def build_group_sheets(result: MergeResult) -> list[Sheet]:
+    """Zakładka per kraj + schemat. Układ wiersza 1-3 i kolejność pierwszych kolumn są 1:1
+    z arkuszem próbnym klienta (wiersz 1: kraj i schemat, wiersz 2: nagłówki, wiersz 3 pusty),
+    dopiero za nimi idą kolumny dodatkowe narzędzia.
+
+    Klient ma dwa układy: dla rynków w EUR (netto PLN, netto EUR, stawka, VAT EUR) i dla walut
+    obcych (netto PLN, netto EUR, VAT EUR, netto/VAT w walucie, stawka).
+    """
     groups: dict[str, list[MergedRow]] = {}
     for r in result.rows:
         groups.setdefault(r.tx.tab_name, []).append(r)
@@ -405,40 +413,56 @@ def build_group_sheets(result: MergeResult) -> list[Sheet]:
         rows = sorted(groups[tab], key=_sort_key)
         currencies = sorted({r.tx.currency for r in rows if r.tx.currency and r.tx.currency not in ("EUR", "PLN")})
         country, category = (tab.split(" ", 1) + [""])[:2]
-        columns: list[tuple[str, Callable[[MergedRow], Any], str]] = [
+        Col = tuple[str, Callable[[MergedRow], Any], str]
+        head: list[Col] = [
             ("Numer faktury VAT", lambda r: r.tx.invoice_number, "s"),
-            ("Typ transakcji", lambda r: r.tx.transaction_type_pl, "s"),
             ("Data zamówienia", lambda r: r.tx.order_date, "d"),
             ("Data wysyłki", lambda r: r.tx.shipment_date, "d"),
             ("Imię i nazwisko Kupującego", lambda r: r.buyer_name, "s"),
             ("Ulica", lambda r: r.street, "s"),
             ("Miasto i kod pocztowy", lambda r: r.city_line, "s"),
+            ("Kwota netto PLN", lambda r: r.net_pln, "m"),
+            ("Kwota netto EUR", lambda r: r.net_eur, "m"),
+        ]
+        if currencies:
+            head.append(("Kwota VAT EUR", lambda r: r.vat_eur, "m"))
+            for cur in currencies:
+                head.append((f"Kwota netto {cur}", (lambda c: lambda r: r.tx.total.net if r.tx.currency == c else None)(cur), "m"))
+                head.append((f"Kwota VAT {cur}", (lambda c: lambda r: r.tx.total.vat if r.tx.currency == c else None)(cur), "m"))
+            head.append(("Stawka VAT", lambda r: r.tx.tax_rate, "p"))
+        else:
+            head.append(("Stawka VAT", lambda r: r.tx.tax_rate, "p"))
+            head.append(("Kwota należnego Vat'u", lambda r: r.vat_eur, "m"))
+        head += [
+            ("Numer zamówienia", lambda r: r.tx.order_id, "s"),
+            ("System sprawozdawczości podatkowej", lambda r: r.tx.scheme, "s"),
+        ]
+        extras: list[Col] = [
+            ("Kwota VAT PLN", lambda r: r.vat_pln, "m"),
+            ("Kwota brutto PLN", lambda r: r.gross_pln, "m"),
+            ("Typ transakcji", lambda r: r.tx.transaction_type_pl, "s"),
+            ("Typ dokumentu (PDF)", lambda r: DOC_TYPE_PL.get(r.invoice.doc_type, "") if r.invoice else "", "s"),
+            ("Faktura pierwotna (PDF)", lambda r: r.invoice.original_invoice_number if r.invoice else None, "s"),
             ("Kraj dostawy", lambda r: r.tx.ship_to_country, "s"),
+            ("Kraj wysyłki (magazyn)", lambda r: r.tx.ship_from_country, "s"),
+            ("NIP nabywcy", lambda r: r.tx.buyer_vat or (r.invoice.buyer_vat_id if r.invoice else None), "s"),
             ("ASIN", lambda r: r.tx.asin, "s"),
             ("SKU", lambda r: r.tx.sku, "s"),
             ("Nazwa produktu", lambda r: (r.item.description if r.item else None) or None, "s"),
             ("Ilość", lambda r: r.tx.quantity, "s"),
-            ("Kwota netto PLN", lambda r: r.net_pln, "m"),
-            ("Kwota VAT PLN", lambda r: r.vat_pln, "m"),
-            ("Kwota netto EUR", lambda r: r.net_eur, "m"),
-            ("Kwota VAT EUR", lambda r: r.vat_eur, "m"),
-        ]
-        for cur in currencies:
-            columns.append((f"Kwota netto {cur}", (lambda c: lambda r: r.tx.total.net if r.tx.currency == c else None)(cur), "m"))
-            columns.append((f"Kwota VAT {cur}", (lambda c: lambda r: r.tx.total.vat if r.tx.currency == c else None)(cur), "m"))
-        columns += [
-            ("Stawka VAT %", lambda r: r.tx.tax_rate_pct, "p"),
             ("Kurs PLN", lambda r: r.rate.rate if r.rate else None, "s"),
-            ("Numer zamówienia", lambda r: r.tx.order_id, "s"),
-            ("System sprawozdawczości podatkowej", lambda r: r.tx.scheme or "—", "s"),
-            ("NIP nabywcy", lambda r: r.tx.buyer_vat or (r.invoice.buyer_vat_id if r.invoice else None), "s"),
-            ("Kraj wysyłki (magazyn)", lambda r: r.tx.ship_from_country, "s"),
+            ("Data kursu", lambda r: r.rate.rate_date if r.rate else None, "d"),
+            ("Źródło kursu", lambda r: r.rate.source if r.rate else None, "s"),
+            ("Data bazowa kursu", lambda r: r.rate_basis_date, "d"),
+            ("Uwaga do kursu", lambda r: r.rate_note or None, "s"),
+            ("Zgodność kwoty PDF/CSV", lambda r: r.amount_check, "s"),
             ("Dopasowanie PDF", lambda r: r.match, "s"),
         ]
-        title = [L.COUNTRY_PL.get(country, country), category, CATEGORY_DESCRIPTION.get(category, "")]
+        columns = head + extras
+        title = ["", L.COUNTRY_PL.get(country, country), category]
         header = [c[0] for c in columns]
         data = [[c[1](r) for c in columns] for r in rows]
-        first, last = 3, 2 + len(data)
+        first, last = 4, 3 + len(data)
         total_row: list[Any] = ["RAZEM"] + [None] * (len(columns) - 1)
         for ci, c in enumerate(columns, start=1):
             if c[2] == "m" and data:
@@ -447,11 +471,12 @@ def build_group_sheets(result: MergeResult) -> list[Sheet]:
         sheets.append(
             Sheet(
                 name=tab,
-                rows=[title, header] + data + [total_row],
+                rows=[title, header, []] + data + [total_row],
                 header_row=2,
                 money_cols=_cols_of_type(columns, "m"),
                 date_cols=_cols_of_type(columns, "d"),
                 pct_cols=_cols_of_type(columns, "p"),
+                extras_from=len(head) + 1,
             )
         )
     return sheets

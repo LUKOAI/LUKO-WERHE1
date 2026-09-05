@@ -1,0 +1,47 @@
+name: Build AmazonVAT.exe (Windows)
+
+on:
+  push:
+    branches: [main, claude/amazon-reports-merger-0mpcvu]
+    paths:
+      - "amazon_vat_merger/**"
+      - "requirements-merger.txt"
+      - ".github/workflows/build-windows.yml"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Zależności
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-merger.txt pyinstaller
+      - name: Testy (bez próbek klienta)
+        run: |
+          pip install pytest
+          python -m pytest -q
+      - name: Budowa AmazonVAT.exe (okienko)
+        run: >
+          pyinstaller --noconfirm --clean --onefile --windowed --name AmazonVAT
+          --collect-all pdfplumber --collect-all pdfminer --collect-all pypdfium2 --collect-all pypdfium2_raw
+          --collect-all openpyxl --collect-all gspread --collect-all google.auth --collect-all charset_normalizer
+          amazon_vat_merger/gui_main.py
+      - name: Budowa AmazonVAT-cli.exe (wiersz poleceń)
+        run: >
+          pyinstaller --noconfirm --clean --onefile --console --name AmazonVAT-cli
+          --collect-all pdfplumber --collect-all pdfminer --collect-all pypdfium2 --collect-all pypdfium2_raw
+          --collect-all openpyxl --collect-all gspread --collect-all google.auth --collect-all charset_normalizer
+          amazon_vat_merger/__main__.py
+      - name: Test zbudowanego CLI
+        run: |
+          dist\AmazonVAT-cli.exe --version
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AmazonVAT-windows
+          path: dist/*.exe
+          retention-days: 90

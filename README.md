@@ -9,8 +9,12 @@ Repozytorium narzędzi dla klienta WERHE / WERKON.
 
 * zakładka **Wszystko** – każda transakcja z CSV + dane z PDF (nazwisko/nazwa kupującego, ulica,
   miasto i kod, NIP, opis produktu, kwota faktury, kontrola zgodności kwot PDF/CSV);
-* zakładki **per kraj i schemat** (np. `DE OSS`, `FR Lokalna`, `CZ WDT`, `FR Marketplace`) w układzie
-  zgodnym z arkuszem próbnym klienta, z wierszem `RAZEM` (formuły SUM);
+* zakładki **per kraj i schemat** (np. `DE OSS`, `FR Lokalna`, `CZ WDT`, `FR Marketplace`): wiersz 1
+  (kraj, schemat), wiersz 2 nagłówki, wiersz 3 pusty i pierwsze kolumny **dokładnie jak w arkuszu
+  próbnym klienta** (układ EUR: netto PLN, netto EUR, stawka, „Kwota należnego Vat'u”; układ walut
+  obcych: netto PLN, netto EUR, VAT EUR, netto/VAT w walucie, stawka); dalej, na szarym tle,
+  kolumny dodatkowe narzędzia (VAT PLN, typ transakcji, ASIN, SKU, nazwa produktu, kurs…);
+  na końcu wiersz `RAZEM` (formuły SUM);
 * zakładka **Diagnostyka** – brakujące PDF-y, PDF-y bez transakcji, różnice kwot, ostrzeżenia parsera,
   brak kursu PLN.
 
@@ -27,8 +31,11 @@ Wynik zapisywany jest do `.xlsx` i opcjonalnie wypychany do **Google Sheets**.
      „Invoice Url" raportu),
    * opcjonalnie `dane/kursy.csv` – własne kursy PLN (`waluta;data;kurs`).
 3. Uruchom:
+   * Windows bez Pythona: `AmazonVAT.exe` (okienko; plik z GitHub Actions → *Artifacts* →
+     `AmazonVAT-windows`), instrukcja dla biura: `INSTRUKCJA_KLIENT.md`
    * macOS / Linux: `./demo.sh`
-   * Windows: `demo.bat`
+   * Windows z Pythonem: `demo.bat`
+   * okienko z Pythona: `python -m amazon_vat_merger.gui`
 
    Skrypt sam tworzy `.venv`, instaluje `requirements-merger.txt`, zapisuje
    `output/amazon_vat_<data>.xlsx` i otwiera plik. Kursy PLN pobiera z API NBP
@@ -110,12 +117,30 @@ Opcje:
 
 Reguła jest w jednym miejscu (`report.py: classify()` i `tab_country()`) – łatwo ją zmienić.
 
-### Kursy PLN
+### Kursy walut – skąd i z jakiego dnia
 
-Kolejność źródeł: plik `--rates-file` → API NBP (tabela A, ostatni kurs opublikowany **przed** datą
-bazową – art. 31a ustawy o VAT) → kurs Amazon z CSV (`Invoice Level Exchange Rate`, tylko gdy
-waluta faktury = PLN). Źródło i data kursu są w kolumnach `Źródło kursu` / `Data kursu`.
-Bez dostępu do NBP i bez pliku kursów kolumny PLN pozostają puste, a `Diagnostyka` to raportuje.
+* **Źródło**: Narodowy Bank Polski, tabela A kursów średnich, pobierana z oficjalnego API
+  `https://api.nbp.pl/api/exchangerates/rates/a/<waluta>/<od>/<do>/` (bez klucza, bez opłat).
+  Numer tabeli NBP (np. `166/A/NBP/2026`) jest zapisywany w kolumnie `Źródło kursu`,
+  a data jej publikacji w `Data kursu`.
+* **Dzień kursu** (art. 31a ust. 1–2 ustawy o VAT): ostatnia tabela opublikowana **przed** dniem
+  powstania obowiązku podatkowego; jeśli fakturę wystawiono wcześniej – przed dniem wystawienia
+  faktury. Narzędzie przyjmuje jako dzień bazowy **wcześniejszą** z dat: data faktury (z PDF)
+  i data wysyłki (`Shipment Date` z raportu). Dzień bazowy jest w kolumnie `Data bazowa kursu`.
+  Przykład: wysyłka i faktura 29.08 (sobota) → kurs z tabeli z piątku 28.08.
+* **Noty kredytowe / zwroty** (art. 31b ust. 1): kurs faktury pierwotnej, jeśli ta faktura jest
+  w przetwarzanych danych; w przeciwnym razie kurs z dnia noty i wpis „kurs z daty noty” w kolumnie
+  `Uwaga do kursu` oraz w `Diagnostyce`.
+* **Zaokrąglanie**: netto i VAT przeliczane osobno i zaokrąglane do grosza (HALF_UP),
+  brutto = netto + VAT.
+* **Gdy NBP jest niedostępne**: 1) plik `--rates-file` (`waluta;data;kurs`, data = data
+  publikacji tabeli), 2) kurs Amazon z raportu (`Invoice Level Exchange Rate`, tylko faktury
+  B2B wystawione w PLN) – wtedy `Źródło kursu` = „Amazon (CSV)”. Bez żadnego źródła kolumny PLN
+  są puste, a `Diagnostyka` wylicza takie wiersze. Nigdy nie jest używany kurs „z głowy”.
+* Kwoty **EUR** dla rynków w EUR pochodzą wprost z raportu; dla walut obcych (SEK, GBP) tylko
+  wtedy, gdy Amazon podał przeliczenie na fakturze/w raporcie (OSS rozlicza się w EUR po kursie
+  EBC z ostatniego dnia kwartału – tego narzędzie nie liczy).
+* Domyślny dzień bazowy można zmienić: `--rate-basis shipment` (tylko data wysyłki) lub `order`.
 
 ### Google Sheets (system klienta)
 
@@ -146,6 +171,51 @@ gdy próbek nie ma.
 Etykiety: PL, IT, FR, DE, ES, NL, SV, EN (`labels.py`). Parser opiera się na stałym układzie faktury
 Amazon (współrzędne słów), więc nowe języki wymagają zwykle tylko dopisania etykiet. Nieznane pola
 nie przerywają przetwarzania – trafiają jako ostrzeżenia do `Diagnostyka` i kolumny `Ostrzeżenia PDF`.
+
+### Jak to działa – narzędzia, koszty, przepływ danych
+
+**Składniki**
+
+| element | co to jest | koszt |
+|---|---|---|
+| `AmazonVAT.exe` / `python -m amazon_vat_merger` | program w Pythonie (biblioteki open source: pdfplumber – odczyt PDF, openpyxl – Excel, gspread – Google Sheets, requests – NBP) uruchamiany **lokalnie na komputerze klienta** | 0 zł |
+| API NBP | publiczne API kursów walut | 0 zł, bez klucza |
+| Google Sheets API + konto serwisowe | projekt w Google Cloud, konto techniczne z własnym e-mailem, któremu udostępnia się arkusz | 0 zł (limit 60 zapisów/min – narzędzie się w nim mieści) |
+| GitHub (repozytorium prywatne + Actions) | kod i automatyczna budowa `.exe` przy każdej zmianie | 0 zł w limicie darmowym (2000 min/mies.) |
+| Excel / Google Sheets | podgląd wyników | już posiadane |
+
+Nie ma żadnego modelu AI, serwera pośredniczącego ani abonamentu. Koszt jednego uruchomienia = 0 zł.
+
+**Przepływ danych**
+
+1. Osoba w biurze pobiera z Seller Central raport CSV i faktury PDF na swój komputer.
+2. Program czyta je lokalnie; jedyne połączenia wychodzące to `api.nbp.pl` (pytanie o kurs:
+   waluta + zakres dat, bez danych klienta) oraz – opcjonalnie – `sheets.googleapis.com`
+   (zapis zakładek do wskazanego arkusza, uwierzytelnienie kluczem konta serwisowego).
+3. Wynik: plik `.xlsx` w folderze wyników i/lub zakładki w arkuszu Google klienta.
+   Dane osobowe kupujących pozostają u klienta (jego komputer, jego arkusz Google).
+4. W repozytorium nie ma żadnych danych klienta (raporty, faktury, klucze są ignorowane przez git).
+
+**Utrzymanie**: zmiana w kodzie → push do GitHuba → Actions buduje nowe `AmazonVAT.exe`
+(zakładka *Actions* → ostatni przebieg → *Artifacts* → `AmazonVAT-windows`) → plik wysyła się
+do biura i podmienia stary.
+
+### Dostarczanie nowych plików – warianty
+
+1. **Lokalnie u klienta (zalecane na start)** – osoba w biurze pobiera raport i faktury z Seller
+   Central, uruchamia `AmazonVAT.exe`, wynik trafia do ich arkusza Google. Zero przesyłania danych
+   osobowych poza firmę. Instrukcja: `INSTRUKCJA_KLIENT.md`.
+2. **Wspólny folder (Google Drive / OneDrive)** – klient wrzuca raport i faktury do folderu
+   udostępnionego opiekunowi narzędzia, który uruchamia program u siebie. Wymaga zgody klienta
+   na przetwarzanie danych kupujących poza firmą (umowa powierzenia).
+3. **Automatycznie z Amazon (etap 2)** – Amazon Selling Partner API: raport
+   `GET_VAT_TRANSACTION_DATA` i pobieranie faktur bez ręcznego klikania; wymaga rejestracji
+   aplikacji deweloperskiej w Seller Central klienta i tokenu odświeżania. Do zrobienia po
+   zaakceptowaniu prototypu.
+
+Ręczne pobieranie faktur można też ominąć częściowo: raport zawiera kolumnę `Invoice Url`
+(link do PDF w Seller Central) – narzędzie ją pokazuje w zakładce `Wszystko`, ale pobranie
+wymaga zalogowanej sesji Seller Central, więc dziś robi to człowiek.
 
 ## 2. WERHE/WERKON DEMO (`main.py`)
 
