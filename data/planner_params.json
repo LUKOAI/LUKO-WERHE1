@@ -1,8 +1,72 @@
 {
  "amazon": {},
- "predictor": {"regime_start": "2024-06-01", "half_life_months": 12, "min_weight": 1.5},
- "filler": {"w_fc": 3.0, "w_sales": 1.5, "w_stock": 2.0, "w_fit": 1.0, "w_affinity": 0.5, "min_fc_prob": 0.8, "target_cover_days": 60, "max_suggestions": 25, "default_qty_cartons": 1},
- "freight": {"pallet_rate_pln": null, "parcel_rate_pln": null},
- "capacity": {"standard_left_m3": null, "oversize_left_m3": null},
- "ui": {"port": 8765}
+ "predictor": {
+  "regime_start": "2024-06-01",
+  "half_life_months": 12,
+  "min_weight": 1.5
+ },
+ "filler": {
+  "w_fc": 3.0,
+  "w_sales": 1.5,
+  "w_stock": 2.0,
+  "w_fit": 1.0,
+  "w_affinity": 0.5,
+  "min_fc_prob": 0.8,
+  "target_cover_days": 60,
+  "max_suggestions": 25,
+  "default_qty_cartons": 1
+ },
+ "freight": {
+  "pallet_rate_pln": null,
+  "parcel_rate_pln": null
+ },
+ "capacity": {
+  "standard_left_m3": null,
+  "oversize_left_m3": null
+ },
+ "ui": {
+  "port": 8765
+ },
+ "analysis": {
+  "source": "docs/analiza/ (historia 2024-06..2026-08)",
+  "parcel_units": {
+   "XPO1": {
+    "median": 14,
+    "p25": 7,
+    "p75": 20,
+    "max": 50
+   },
+   "WRO5": {
+    "median": 40,
+    "p25": 15,
+    "p75": 69,
+    "max": 200
+   }
+  },
+  "pallet_units": {
+   "median": 148,
+   "p25": 126,
+   "p75": 174,
+   "min": 80,
+   "max": 210,
+   "lines_median": 6,
+   "products_median": 4
+  },
+  "pallet_fc_share": {
+   "XPO1": 19,
+   "WRO5": 3
+  },
+  "fc_rule_accuracy_lines": 0.9929,
+  "split_plans_share": 0.027,
+  "auger_carton_by_diameter": {
+   "40": 15,
+   "50": 14,
+   "60": 13,
+   "80": 11,
+   "100": 10,
+   "120": 9,
+   "150": 7,
+   "200": 6
+  }
+ }
 }

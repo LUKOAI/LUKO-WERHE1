@@ -30,12 +30,12 @@ Dane: 4 192 wysyłki, 10 741 pozycji, 209 641 sztuk. Trzy epoki:
 
 Kluczowe obserwacje (reżim polski, od 06.2024, 1 864 wysyłki):
 
-- **Magazyn docelowy jest niemal deterministyczny per produkt.** Na 201 kluczy produktowych z ≥ 50 szt. 191 ma czystość ≥ 0,9 (ten sam FC prawie zawsze). Długie produkty (świdry 45–80 cm, dłuta 600 mm, zestawy dłut) → **XPO1**; małe (adaptery, nożyki, pobijaki, smary, przedłużki 400 mm, dłuta 410 mm Hex) → **WRO5**. To odpowiada podziałowi Amazona na magazyny *sortable* (standard size) i *non-sortable* (oversize): granica „standard parcel” to 45 × 34 × 26 cm / 11,9 kg.
-- Niejednoznaczne klucze („other”, „adapter|sds_max”) to głównie luki normalizacji nazw, nie losowość Amazona — stąd konieczność mapowania nazw na kanoniczne SKU.
-- Wysyłki są małe: mediana 27 szt., średnia 49, p90 = 135 szt.; mediana 1 pozycja, maks. 14. Pracownik zwykle tworzy jedną wysyłkę FBA na paczkę.
-- W PDF-ach z Apilo: 198 wysyłek „Paczki FBA” vs 22 „Palety Amazon” w dwóch miesiącach.
+- **Magazyn docelowy jest niemal deterministyczny per produkt.** Po zmapowaniu 1 354 nazw historycznych na 465 kanonicznych SKU (`data/product_aliases.csv`, 100 % pozycji rozpoznanych) 233 z 237 SKU z ≥ 5 pozycjami trafia zawsze do tego samego FC (czystość ≥ 0,9). Decyduje **najdłuższy bok**: ≥ 46 cm → **XPO1** (non-sortable, 3PL ID Logistics), < 40 cm → **WRO5** (sortable, Okmiany); 40–46 cm zależy od opakowania danego ASIN-u, ale stałe podreguły (przedłużki 400 i dłuta HEX28 400 → WRO5; dłuta SDS 400–410, HEX30 410, szerokie szypy, świdry ×450 → XPO1) dają regule 99,3 % trafności na pozycjach. Granica pokrywa się z klasą „paczka standardowa” Amazona (45 × 34 × 26 cm / 11,9 kg).
+- **Amazon dzieli plan po SKU** (nigdy ilości jednego SKU), nigdy nie miesza klas w jednej wysyłce; tylko 2,7 % planów było rozdzielonych między WRO5 i XPO1. Palety jadą prawie wyłącznie do XPO1 (19/22 w 07–08.2026).
+- Wysyłki są małe: mediana 25–28 szt., p90 ≈ 135 szt.; mediana 1 pozycja. Paczka do XPO1 ≈ 14 szt. jednego produktu, do WRO5 ≈ 40 szt.; paleta ≈ 150 szt., 6 pozycji, 4 produkty. Pracownik zwykle tworzy jedną wysyłkę FBA na paczkę.
+- Ilości na pozycjach są wielokrotnościami kartonów zbiorczych (świdry wg średnicy 15/14/13/11/10/9/7/6 szt., przedłużka 400 → 34 itd.) — narzędzie odtwarza moduły kartonów z historii, gdy katalog ich nie ma.
 
-Szczegółowe analizy (reguły FC, kompozycja wysyłek, rotacja, współwystępowanie) — patrz `docs/analiza/`.
+Szczegółowe analizy (reguły FC, kompozycja wysyłek, moduły kartonów, sezonowość) — patrz `docs/analiza/`.
 
 ## 3. Reguły Amazon istotne dla planera (EU / PL, stan 2026)
 

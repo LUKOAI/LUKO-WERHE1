@@ -1,0 +1,887 @@
+name,lines,units,lines_WRO5,lines_XPO1,first_month,last_month,family,shank,L_est,fkey,skus,fc_dominant,purity,fc_last
+Adapter gwintowy WERHE® 1/2-20UNF i gwint zewnętrzny M14 - do mieszadeł i uchwytów wiertarskich,24,2010.0,24,0,2024-06,2026-06,adapter,m14,150.0,adapter|m14|unf_1_2,,WRO5,1.0,WRO5
+"WERHE® 20,2x28x100 Professional Peg Driver Jack Hammer Picket Driver Post Driver SDS Plus",23,1948.0,23,0,2024-06,2026-05,driver_pile,sds_plus,28.0,driver_pile|d20.2|l28|sds_plus,,WRO5,1.0,WRO5
+"WERHE® Profesjonalny gwoździowkrętak SDS Max Ø20,2mm 165x30mm do wbijania głębokich uziomów Uziom prętowy Uziom prętowy Uziom prętowy - Młot udarowo-obrotowy Młot udarowo-obrotowy Gwoździowkrętak",35,1721.0,35,0,2024-09,2026-05,driver_rod,sds_max,165.0,driver_rod|d20.2|l165|sds_max,,WRO5,1.0,WRO5
+WERHE Wiertło do ziemi 80 mm z SDS Plus rejestrujące precyzyjne wiertło wiertło do runa,38,1689.0,0,38,2024-06,2025-11,auger,sds_plus,800.0,auger|d80|sds_plus,,XPO1,1.0,XPO1
+"WERHE ® Profesjonalne - 5 x brzeszczoty do wyrzynarki do drewna - C 180 mm T744D bardzo długie - szybkie cięcie grubych warstw - kompatybilne z wyrzynarkami Bosch, Metabo, Milwaukee, Makita",15,1636.0,15,0,2024-10,2025-10,blade_jigsaw,,180.0,blade_jigsaw|T744D|l180|n5,,WRO5,1.0,WRO5
+"WERHE ® 13,5x34x223 Profesjonalny wbijak do gwoździ, młot udarowy, wbijak do słupków SDS Plus",19,1520.0,19,0,2024-06,2026-02,driver_rod,sds_plus,34.0,driver_rod|d13.5|l34|sds_plus,,WRO5,1.0,WRO5
+"Werkon Profesjonalny adapter do wiertnic ziemnych pasujący do wiertarki SDS Plus wiertarki akumulatorowej, wkrętarki akumulatorowej, wiertarki palowej",16,1468.0,16,0,2024-06,2025-10,adapter,sds_plus,150.0,adapter|sds_plus,,WRO5,1.0,WRO5
+WERHE Wiertło uziemiające 60 mm z precyzyjnym wiertłem do nagrywania SDS Plus,31,1169.0,0,31,2024-06,2025-10,other,sds_plus,800.0,other|sds_plus,,XPO1,1.0,XPO1
+"WERHE 1 szt. Przedłużacz ślimaka ziemnego - stal 40 cm, spiralny flet, odpowiedni do uniwersalnych prowadnic wiertarskich, 0,5 kg, model 81334",34,1138.0,34,0,2024-09,2026-05,extension,,400.0,extension|l400,,WRO5,1.0,WRO5
+"WERHE® Adapter M14 do wiertarki ziemnej, M14 ADAPTER, wiertarka ziemna, ślimak, mieszadło do betonu",17,1135.0,17,0,2024-07,2025-11,adapter,m14,150.0,adapter|m14,,WRO5,1.0,WRO5
+WERHE ® Profi SDS HEX Spatmeißel 75 x 410 mm Sechskant-Aufnahme 30 mm für Abbruchhammer Flach Spat Meißel Meissel,35,1102.0,29,6,2024-06,2026-01,chisel_spade,hex30,410.0,chisel_spade|d75|l410|hex30,,WRO5,0.829,WRO5
+"WERHE ® Adapter SDS Max do złącza uchwytu SDS Max - wytrzymały i stabilny, wykonany ze stali - odpowiedni do przedłużaczy wiertarskich, młotów obrotowych i narzędzi z uchwytem SDS Max",32,1085.0,32,0,2024-06,2025-12,adapter,sds_max,150.0,adapter|sds_max,,WRO5,1.0,WRO5
+WERHE Wiertło do ziemi 80 mm z precyzyjnym wiertłem SDS Plus,13,882.0,0,13,2026-02,2026-04,auger,sds_plus,800.0,auger|d80|sds_plus,,XPO1,1.0,XPO1
+"WERHE ® 16,5x34x223 Profesjonalny wbijak do gwoździ gruntowych Młot udarowy SDS Plus",18,860.0,18,0,2024-07,2026-01,driver_rod,sds_plus,34.0,driver_rod|d16.5|l34|sds_plus,,WRO5,1.0,WRO5
+WERHE Profesjonalny słupek przedłużający 1000 mm wytrzymały,33,839.0,0,33,2024-06,2026-03,other,,1000.0,other,,XPO1,1.0,XPO1
+"WERHE Świder ziemny do wiertarki z adapterem SDS Plus ⌀50 mm, długość 80 cm - świder do studni, świder do sadzenia drzew, świder do otworów ziemnych, świder do pali, świder do przepustów",32,819.0,0,32,2024-06,2026-05,auger,sds_plus,800.0,auger|d50|l800|sds_plus,,XPO1,1.0,XPO1
+WERHE Wiertarka do uziemienia 40 mm z pojemnikiem SDS Plus solidna końcówka wiertła do pali wiertniczych,25,817.0,0,25,2024-07,2026-04,auger,sds_plus,800.0,auger|d40|sds_plus,,XPO1,1.0,XPO1
+WERHE ® Przedłużenie wiercenia 1000 mm SDS Max do SDS Max chwyt do nagrywania adaptera,42,816.0,0,42,2024-06,2025-12,adapter,sds_max,1000.0,adapter|sds_max,,XPO1,1.0,XPO1
+"WERHE® smar MOS2 100 ml – Wodoodporny, uniwersalny smar do narzędzi i łożysk",8,770.0,8,0,2026-02,2026-05,grease,,150.0,grease|d100,,WRO5,1.0,WRO5
+WERHE profesjonalna wiertarka do ślimaka 150 mm Pełna Stal podwójny wałek runo dobrze wytrzymałe z adapterem SDS Plus,32,752.0,0,32,2024-07,2026-04,auger,sds_plus,800.0,auger|d150|sds_plus|dbl,,XPO1,1.0,XPO1
+"WERHE ® 20,2x28x65 Profesjonalny młot udarowy z gwoździarką - gwoździarka SDS Plus",19,750.0,19,0,2024-06,2026-01,other,sds_plus,65.0,other|sds_plus,,WRO5,1.0,WRO5
+"WERHE Profesjonalny adapter SDS Plus do świdrów, do wiertarki",13,745.0,13,0,2024-06,2025-11,adapter,sds_plus,150.0,adapter|sds_plus,,WRO5,1.0,WRO5
+WERHE® Adapter M14 na 1/2-20UNF cala - zastosowanie we wszystkich uchwytach wiertarskich z gwintem zewnętrznym 1/2-20UNF,19,715.0,19,0,2024-06,2025-12,adapter,m14,150.0,adapter|m14|unf_1_2,,WRO5,1.0,WRO5
+"Profesjonalna wiertarka WERHE®, świder do wiertarki 150 mm wytrzymały z adapterem SDS Plus - wiertło do pali wiertło do wiercenia precyzyjna końcówka wiertła - wiertło do świdra do ziemi",23,693.0,0,23,2024-10,2025-06,auger,sds_plus,800.0,auger|d150|sds_plus,,XPO1,1.0,XPO1
+"WERHE Wiertło ziemne do wiertarki z adapterem SDS Plus Ø 60 mm, długość 80 cm – wiertło do studni, sadzenie drzew, wiertło do otworów, wiertło do pali, wiertło przelotowe – precyzyjna końcówka",10,650.0,0,10,2026-01,2026-04,auger,sds_plus,800.0,auger|d60|l800|sds_plus,,XPO1,1.0,XPO1
+"WERHE Świder glebowy do wiertarki 60 mm Ø, 600 mm długości - Świder ogrodowy do wkrętarki akumulatorowej do sadzenia, kwiatów i kopania dołków - Narzędzie do kopania w ogrodzie",31,643.0,0,31,2024-12,2026-04,auger,,600.0,auger|d60|l600,,XPO1,1.0,XPO1
+WERHE Earthmover 120 mm z mocowaniem SDS Plus wytrzymałe wiertło wiertło runo wiertło,31,639.0,0,31,2024-06,2026-04,auger,sds_plus,800.0,auger|d120|sds_plus,,XPO1,1.0,XPO1
+"WERKON M14 adapter do ślimaków, M14 ADAPTER DO MIESZALNIKA, mieszadła, ŚLIMAK",14,585.0,14,0,2024-06,2026-04,adapter,m14,150.0,adapter|m14,,WRO5,1.0,WRO5
+"WERHE ® 13,5x34x162 Profesjonalny wbijak do gwoździ ziemnych Młot udarowy SDS Max",13,568.0,13,0,2024-08,2026-01,driver_rod,sds_max,34.0,driver_rod|d13.5|l34|sds_max,,WRO5,1.0,WRO5
+"WERHE Świder glebowy do wiertarki 50 mm Ø, 450 mm długości - Świder ogrodowy do wkrętarki akumulatorowej do sadzenia, kwiatów i kopania dołków - Narzędzie do kopania w ogrodzie",22,565.0,0,22,2024-12,2026-04,auger,,450.0,auger|d50|l450,,XPO1,1.0,XPO1
+"Pobijak 13,5mm SDS Plus",6,530.0,6,0,2026-07,2026-08,driver_rod,sds_plus,150.0,driver_rod|d13.5|sds_plus,"6PO13,5p",WRO5,1.0,WRO5
+WERHE®adapter M14 do świdrów ziemnych – adapter mieszający ze stali hartowanej,7,530.0,7,0,2026-02,2026-05,adapter,m14,150.0,adapter|m14,,WRO5,1.0,WRO5
+"WERHE® 1 1/4"" UNC cal - przedłużenie do wiertła diamentowego Wiertło rdzeniowe 200 mm Wiertło rdzeniowe - uchwyt do piły walcowej lub wiertła skrzynkowego",22,528.0,22,0,2024-06,2026-05,other,unc_1_1_4,200.0,other|unc_1_1_4,,WRO5,1.0,WRO5
+"WERHE Świder glebowy do wiertarki 100 mm Ø, 600 mm długości - Świder ogrodowy do wkrętarki akumulatorowej do sadzenia, kwiatów i kopania dołków - Narzędzie do kopania w ogrodzie",29,511.0,1,28,2024-12,2026-04,auger,,600.0,auger|d100|l600,,XPO1,0.966,XPO1
+"Profesjonalna wiertarka WERHE®, świder do wiertarki 150 mm wytrzymały z adapterem SDS Plus - wiertło do wiercenia precyzyjna końcówka wiertła - wiertło do świdra do ziemi",16,506.0,0,16,2025-07,2026-05,auger,sds_plus,800.0,auger|d150|sds_plus,,XPO1,1.0,XPO1
+WERHE Wiertło do ziemi z uchwytem SDS Max 120 mm Wytrzymała końcówka wiertła 120 mm,29,495.0,0,29,2024-07,2026-04,auger,sds_max,800.0,auger|d120|sds_max,,XPO1,1.0,XPO1
+"WERHE Świder glebowy do wiertarki 80 mm Ø, 600 mm długości - Świder ogrodowy do wkrętarki akumulatorowej do sadzenia, kwiatów i kopania dołków - Narzędzie do kopania w ogrodzie",27,491.0,1,26,2024-12,2026-04,auger,,600.0,auger|d80|l600,,XPO1,0.963,XPO1
+WERHE Professional 600 mm solidne przedłużenie słupka,20,488.0,0,20,2024-07,2026-05,other,,600.0,other,,XPO1,1.0,XPO1
+WERHE Profesjonalny adapter do wierteł ziemnych – kompatybilny z SDS Plus – wytrzymały do ​​prac w ogrodzeniach i ogrodnictwie – szary,7,460.0,7,0,2026-02,2026-05,adapter,sds_plus,150.0,adapter|sds_plus,,WRO5,1.0,WRO5
+WERHE Profesjonalny otwór odpowiedni do wiertarki sześciokątnej akumulatorowa wkrętarka combi adapter biegunowy do wiertarki,12,460.0,12,0,2024-06,2025-11,adapter,hex,150.0,adapter|hex,,WRO5,1.0,WRO5
+WERHE Profesjonalne wiertło do ślimaków 40 mm Wiertło ślimakowe precyzyjne wiercenie,23,458.0,0,23,2024-07,2026-04,auger,,800.0,auger|d40,,XPO1,1.0,XPO1
+WERHE Wiertło do Gleby 120D mm z adapterem SDS PLUS do profesjonalnego wiercenia w ziemi,18,458.0,0,18,2024-06,2026-04,auger,sds_plus,800.0,auger|sds_plus,,XPO1,1.0,XPO1
+Nożyki T744D,3,450.0,3,0,2026-07,2026-08,blade_jigsaw,,150.0,blade_jigsaw|T744D,7NT744D,WRO5,1.0,WRO5
+"WERHE Świder glebowy do wiertarki 40 mm Ø, 450 mm długości - Świder ogrodowy do wkrętarki akumulatorowej do sadzenia, kwiatów i kopania dołków - Narzędzie do kopania w ogrodzie",17,441.0,1,16,2024-12,2026-04,auger,,450.0,auger|d40|l450,,XPO1,0.941,XPO1
+WERHE Professional SDS hex 135 x 410 mm łodyga sześciokątna łopata dłutowa do młotka rozbiórkowego 30 mm w plastikowej obudowie,20,431.0,0,20,2024-06,2025-12,chisel_flat,hex30,410.0,chisel_flat|d135|l410|hex30,,XPO1,1.0,XPO1
+WERHE Profesjonalne wiertło do ślimaków 80 mm wiertło ślimakowe dobre wiertło precyzyjne,26,430.0,0,26,2024-07,2026-04,auger,,800.0,auger|d80,,XPO1,1.0,XPO1
+WERHE Profesjonalna wiertarka do uziemienia 60 mm bateria precyzyjna końcówka,25,430.0,0,25,2024-06,2026-04,auger,,800.0,auger|d60,,XPO1,1.0,XPO1
+"WERHE® Gumowy młotek SDS Plus do młotowiertarki o średnicy ⌀ 36 mm - gumowy młotek idealny do obróbki blachy, kostki brukowej, pali",19,425.0,19,0,2024-06,2026-05,other,sds_plus,150.0,other|d36|sds_plus,,WRO5,1.0,WRO5
+WERHE Profi wiertło do gleby Wiertarka do podwójnego wału 100 mm Wiertarka do studni z adapterem SDS Max,26,420.0,0,26,2024-07,2026-04,auger,sds_max,800.0,auger|d100|sds_max|dbl,,XPO1,1.0,XPO1
+"WERHE ® Pobijak do kotew gruntowych SDS Plus, średnica wewnętrzna 13,5 mm – długość 100 mm, grubość 22 mm – wbijak do prętów uziomowych do wiertarek SDS Plus – solidny precyzyjny",3,420.0,3,0,2026-04,2026-04,driver_rod,sds_plus,100.0,driver_rod|d13.5|l100|sds_plus,,WRO5,1.0,WRO5
+"Adapter WERHE® 1 1/4"" UNC na gniazdo R 1/2"". Wiertło koronowe do otwornicy do betonu, wiertło koronowe do wiertarki puszkowej.",21,418.0,21,0,2024-06,2025-11,adapter,unc_1_1_4,150.0,adapter|unc_1_1_4,,WRO5,1.0,WRO5
+"WERHE ® 16,5x25x162 Profesjonalny sterownik kołkowy Jack Hammer Picket Driver Driver SDS Max",15,417.0,15,0,2024-07,2026-05,driver_pile,sds_max,25.0,driver_pile|d16.5|l25|sds_max,,WRO5,1.0,WRO5
+WERHE Wiertło ziemne z uchwytem SDS Max 60 mm wytrzymałe wiertło wiertło 60 mm,21,402.0,0,21,2024-06,2026-05,auger,sds_max,800.0,auger|d60|sds_max,,XPO1,1.0,XPO1
+WERHE Wiertarka z adapterem SDS Max 80 mm Wytrzymała wiertarka 80 mm,20,402.0,0,20,2024-10,2026-04,adapter,sds_max,800.0,adapter|sds_max,,XPO1,1.0,XPO1
+WERHE® Smar MOS2 100ml w plastikowym pojemniku – środek smarny do końcówek narzędzi i łożysk kulkowych – wodoodporny smar uniwersalny,13,392.0,13,0,2025-04,2026-01,grease,,150.0,grease|d100,,WRO5,1.0,WRO5
+"WERHE ® Profesjonalne - 2 x drewniane ostrza do wyrzynarki - C 250 mm T225B Slim Long - Gruba warstwa o dużej żywotności - kompatybilna z wyrzynarkami Bosch, Metabo, Milwaukee, Makita",8,390.0,8,0,2024-06,2025-10,other,,250.0,other,,WRO5,1.0,WRO5
+"WERHE® Profesjonalny wkrętak do gwoździ 32,5 x 45 x 100 mm do wbijania prętów do gruntów głębinowych - Jack Hammer Picket Post Driver Driver SDS Plus",20,389.0,20,0,2024-06,2026-04,driver_rod,sds_plus,45.0,driver_rod|d32.5|l45|sds_plus,,WRO5,1.0,WRO5
+WERHE Ślimak ziemny 100 mm z uchwytem SDS Plus Wytrzymała końcówka wiertła Wiertło palowe Wiertło dwuwałowe,27,387.0,0,27,2024-07,2026-04,auger,sds_plus,800.0,auger|d100|sds_plus,,XPO1,1.0,XPO1
+"Adapter WERHE® 1 1/4"" UNC do tulei M16. Do wierteł rdzeniowych do otwornic do betonu, wiertła rdzeniowe do wierceń.",10,380.0,10,0,2024-06,2025-03,adapter,unc_1_1_4,150.0,adapter|unc_1_1_4,,WRO5,1.0,WRO5
+WERHE® Professional SDS HEX Spade Sisel 75 x 410 mm – Dłuto płaskie do młotów wyburzeniowych – Wytrzymała stal narzędziowa,8,380.0,8,0,2026-02,2026-04,chisel_flat,hex30,410.0,chisel_flat|d75|l410|hex30,,WRO5,1.0,WRO5
+Świder do Gleby 60D SDS PLUS,6,379.0,0,6,2026-07,2026-08,auger,sds_plus,800.0,auger|sds_plus,1ZWG60dp,XPO1,1.0,XPO1
+"WERHE® Profesjonalny wkrętak do gwoździ 25,5 x 35,5 x 160 mm do wbijania prętów do gruntów głębinowych - Jack Hammer Picket Post Driver Driver SDS Max",19,372.0,19,0,2024-07,2026-04,driver_rod,sds_max,35.5,driver_rod|d25.5|l35.5|sds_max,,WRO5,1.0,WRO5
+WERHE Wiertło wiertnicze 100 mm z wiertłem SDS Plus,12,368.0,0,12,2024-06,2025-07,other,sds_plus,800.0,other|sds_plus,,XPO1,1.0,XPO1
+Profesjonalny adapter do wiertarki ziemnej pasujący do wiertarki SDS MAX wiertarki akumulatorowej młot udarowo-obrotowy wiertło do palu,22,365.0,22,0,2024-07,2026-04,adapter,sds_max,150.0,adapter|sds_max,,WRO5,1.0,WRO5
+"WERHE Świder glebowy do wiertarki 80 mm Ø, 450 mm długości - Świder ogrodowy do wkrętarki akumulatorowej do sadzenia, kwiatów i kopania dołków - Narzędzie do kopania w ogrodzie",18,362.0,18,0,2024-12,2026-04,auger,,450.0,auger|d80|l450,,WRO5,1.0,WRO5
+WERHE ® Przedłużenie wiertła 500 mm SDS Max na SDS Max trzpień do adaptera,18,356.0,0,18,2024-09,2026-05,adapter,sds_max,500.0,adapter|sds_max,,XPO1,1.0,XPO1
+WERHE Professional 200 mm drążek przedłużający wytrzymały,26,354.0,26,0,2024-08,2026-05,other,,200.0,other,,WRO5,1.0,WRO5
+"WERHE Profesjonalny adapter do wiertnic ziemnych pasujący do wiertarki SDS MAX, wiertarki akumulatorowej, wiertarki udarowej, wiertarki palowej",10,350.0,10,0,2024-09,2025-10,adapter,sds_max,150.0,adapter|sds_max,,WRO5,1.0,WRO5
+"WERHE® 32,5 x 45 x 160 mm profesjonalny wkrętak do gwoździ szlifowanych do wbijania prętów do głębokiego uziemienia, prętów uziemiających - Jack Hammer Picket Post Driver Driver SDS Max",20,348.0,20,0,2024-06,2026-05,driver_rod,sds_max,45.0,driver_rod|d32.5|l45|sds_max,,WRO5,1.0,WRO5
+"WERHE® Przedłużka M14 - długość 120 mm - wałek przedłużający obrót do szlifierki kątowej - pręt przedłużający do mieszadła - talerze polerskie do gwintu M14, polerka samochodowa",18,340.0,18,0,2024-08,2026-03,extension,m14,120.0,extension|l120|m14,,WRO5,1.0,WRO5
+Adapter do świdra SDS PLUS,7,340.0,7,0,2026-07,2026-08,adapter,sds_plus,150.0,adapter|sds_plus,4APlus,WRO5,1.0,WRO5
+"WERHE® Profesjonalny wkrętak do gwoździ 25,5 x 35,5 x 100 mm do wbijania prętów do gruntów głębinowych - Jack Hammer Picket Post Driver Driver SDS Plus",20,330.0,20,0,2024-06,2026-04,driver_rod,sds_plus,35.5,driver_rod|d25.5|l35.5|sds_plus,,WRO5,1.0,WRO5
+"WERHE Świder glebowy do wiertarki 60 mm Ø, 450 mm długości - Świder ogrodowy do wkrętarki akumulatorowej do sadzenia, kwiatów i kopania dołków - Narzędzie do kopania w ogrodzie",15,327.0,0,15,2024-12,2026-04,auger,,450.0,auger|d60|l450,,XPO1,1.0,XPO1
+WERHE ® Profesjonalny adapter ślimakowy do wiertarki Stihl BT 106°C BT 120°C BT 121 BT 130 BT 131 biegun,14,325.0,14,0,2024-08,2025-11,adapter,,150.0,adapter,,WRO5,1.0,WRO5
+"WERHE Zestaw świdrów ziemnych Ø80 mm, długość 80 cm, z adapterem SDS Plus – Wytrzymała stal z metalowymi ostrzami do budowy ogrodzeń i prac ogrodniczych – Kompatybilny ze standardowymi wiertłami",5,320.0,0,5,2026-05,2026-05,adapter,sds_plus,800.0,adapter|d80|l800|sds_plus,,XPO1,1.0,XPO1
+WERHE Przedłużacz do wierteł 1000 mm – adapter SDS Max do głębokich wierceń – wytrzymały i kompatybilny,10,320.0,0,10,2026-02,2026-03,extension,sds_max,1000.0,extension|l1000|sds_max,,XPO1,1.0,XPO1
+WERHE profesjonalny adapter do świdrów odpowiedni do młotowiertarki SDS Max wiertarka do pali wiertarka akumulatorowa z szybką śrubą motylkową wykonany z wysokiej jakości stali sprężynowej,17,320.0,17,0,2024-06,2026-04,adapter,sds_max,150.0,adapter|sds_max,,WRO5,1.0,WRO5
+WERHE Profesjonalne wiertło do Auger 120 mm podwójny wał wytrzymały akumulator z adapterem SDS Max,23,317.0,0,23,2024-06,2026-05,auger,sds_max,800.0,auger|d120|sds_max|dbl,,XPO1,1.0,XPO1
+"WERHE® Adapter do wiertła diamentowego wiertła koronowego - 1 1/4"" cala UNC na M18 - dodatkowo z gwintem wewnętrznym 1/2"" cala",16,310.0,16,0,2024-07,2025-11,adapter,m18,150.0,adapter|m18|unc_1_1_4,,WRO5,1.0,WRO5
+WERKON 5 x brzeszczot do wyrzynarki 180 mm trzpień T T744D bardzo długie brzeszczoty do wyrzynarki do drewna,11,310.0,11,0,2024-06,2025-11,blade_jigsaw,,180.0,blade_jigsaw|T744D|l180|n5,,WRO5,1.0,WRO5
+WERHE® Uchwyt wiertarski SDS Plus z adapterem 1/2-20UNF - adapter SDS Plus do stosowania z wiertarką do betonu SDS Plus lub otwornicą do betonu,17,302.0,17,0,2024-06,2026-01,adapter,sds_plus,150.0,adapter|sds_plus|unf_1_2,,WRO5,1.0,WRO5
+WERHE profesjonalne wiertło do ślimaka 150 mm pełna stal runo wiertło do wiertła wiertła wytrzymałe,24,301.0,0,24,2024-07,2026-05,auger,,800.0,auger|d150,,XPO1,1.0,XPO1
+"WERHE brzeszczoty do wyrzynarki T744D, 180 mm, HCS, zestaw 5 szt.",2,300.0,2,0,2026-06,2026-06,blade_jigsaw,,180.0,blade_jigsaw|T744D|l180|n5,,WRO5,1.0,WRO5
+"WERHE Profi Adapter do wiertła glebowego pasuje do wiertarki SDS Plus Wiertarka akumulatorowa, Wiertło do pali. Wraz ze bolcem wykonaną z wysokiej jakości stali sprężynowej",14,295.0,14,0,2024-06,2026-05,adapter,sds_plus,150.0,adapter|sds_plus,,WRO5,1.0,WRO5
+WERHE® 85x105x234 Jack Hammer Star Picket Post Driver Bit dłuta do rozbiórki SDS Max hammer Breaker,22,281.0,22,0,2024-06,2026-03,driver_pile,sds_max,105.0,driver_pile|d85|l105|sds_max,,WRO5,1.0,WRO5
+"WERHE® Przedłużka M14 - długość 250mm - przedłużka obrotowa do szlifierki kątowej - przedłużka do mieszadła - pady polerskie do gwintów M14, polerka samochodowa",17,279.0,17,0,2024-08,2026-03,extension,m14,250.0,extension|l250|m14,,WRO5,1.0,WRO5
+WERHE Profesjonalne wiertło do wiertła do ziemi 100 mm Wiertarka kolumnowa,18,272.0,0,18,2024-08,2026-05,other,,800.0,other,,XPO1,1.0,XPO1
+WERHE Erdbohrer 100 mm z SDS Plus rejestrującym solidne wiertła wiertnicze,16,269.0,0,16,2025-09,2026-05,auger,sds_plus,800.0,auger|d100|sds_plus,,XPO1,1.0,XPO1
+"Profesjonalna wiertarka WERHE®, świder do wiertarki 150 mm wytrzymały z adapterem SDS Max - wiertło do wiercenia precyzyjna końcówka wiertła - świdra do ziemi",12,266.0,0,12,2025-07,2026-04,auger,sds_max,800.0,auger|d150|sds_max,,XPO1,1.0,XPO1
+WERHE® 66 A 85x105x234 Jack młotek gwiazda picket post driver dłuto do rozbiórki jackhammer wyłącznik automatyczny,21,265.0,21,0,2024-06,2026-06,driver_pile,,105.0,driver_pile|d85|l105,,WRO5,1.0,WRO5
+"Profesjonalna wiertarka WERHE®, świder do wiertarki 150 mm wytrzymały z adapterem SDS Max - wiertło do pali wiertło do wiercenia precyzyjna końcówka wiertła - wiertło do świdra do ziemi",22,264.0,0,22,2024-07,2025-06,auger,sds_max,800.0,auger|d150|sds_max,,XPO1,1.0,XPO1
+Świder do Gleby 40D SDS PLUS,6,264.0,0,6,2026-07,2026-08,auger,sds_plus,800.0,auger|sds_plus,1ZWG40dp,XPO1,1.0,XPO1
+Adapter do Świdra M14 gwint męski,5,260.0,5,0,2026-07,2026-08,adapter,m14,150.0,adapter|m14,4AM14,WRO5,1.0,WRO5
+"WERHE pobijak do uziomów SDS Plus Ø 20,2 mm ze stali do prętów",2,260.0,2,0,2026-06,2026-06,driver_rod,sds_plus,150.0,driver_rod|d20.2|sds_plus,,WRO5,1.0,WRO5
+"Pobijak 20,2mm SDS Max",7,255.0,7,0,2026-07,2026-08,driver_rod,sds_max,150.0,driver_rod|d20.2|sds_max,"6PO20,2m",WRO5,1.0,WRO5
+WERHE uchwyt do ślimaka dobrze nawiercana konstrukcja 56 cm bardzo długi uchwyt,16,255.0,0,16,2024-10,2026-03,auger,,560.0,auger|l560,,XPO1,1.0,XPO1
+WERHE profesjonalna wiertarka do ślimaka 150 mm pełna stal podwójny wałek runo dobrze wytrzymała z adapterem SDS Max,19,254.0,0,19,2024-07,2026-05,auger,sds_max,800.0,auger|d150|sds_max|dbl,,XPO1,1.0,XPO1
+WERHE Profesjonalne wiertło SDS Plus do betonu 14 x 600 mm wiertło udarowe wiertło do kamienia wiertło do betonu,9,247.0,0,9,2024-08,2026-04,drill_bit,sds_plus,600.0,drill_bit|d14|l600|sds_plus,,XPO1,1.0,XPO1
+WERHE ® Jack Hammer Compactor Anti Shock Hex Spline Rammer Tamping Shaft Plate Tamper Packer Beton Landscaper Builder Narzędzia do robót ziemnych do rozbiórki młota pneumatycznego,29,245.0,29,0,2024-06,2026-05,tamper,hex,150.0,tamper|hex,,WRO5,1.0,WRO5
+WERHE Profi SDS Max Dłuto płaskie Dłuto szerokie Dłuto płaskie szerokie 75 x 600 mm Dłuto płaskie szerokie,19,245.0,0,19,2024-08,2025-06,chisel_flat,sds_max,600.0,chisel_flat|d75|l600|sds_max,,XPO1,1.0,XPO1
+"WERHE ® Profesjonalne - 2 x drewniane dwustronne ostrza do wyrzynarki - C 116 mm T344CB - różne kształty szybkie ciasne cięcie czyste warstwy - dla ambitnych artystów, projektantów, inżynierów",11,242.0,11,0,2024-07,2026-01,other,,116.0,other,,WRO5,1.0,WRO5
+WERHE Profi SDS Max Dłuto płaskie Dłuto szerokie Dłuto płaskie szerokie 75 x 600 mm,18,239.0,0,18,2025-07,2026-01,chisel_flat,sds_max,600.0,chisel_flat|d75|l600|sds_max,,XPO1,1.0,XPO1
+WERHE świder ziemny z adapter SDS Plus 60 mm 80 cm do wiertarki i budowy,3,237.0,0,3,2026-06,2026-06,auger,sds_plus,800.0,auger|d60|l800|sds_plus,,XPO1,1.0,XPO1
+WERHE ® 13.5x35x260mm Profesjonalny wzmocniony wbijak do gwoździ do gleby Młot pneumatyczny Wbijak do słupków SDS Max,21,235.0,21,0,2024-08,2026-04,driver_rod,sds_max,35.0,driver_rod|d13.5|l35|sds_max,,WRO5,1.0,WRO5
+WERHE Adapter SDS MAX do M14I wewnętrzny,18,233.0,18,0,2024-07,2026-05,adapter,sds_max,150.0,adapter|sds_max,,WRO5,1.0,WRO5
+WERHE Profesjonalne dłuto szpiczaste SDS z chwytem sześciokątnym do młota wyburzeniowego 30 x 410 mm ze stali nierdzewnej,21,226.0,0,21,2024-09,2026-05,chisel_flat,hex,410.0,chisel_flat|d30|l410|hex,,XPO1,1.0,XPO1
+WERHE ® Professional – 2 x metalowe ostrza do wyrzynarki – C185 180 mm T718GF bardzo długie – szybkie cięcie ciężkiej pracy – dla ambitnych artystów,8,225.0,8,0,2024-06,2025-10,other,,180.0,other,,WRO5,1.0,WRO5
+"WERHE Świder glebowy do wiertarki 100 mm Ø, 450 mm długości - Świder ogrodowy do wkrętarki akumulatorowej do sadzenia, kwiatów i kopania dołków - Narzędzie do kopania w ogrodzie",20,221.0,0,20,2024-12,2026-04,auger,,450.0,auger|d100|l450,,XPO1,1.0,XPO1
+"WERHE® SDS Plus dłuto zestaw 600 mm, 3-częściowy dłuto spiczaste, 25, 50 mm, końcówka dłuto",25,220.0,0,25,2024-09,2026-01,set_chisel,sds_plus,600.0,set_chisel|sds_plus|n3,,XPO1,1.0,XPO1
+"WERHE Profesjonalne brzeszczoty do wyrzynarki T744D zestaw 5 sztuk, 180 mm, bardzo długie ostrza do precyzyjnego cięcia drewna, kompatybilne z wyrzynarkami Bosch, METABO, MAKITA i chwytem T",1,220.0,1,0,2025-11,2025-11,blade_jigsaw,,180.0,blade_jigsaw|T744D|l180|n5,,WRO5,1.0,WRO5
+Przedłużka do świdra 1000mm,8,218.0,0,8,2026-07,2026-08,extension,,1000.0,extension|l1000,5PR1000,XPO1,1.0,XPO1
+"WERHE ® Profesjonalne - 5 x drewniane ostrza do wyrzynarki, C 152 mm, T544D, bardzo długie, szybkie cięcie, grube warstwy, kompatybilne z wyrzynarkami Bosch, Metabo, Milwaukee, Makita",7,215.0,7,0,2025-01,2025-10,other,,152.0,other,,WRO5,1.0,WRO5
+"WERHE Świder glebowy do wiertarki 50 mm Ø, 220 mm długości - Świder ogrodowy do wkrętarki akumulatorowej do sadzenia, kwiatów i kopania dołków - Narzędzie do kopania w ogrodzie",11,213.0,11,0,2024-12,2026-04,auger,,220.0,auger|d50,,WRO5,1.0,WRO5
+Przedłużka do świdra 400mm,6,210.0,6,0,2026-07,2026-08,extension,,400.0,extension|l400,5PR400,WRO5,1.0,WRO5
+WERHE Przedłużacz do wiercenia 750 mm – SDS Max adapter do głębokich otworów – wytrzymały i kompatybilny,15,208.0,0,15,2025-09,2026-03,extension,sds_max,750.0,extension|l750|sds_max,,XPO1,1.0,XPO1
+WERHE SDS Max wiertło do betonu 40 x 600 mm wiertło udarowe wiertło do kamienia wiertło do betonu,15,206.0,0,15,2024-08,2026-04,drill_bit,sds_max,600.0,drill_bit|d40|l600|sds_max,,XPO1,1.0,XPO1
+"WERHE ® Wbijak gwoździ SDS Plus 20,2 mm do młotowiertarek – Wydajne narzędzie do wbijania gwoździ i prętów – Wytrzymała stal chromowo-wanadowa",2,200.0,2,0,2026-03,2026-05,driver_rod,sds_plus,150.0,driver_rod|d20.2|sds_plus,,WRO5,1.0,WRO5
+Smar z dwusiarczkiem molibdenu - 100ml,2,200.0,2,0,2026-08,2026-08,grease,,150.0,grease|d100,4Smar100,WRO5,1.0,WRO5
+"WERHE Zestaw 5 brzeszczotów do wyrzynarek Professional T744D 180 mm – Bardzo długie brzeszczoty do precyzyjnych cięć w drewnie, kompatybilne z wyrzynarkami BOSCH, METABO, MAKITA oraz z chwytem T.",2,200.0,2,0,2026-04,2026-05,other,,180.0,other,,WRO5,1.0,WRO5
+WERHE Wiertarka uziemiająca z uchwytem SDS Max 40 mm Wytrzymała końcówka wiertła 40mm,11,198.0,0,11,2025-02,2026-03,other,sds_max,800.0,other|sds_max,,XPO1,1.0,XPO1
+"Werhe® Sds max do Sds plus Adapter. Wysokiej jakości adapter SDS Max z uchwytem SDS Plus, adapter uchwytu wiertarskiego, do wiertarki udarowej SDS Max i narzędzi SDS Plus.",12,197.0,12,0,2024-06,2026-03,adapter,sds_max,150.0,adapter|sds_max|sds_plus,,WRO5,1.0,WRO5
+"Adapter WERHE® HEX do gwintu wewnętrznego m14 - wytrzymały i stabilny, wykonany ze stali - pasuje do wszystkich wiertarek i wkrętarek akumulatorowych z uniwersalnym uchwytem wiertarskim",13,195.0,13,0,2024-07,2026-04,adapter,hex,150.0,adapter|hex|m14,,WRO5,1.0,WRO5
+"WERHE adapter SDS Max do wierteł ziemnych – łączy wiertarki z uchwytami SDS Max i wiertła ziemne WERHE (40-200 mm) – solidna konstrukcja stalowa, długość 140 mm",5,195.0,5,0,2026-02,2026-05,adapter,sds_max,140.0,adapter|l140|sds_max,,WRO5,1.0,WRO5
+"WERHE Świder ziemny do wiertarki z adapterem SDS Max ⌀50 mm, długość 80 cm - świder do studni, świder do sadzenia drzew, świder do otworów ziemnych, świder do pali, świder do przepustów",15,194.0,0,15,2024-06,2026-05,auger,sds_max,800.0,auger|d50|l800|sds_max,,XPO1,1.0,XPO1
+"WERHE Profesjonalne dłuto łopatkowe SDS Max, płaskie, 50 x 600 mm szerokości",15,189.0,0,15,2024-08,2026-05,chisel_flat,sds_max,600.0,chisel_flat|d50|l600|sds_max,,XPO1,1.0,XPO1
+"WERHE® Adapter do diamentowych wierteł rdzeniowych - 1 1/4"" cala UNC na HEX - do wkrętarek akumulatorowych - dodatkowo z gwintem wewnętrznym 1/2˝ cala",13,187.0,13,0,2024-06,2025-10,adapter,hex,150.0,adapter|hex|unc_1_1_4,,WRO5,1.0,WRO5
+"WERHE ® Profesjonalne - 2 x drewniane ostrza do wyrzynarki - C 250 mm T1044D Jumbo Long - szybkie cięcie grubych warstw - kompatybilne z wyrzynarkami Bosch, Metabo, Milwaukee, Makita",9,185.0,9,0,2024-09,2025-09,other,,250.0,other,,WRO5,1.0,WRO5
+"WERHE świder ziemny do wiertnicy ⌀50 mm, długość 80 cm - świder do studni, świder do sadzenia drzew, świder do otworów ziemnych, świder do pali, świder do przepustów - narzędzie do kopania",13,182.0,0,13,2024-06,2026-04,auger,,800.0,auger|d50|l800,,XPO1,1.0,XPO1
+Werkon Profesjonalny adapter ślimakowy do wiertarki Stihl BT 106 BT 120 BT 121 BT 130 BT 131 biegun,7,181.0,7,0,2024-06,2025-07,adapter,,150.0,adapter,,WRO5,1.0,WRO5
+"WERHE dłuto łopatkowe SDS Hex 75x410 mm, do betonu, mur, młot wyburzeniowy",1,180.0,1,0,2026-06,2026-06,chisel_flat,hex30,410.0,chisel_flat|d75|l410|hex30,,WRO5,1.0,WRO5
+Adapter gwint 1/2-20unf zewnętrzny na m14 zewnętrzny (7),2,180.0,2,0,2026-07,2026-08,adapter,m14,150.0,adapter|m14|unf_1_2,4A1/2-20UNF-M14,WRO5,1.0,WRO5
+Świder Do gleby 150D SDS MAX,9,175.0,0,9,2026-07,2026-08,auger,sds_max,800.0,auger|sds_max,1ZWG150dm,XPO1,1.0,XPO1
+Adapter do świdra SDS MAX,5,175.0,5,0,2026-07,2026-08,adapter,sds_max,150.0,adapter|sds_max,4AMax,WRO5,1.0,WRO5
+WERHE Adapter sześciokątny do wiertarek ziemnych – stalowy adapter sześciokątny do wiertarek akumulatorowych – kompatybilny z wiertarkami do otworów w ziemi 40-200 mm,5,175.0,5,0,2026-03,2026-05,adapter,hex,150.0,adapter|hex,,WRO5,1.0,WRO5
+WERHE ® Professional HEX28 Dłuto płaskie 75 x 400 mm Uchwyt sześciokątny 28 mm do młota wyburzeniowego Dłuto płaskie płaskie,19,174.0,19,0,2024-08,2026-05,chisel_flat,hex28,400.0,chisel_flat|d75|l400|hex28,,WRO5,1.0,WRO5
+"WERHE Świder glebowy do wiertarki 100 mm Ø, 250 mm długości - Świder ogrodowy do wkrętarki akumulatorowej do sadzenia, kwiatów i kopania dołków - Narzędzie do kopania w ogrodzie",14,173.0,14,0,2024-12,2026-04,auger,,250.0,auger|d100,,WRO5,1.0,WRO5
+WERHE Profesjonalny wiertło do ślimaka 80 mm dobrze precyzyjne spiralne ekologiczne farby z adapterem sześciokątnym,14,173.0,0,14,2024-08,2026-04,auger,hex,800.0,auger|d80|hex,,XPO1,1.0,XPO1
+WERHE ® Przedłużenie wiercenia 300 mm SDS Max do SDS Max chwyt do nagrywania adaptera,12,172.0,12,0,2024-12,2026-03,adapter,sds_max,300.0,adapter|sds_max,,WRO5,1.0,WRO5
+"WERKON Profesjonalny adapter do wiertnic ziemnych, pasujący do wiertarki SDS Plus, wkrętarki akumulatorowej, wiertarki palowej",6,170.0,6,0,2026-03,2026-05,adapter,sds_plus,150.0,adapter|sds_plus,,WRO5,1.0,WRO5
+"WERHE adapter do wierteł ziemnych STIHL BT 106 C, BT 120 C, BT 121, BT 130, BT 131 – Wysokiej jakości stal, uniwersalne zastosowanie",8,170.0,8,0,2026-02,2026-05,adapter,,150.0,adapter,,WRO5,1.0,WRO5
+Adapter z M18 do 1.1/4,8,164.0,8,0,2026-07,2026-08,adapter,m18,150.0,adapter|m18|unc_1_1_4,4AM18-1.1/4,WRO5,1.0,WRO5
+"WERHE® Adapter M14 do wiertła do gleby ze śrubą motylkową, ADAPTER do9 MIESZadła M14 WIERTARKA DO GRUNTÓW, ŚLIMAK, mieszadło do betonu",14,162.0,14,0,2024-07,2026-03,adapter,m14,150.0,adapter|m14,,WRO5,1.0,WRO5
+WERHE® Adapter do wiertła diamentowego wiertła rdzeniowego - 1 1/4 cala UNC na M16 - dodatkowo z gwintem wewnętrznym 1/2 cala,10,160.0,10,0,2024-06,2025-12,adapter,unc_1_1_4,150.0,adapter|unc_1_1_4,,WRO5,1.0,WRO5
+Werhe® 5 szt. Szybka wymiana śrub do wierteł ziemnych. Śruba bezpieczeństwa z zawleczką. Wykonany z wysokiej jakości stali sprężynowej. Śruba nadaje się do wszystkich uniwersalnych wierteł ziemnych.,11,160.0,11,0,2024-06,2026-05,pin,,150.0,pin|n5,,WRO5,1.0,WRO5
+"Zestaw świdrów ziemnych WERHE Ø60 mm, dł. 80 cm z adapterem SDS Plus – kompatybilny ze standardowymi wiertłami SDS Plus, idealny do budowy ogrodzeń i prac ogrodniczych.",2,156.0,0,2,2026-05,2026-05,adapter,sds_plus,800.0,adapter|d60|sds_plus,,XPO1,1.0,XPO1
+WERHE Profesjonalny adapter do świdrów pasujący do młotowiertarki SDS Max do wiercenia pali wiertarka akumulatorowa z Bolcem wykonany z wysokiej jakości stali sprężynowej,11,156.0,11,0,2024-06,2026-05,adapter,sds_max,150.0,adapter|sds_max,,WRO5,1.0,WRO5
+"Adapter WERHE® 1 1/4” UNC do gniazda M18. Do połączenia wiertła koronowego z otwornicą do betonu, wiertła koronowego z wiertłem puszkowym.",14,155.0,14,0,2024-08,2026-05,adapter,m18,150.0,adapter|m18|unc_1_1_4,,WRO5,1.0,WRO5
+"WERHE®adapter do wierteł diamentowych – gwint M18 na 1 1/4"" UNC i gwint wewnętrzny 1/2"" – solidne stalowe złącze do precyzyjnego wiercenia na mokro w betonie i kamieniu",7,155.0,7,0,2026-02,2026-05,adapter,m18,150.0,adapter|m18|unc_1_1_4,,WRO5,1.0,WRO5
+"WERHE Profi SDS PLUS Wiertło do betonu 32 x 260 mm Wiertło młotkowe Wiertło do muru, wiertło do betonu",9,153.0,9,0,2024-06,2026-04,drill_bit,sds_plus,260.0,drill_bit|d32|l260|sds_plus,,WRO5,1.0,WRO5
+WERHE Wiertło do betonu SDS MAX 16 x 600 mm - wiertło do muru pasuje do wiertarki - wiertło udarowe do wiercenia w betonie i cegle - poczwórna krawędź tnąca z podwójną spiralą i końcówką z węglików,13,151.0,0,13,2025-02,2026-04,drill_bit,sds_max,600.0,drill_bit|d16|l600|sds_max|dbl,,XPO1,1.0,XPO1
+WERHE® 55x70x220 Młot udarowy gwiazdkowy do wbijania słupków z dłutem do wyburzeń Młot udarowy SDS Max,14,150.0,14,0,2024-06,2025-12,driver_rod,sds_max,70.0,driver_rod|d55|l70|sds_max,,WRO5,1.0,WRO5
+"WERKON Zestaw 5 brzeszczotów do wyrzynarek Professional T744D 180 mm – Bardzo długie brzeszczoty do precyzyjnych cięć w drewnie, kompatybilne z wyrzynarkami BOSCH, METABO, MAKITA oraz z chwytem T.",3,150.0,3,0,2026-02,2026-04,other,,180.0,other,,WRO5,1.0,WRO5
+"WERHE ® Zestaw dłut SDS Plus 400 mm 3-częściowy 20, 50 mm",11,149.0,0,11,2024-12,2026-03,set_chisel,sds_plus,400.0,set_chisel|sds_plus|n3,,XPO1,1.0,XPO1
+WERHE ® Professional SDS Max Dłuto łopatkowe 110 x 410 mm Uchwyt SDS Max 18 mm do wiertarki Dłuto do młotowiertarki Plastikowa walizka,20,147.0,0,20,2024-08,2025-11,chisel_flat,sds_max,410.0,chisel_flat|d110|l410|sds_max,,XPO1,1.0,XPO1
+WERHE ® 20.2x35x257 Profesjonalny wzmocniony młot do wbijania gwoździ w ziemię młot udarowy do wbijania pali SDS Max,18,146.0,18,0,2024-08,2026-02,driver_rod,sds_max,35.0,driver_rod|d20.2|l35|sds_max,,WRO5,1.0,WRO5
+"WERHE® Adapter M14 do wiertarki ziemnej ze bolcem szybkomocującym, ADAPTER MIESZANIA M14 WIERTARKA DO GRUNTÓW, ŚRUBA, mieszadło do betonu",12,145.0,12,0,2024-06,2026-03,adapter,m14,150.0,adapter|m14,,WRO5,1.0,WRO5
+"WERHE Profesjonalny zestaw dłut sześciokątnych SDS, 2 sztuki, 35, 50 x 410 mm, końcówka płaska do młota wyburzeniowego",25,142.0,0,25,2024-06,2025-11,set_chisel,hex,410.0,set_chisel|hex|n50,,XPO1,1.0,XPO1
+"WERHE ® Wbijak do kotew gruntowych SDS-Max 13,5 x 35 x 260 mm – Wytrzymała stal do prętów uziomowych i kołków uziemiających – Kompatybilny z młotami udarowo-obrotowymi – Profesjonalna jakość",4,142.0,4,0,2026-03,2026-03,driver_rod,sds_max,35.0,driver_rod|d13.5|l35|sds_max,,WRO5,1.0,WRO5
+Świder do Gleby 80D SDS PLUS,5,140.0,0,5,2026-07,2026-08,auger,sds_plus,800.0,auger|sds_plus,1ZWG80dp,XPO1,1.0,XPO1
+WERHE Wiertarka ziemna z uchwytem SDS Max 100 mm wiertło wiertło runo 100 mm,10,138.0,0,10,2025-01,2026-05,other,sds_max,800.0,other|sds_max,,XPO1,1.0,XPO1
+WERHE Profesjonalne wiertło SDS Plus do betonu 16 x 460 mm wiertło udarowe wiertło do kamienia wiertło do betonu,4,136.0,0,4,2024-08,2025-01,drill_bit,sds_plus,460.0,drill_bit|d16|l460|sds_plus,,XPO1,1.0,XPO1
+WERHE ® Profi HEX28 dłuto szpiczaste 28 x 400 mm gniazdo sześciokątne 28 mm do młota wyburzeniowego dłuto szpiczaste Dłuto,16,135.0,16,0,2024-09,2026-05,chisel_flat,hex28,400.0,chisel_flat|d28|l400|hex28,,WRO5,1.0,WRO5
+WERHE Profesjonalny otwór odpowiedni do wiertarki udarowej SDS Max adapter do wiertarki udarowej do wiertarki biegunowej,4,135.0,4,0,2024-06,2025-09,adapter,sds_max,150.0,adapter|sds_max,,WRO5,1.0,WRO5
+"Adapter WERHE® 1 1/4"" UNC na gniazdo R 1/2""BSPP. Wiertło koronowe do otwornicy do betonu, wiertło koronowe do wiertarki puszkowej.",7,133.0,7,0,2026-01,2026-04,adapter,unc_1_1_4,150.0,adapter|unc_1_1_4,,WRO5,1.0,WRO5
+Adapter Hex,3,130.0,3,0,2026-07,2026-08,adapter,hex,150.0,adapter|hex,4AHex,WRO5,1.0,WRO5
+"WERHE Dłuto płaskie SDS Max 75 x 600 mm – szerokie dłuto wykonane z hartowanej stali do betonu i muru, kompatybilne z młotami udarowo-obrotowymi",6,130.0,0,6,2026-02,2026-05,chisel_flat,sds_max,600.0,chisel_flat|d75|l600|sds_max,,XPO1,1.0,XPO1
+Świder Ogrodowy 60X600,5,130.0,0,5,2026-07,2026-08,auger,,600.0,auger|d60|l600,1Wo60x600,XPO1,1.0,XPO1
+WERHE ® Przedłużacz wiertła 750 mm SDS Max na SDS Max trzpień do adaptera uchwyt,9,128.0,0,9,2024-08,2025-07,extension,sds_max,750.0,extension|l750|sds_max,,XPO1,1.0,XPO1
+WERHE Profesjonalne wiertło do ślimaka 60 mm stos dobrze precyzyjna spiralna farba ekologiczna z adapterem sześciokątnym,11,127.0,0,11,2024-06,2026-04,auger,hex,800.0,auger|d60|hex,,XPO1,1.0,XPO1
+Świder do Gleby 150H SDS PLUS,8,126.0,0,8,2026-07,2026-08,auger,sds_plus,800.0,auger|sds_plus,1ZWG150hp,XPO1,1.0,XPO1
+Świder do Gleby 50D SDS PLUS,2,126.0,0,2,2026-07,2026-08,auger,sds_plus,800.0,auger|sds_plus,1ZWG50dp,XPO1,1.0,XPO1
+WERHE ® Professional SDS Plus Spitz szpiczasty 600 mm młot rozbiórkowy beton,12,125.0,0,12,2024-08,2026-04,chisel_point,sds_plus,600.0,chisel_point|l600|sds_plus,,XPO1,1.0,XPO1
+"WERHE® Profi SDS PLUS wiertarka do betonu 40 x 600 mm wiertarka do kamienia, wiertarka do betonu",10,125.0,0,10,2024-06,2026-04,drill_bit,sds_plus,600.0,drill_bit|d40|l600|sds_plus,,XPO1,1.0,XPO1
+Świder do Gleby 80D SDS MAX,6,124.0,0,6,2026-07,2026-08,auger,sds_max,800.0,auger|sds_max,1ZWG80dm,XPO1,1.0,XPO1
+Wiertło do betonu SDS Plus profesjonalna jakość do młotowiertarki 32 x 600 mm,9,123.0,0,9,2024-10,2026-04,drill_bit,sds_plus,600.0,drill_bit|d32|l600|sds_plus,,XPO1,1.0,XPO1
+"WERHE ® Professional - 10 x drewniane ostrza do wyrzynarki - C 180 mm T744D bardzo długi - szybkie cięcie grube warstwy - kompatybilne z wyrzynarkami Bosch, Metabo, Milwaukee, Makita",10,122.0,10,0,2024-07,2025-11,other,,180.0,other,,WRO5,1.0,WRO5
+WERKON Profesjonalne wiertło do betonu SDS Plus 10 x 600 mm wiertło udarowe wiertło do kamienia wiertło do betonu Quadro X poczwórne ostrze ostrze krzyżowe,10,120.0,0,10,2024-08,2026-04,drill_bit,sds_plus,600.0,drill_bit|d10|l600|sds_plus,,XPO1,1.0,XPO1
+WERHE Przedłużka do świdra ziemnego 1000 mm – solidna stalowa konstrukcja do głębszych wierceń – profesjonalna jakość,4,120.0,0,4,2026-05,2026-05,extension,,1000.0,extension|l1000,,XPO1,1.0,XPO1
+"WERHE Profesjonalny brzeszczot do wyrzynarki do drewna, C 250 mm, T225B, smukły, długi, szeroki, grubszy warstw, kompatybilny z wyrzynarkami Bosch, Metabo, Milwaukee, Makita",5,120.0,5,0,2025-11,2026-04,blade_jigsaw,,250.0,blade_jigsaw|T225B|l250,,WRO5,1.0,WRO5
+WERHE Profesjonalny adapter SDS Plus do M14 wewnętrzny,8,120.0,8,0,2025-12,2026-05,adapter,sds_plus,150.0,adapter|sds_plus|m14,,WRO5,1.0,WRO5
+Świder do Gleby 100H SDS Plus,4,120.0,0,4,2026-07,2026-08,auger,sds_plus,800.0,auger|sds_plus,,XPO1,1.0,XPO1
+WERHE Wiertło do betonu SDS MAX 18 x 600 mm - wiertło do muru pasuje do wiertarki - wiertło udarowe do wiercenia w betonie i cegle - poczwórna krawędź tnąca z podwójną spiralą i końcówką z węglików,12,119.0,0,12,2025-02,2026-03,drill_bit,sds_max,600.0,drill_bit|d18|l600|sds_max|dbl,,XPO1,1.0,XPO1
+WERHE Profesjonalne wiertło do ślimaków 40 mm bateria precyzyjna spirala Eco kolorowa farba z adapterem sześciokątnym,11,119.0,0,11,2024-11,2026-05,auger,hex,800.0,auger|d40|hex,,XPO1,1.0,XPO1
+"WERHE Profesjonalny zestaw adapterów ślimakowych odpowiedni do wiertarki udarowej SDS Plus, a także do wiertarki akumulatorowej SDS Max z 2 szt.. Śruba wykonana z wysokiej jakości stali sprężynowej.",12,119.0,12,0,2024-08,2026-05,set_adapter,sds_max,150.0,set_adapter|sds_max|sds_plus|n2,,WRO5,1.0,WRO5
+WERHE profesjonalne wiertło do ziemi 120 mm wiertło do pali wiertło do studni precyzyjne wiertło punktowe,9,118.0,0,9,2024-06,2025-10,auger,,800.0,auger|d120,,XPO1,1.0,XPO1
+"WERHE ® 20.2x35x257 Profesjonalny wbijak do gwoździ, wbijak do słupów, przecinak HEX do młotów wyburzeniowych.",13,118.0,13,0,2024-06,2026-04,driver_rod,hex,35.0,driver_rod|d20.2|l35|hex,,WRO5,1.0,WRO5
+Wbijak do pali 85x105x234 mm HEX30,6,114.0,6,0,2026-07,2026-08,driver_pile,hex30,105.0,driver_pile|d85|l105|hex30,6PO85x234h30;6PO85x220h30,WRO5,1.0,WRO5
+WERKON SDS Max wiertło do betonu 40 x 600 mm wiertło udarowe wiertło do kamienia wiertło do betonu,16,112.0,0,16,2024-06,2026-05,drill_bit,sds_max,600.0,drill_bit|d40|l600|sds_max,,XPO1,1.0,XPO1
+"Profesjonalna wiertarka WERHE®, świder do wiertarki Wytrzymała 150 mm, wiertło do świdra do ziemi.",7,112.0,0,7,2025-09,2026-05,auger,,800.0,auger|d150,,XPO1,1.0,XPO1
+Świder do Gleby 100D SDS PLUS,3,112.0,0,3,2026-07,2026-08,auger,sds_plus,800.0,auger|sds_plus,1ZWG100dp,XPO1,1.0,XPO1
+"WERHE® M14 na 1/2""-20 UNF – Wysokiej jakości stalowy adapter do uchwytów wiertarskich i mieszadeł, wytrzymały i wszechstronnych",3,110.0,3,0,2026-02,2026-05,adapter,m14,150.0,adapter|m14,,WRO5,1.0,WRO5
+WERHE Profi Adapter do wiertarki ziemnej odpowiedni do wiertarki SDS Plus Wiertarka akumulatorowa Wiertarka do pali z szybkozłączką wykonany z wysokiej jakości stali sprężynowej,8,110.0,8,0,2024-07,2026-05,adapter,sds_plus,150.0,adapter|sds_plus,,WRO5,1.0,WRO5
+"WERHE Adapter SDS-Plus na SDS-Max – używaj osprzętu SDS-Max z młotem SDS-Plus – obrót i udar – wykonany ze stali narzędziowej, tworzywa sztucznego – długość 200 mm, 0,77 kg",9,109.0,9,0,2025-09,2026-05,adapter,sds_max,200.0,adapter|l200|sds_max|sds_plus,,WRO5,1.0,WRO5
+WERHE Profesjonalny adapter SDS Plus do wewnętrznego M14,9,109.0,9,0,2024-07,2025-08,adapter,sds_plus,150.0,adapter|sds_plus|m14,,WRO5,1.0,WRO5
+Świder do gleby 120D,4,108.0,0,4,2026-07,2026-08,auger,,800.0,auger,1WG120d,XPO1,1.0,XPO1
+Wbijak do pali 85x105x234mm SDS Max,2,108.0,2,0,2026-07,2026-08,driver_pile,sds_max,105.0,driver_pile|d85|l105|sds_max,6PO85x234m,WRO5,1.0,WRO5
+"WERHE pobijak do uziomów SDS Max 20,2 mm",2,106.0,2,0,2026-06,2026-06,driver_rod,sds_max,150.0,driver_rod|d20.2|sds_max,,WRO5,1.0,WRO5
+Świder do gleby 40D,3,105.0,0,3,2026-07,2026-08,auger,,800.0,auger,1WG40d,XPO1,1.0,XPO1
+"WERHE świder ziemny Ø 40 mm, długość 80 cm, z adapter do wiertarki SDS Plus",3,105.0,0,3,2026-06,2026-06,auger,sds_plus,800.0,auger|d40|l800|sds_plus,,XPO1,1.0,XPO1
+"Pobijak 13,5mm SDS Max",4,105.0,4,0,2026-07,2026-08,driver_rod,sds_max,150.0,driver_rod|d13.5|sds_max,"6PO13,5m",WRO5,1.0,WRO5
+Adapter Łącznik MAX do MAX,3,105.0,3,0,2026-07,2026-07,adapter,,150.0,adapter,4Am-m,WRO5,1.0,WRO5
+Werhe® 5 szt. szybkośrubek do wierteł do ziemi. Wiertło zabezpieczające z przetyczką. Wykonane z wysokiej jakości stali sprężynowej. Śruba Pasuje do wszystkich uniwersalnych wierteł do ziemi.,8,105.0,8,0,2024-08,2025-10,spring,,150.0,spring,,WRO5,1.0,WRO5
+WERHE® adapter SDS Max do SDS Max – Wytrzymały stalowy łącznik do przedłużek wiertniczych 190 mm,3,105.0,3,0,2026-02,2026-05,adapter,sds_max,190.0,adapter|sds_max,,WRO5,1.0,WRO5
+"WERHE przedłużka do świdra ziemnego, 40 cm, uchwyt 20 mm, stal hartowana",3,102.0,3,0,2026-06,2026-06,extension,shank20,400.0,extension|l400|shank20,,WRO5,1.0,WRO5
+Adapter SDS Plus do SDS MAX,4,100.0,4,0,2026-07,2026-08,adapter,sds_max,150.0,adapter|sds_max|sds_plus,4Ap-m,WRO5,1.0,WRO5
+WERHE Wiertło uziemiające z adapterem SDS Max 80 mm solidne wiertło do runa 80 mm,5,100.0,0,5,2024-06,2024-09,adapter,sds_max,800.0,adapter|sds_max,,XPO1,1.0,XPO1
+Dłuto do betonu 75x410 Hex 30mm,2,100.0,2,0,2026-08,2026-08,chisel_flat,hex30,410.0,chisel_flat|d75|l410|hex30,3DB75x410h30,WRO5,1.0,WRO5
+"WERKON brzeszczoty do wyrzynarki T744D, HCS, 180 mm, do Bosch, Metabo",2,100.0,2,0,2026-06,2026-06,blade_jigsaw,,180.0,blade_jigsaw|T744D|l180,,WRO5,1.0,WRO5
+"WERHE smar MoS2 100 ml, smar uniwersalny",1,100.0,1,0,2026-06,2026-06,grease,,150.0,grease|d100,,WRO5,1.0,WRO5
+Świder do gleby 60D,4,98.0,0,4,2026-07,2026-08,auger,,800.0,auger,1WG60d,XPO1,1.0,XPO1
+WERHE Professional 5000 mm drążek przedłużający wytrzymały,19,97.0,0,19,2024-06,2025-08,other,,5000.0,other,,XPO1,1.0,XPO1
+Przedłużka do świdra 600mm,4,96.0,0,4,2026-07,2026-08,extension,,600.0,extension|l600,5PR600,XPO1,1.0,XPO1
+"WERHE Świder glebowy do wiertarki 100 mm Ø, 300 mm długości - Świder ogrodowy do wkrętarki akumulatorowej do sadzenia, kwiatów i kopania dołków - Narzędzie do kopania w ogrodzie",9,96.0,9,0,2024-12,2026-04,auger,,300.0,auger|d100,,WRO5,1.0,WRO5
+"WERHE ® Wbijak do kotew gruntowych SDS Plus, średnica wewnętrzna 16,5 mm – długość 100 mm, grubość 25 mm – wkrętak do prętów uziomowych do wiertarek SDS-Plus – solidny i precyzyjny",2,95.0,2,0,2026-03,2026-04,driver_rod,sds_plus,100.0,driver_rod|d16.5|l100|sds_plus,,WRO5,1.0,WRO5
+"WERHE ® 13,5x22x65 Profesjonalny młot udarowy z gwoździarką - gwoździarka SDS Plus",7,95.0,7,0,2024-06,2025-10,other,sds_plus,65.0,other|sds_plus,,WRO5,1.0,WRO5
+GRYF ręczny do świdra glebowego,5,94.0,0,5,2026-07,2026-08,handle,,560.0,handle,5gryf,XPO1,1.0,XPO1
+"Adapter do wiertnic ziemnych kompatybilny z wiertarkami pilarskimi Stihl BT 106 C, BT 120 C, BT 121, BT 130",6,93.0,6,0,2025-11,2026-06,adapter,,150.0,adapter,,WRO5,1.0,WRO5
+"WERHE ® Professional 5 szt. SDS Plus wiertło do betonu 6,5 x 260 mm kamień młotkowy Quadro X Quadruple cięcie krzyżowe",7,92.0,7,0,2024-06,2026-04,drill_bit,sds_plus,260.0,drill_bit|d6.5|l260|sds_plus,,WRO5,1.0,WRO5
+WERHE® 55x75x210 Jack Hammer Star Picket Post Driver Driver Dłuto do wyburzeń SDS Max młot udarowy,12,91.0,12,0,2024-06,2026-03,driver_pile,sds_max,75.0,driver_pile|d55|l75|sds_max,,WRO5,1.0,WRO5
+"Pobijak 32,5 SDS Max",3,90.0,3,0,2026-07,2026-08,driver_rod,sds_max,150.0,driver_rod|sds_max,"6PO32,5m",WRO5,1.0,WRO5
+"WERHE adapter M14 do świdra ziemnego, twarda stal, do mieszadeł i wiertarek",1,90.0,1,0,2026-06,2026-06,adapter,m14,150.0,adapter|m14,,WRO5,1.0,WRO5
+"WERHE® adapter do wierteł diamentowych – 1 1/4"" UNC na HEX – do wkrętarek akumulatorowych i wiertarek z uchwytami uniwersalnymi – z gwintem wewnętrznym 1/2""",5,90.0,5,0,2026-02,2026-05,adapter,hex,150.0,adapter|hex|unc_1_1_4,,WRO5,1.0,WRO5
+WERHE ® Przedłużenie wiertła 1180 mm SDS Max do uchwytu adaptera SDS Max,10,90.0,0,10,2025-03,2026-03,adapter,sds_max,1180.0,adapter|sds_max,,XPO1,1.0,XPO1
+"WERHE ® 16,5x25x65 Profesjonalny młot udarowy z gwoździarką - gwoździarka SDS Plus",8,90.0,8,0,2024-07,2026-01,other,sds_plus,65.0,other|sds_plus,,WRO5,1.0,WRO5
+"WERHE® Groszkownik SDS Plus 25 zębów dł. 300 mm, kwadrat 40 mm - Młoty nasadowe do młotowiertarek elektrycznych - Nasadki wyburzeniowe, do młotkowania betonu - Dłuto młotkowe",7,89.0,7,0,2025-03,2025-07,chisel_bush,sds_plus,300.0,chisel_bush|d40|l300|sds_plus,,WRO5,1.0,WRO5
+WERHE Profesjonalne dłuto sześciokątne SDS z trzpieniem walcowym do młota rozbiórkowego 30 x 410 mm ze stali nierdzewnej,7,88.0,0,7,2024-06,2024-08,chisel_flat,hex,410.0,chisel_flat|d30|l410|hex,,XPO1,1.0,XPO1
+Adapter z HEX do 1.1/4,4,87.0,4,0,2026-07,2026-08,adapter,hex,150.0,adapter|hex|unc_1_1_4,4AHex-1.1/4,WRO5,1.0,WRO5
+WERHE Profesjonalne wiertarki ślimakowe 120 mm Wiertarka z podwójnym wałem Wiertarka do wiertarek o wysokiej jakości stali,8,87.0,0,8,2024-07,2026-04,auger,,800.0,auger|d120|dbl,,XPO1,1.0,XPO1
+WERHE ® 65 A 50 x 70 x 220 Jack Hammer Star Picket Post Driver Bit do rozbiórki młota pneumatycznego,10,86.0,10,0,2024-06,2025-08,driver_pile,,70.0,driver_pile|d50|l70,,WRO5,1.0,WRO5
+Świder do Gleby 150D SDS PLUS,5,85.0,0,5,2026-07,2026-08,auger,sds_plus,800.0,auger|sds_plus,1ZWG150dp,XPO1,1.0,XPO1
+"WERHE ® Profi – 1 x kamienny brzeszczot do piły szablastycznej – C 240 mm S1543HM najmocniejszy brzeszczot w lisie ogon – idealny do cięcia na ścianie w cegle, gazbetonie, drewnie – kompatybilny z Dewalt, piłami Bosch",6,84.0,6,0,2024-08,2025-08,other,,240.0,other,,WRO5,1.0,WRO5
+"WERHE ® 13,5x30x257 Profesjonalny wbijak do gwoździ ziemnych Wbijak do słupów HEX Dłuto do rozbiórki Młot udarowy",8,84.0,8,0,2024-09,2026-04,driver_rod,hex,30.0,driver_rod|d13.5|l30|hex,,WRO5,1.0,WRO5
+WERHE Wiertło do betonu SDS MAX 18 x 460 mm - wiertło do muru pasuje do wiertarki - wiertło udarowe do wiercenia w betonie i cegle - poczwórna krawędź tnąca z podwójną spiralą i końcówką z węglików,9,82.0,0,9,2025-02,2026-03,drill_bit,sds_max,460.0,drill_bit|d18|l460|sds_max|dbl,,XPO1,1.0,XPO1
+WERHE ® Professional SDS Max wiertło do betonu 28 x 600 mm Wiertło udarowe Wiertło do muru Wiertło do betonu,11,82.0,0,11,2024-07,2026-03,drill_bit,sds_max,600.0,drill_bit|d28|l600|sds_max,,XPO1,1.0,XPO1
+"WERHE ® Profesjonalny brzeszczot do piły szablastej do kamienia - C 455 mm S2243HM najmocniejszy brzeszczot do lisa – idealnie nadaje się do nacinania na ścianie w cegle, gazobetonie, drewnie –",6,80.0,6,0,2024-09,2025-07,blade_recip,,455.0,blade_recip|S2243HM,,WRO5,1.0,WRO5
+"WERHE Świder glebowy do wiertarki 40 mm Ø, 220 mm długości - Świder ogrodowy do wkrętarki akumulatorowej do sadzenia, kwiatów i kopania dołków - Narzędzie do kopania w ogrodzie",6,80.0,6,0,2024-12,2026-04,auger,,220.0,auger|d40,,WRO5,1.0,WRO5
+"WERKON adapter do świdra ziemnego, srebrny do wiertarki i świdra do słupków",2,80.0,2,0,2026-06,2026-06,adapter,,150.0,adapter,,WRO5,1.0,WRO5
+WERHE ® Professional SDS Max zestaw szpicaków dłutowych 3 sztuki 18 20 50 x 600 mm szpicak do cięcia na zimno dysza płaska do młota wyburzeniowego,15,80.0,0,15,2024-09,2026-04,set_chisel,sds_max,600.0,set_chisel|sds_max|n50,,XPO1,1.0,XPO1
+WERHE® SDS Max 85 mm – Do szybkiego wbijania palików Star-Pitch młotem wyburzeniowym – Wytrzymała konstrukcja ze stali chromowo-wanadowej,6,80.0,6,0,2026-04,2026-05,driver_rod,sds_max,150.0,driver_rod|sds_max,,WRO5,1.0,WRO5
+"WERKON Profesjonalne wiertło do betonu SDS Plus 20 x 600 mm wiertło udarowe wiertło do kamienia, wiertło do betonu",9,79.0,0,9,2024-09,2026-05,drill_bit,sds_plus,600.0,drill_bit|d20|l600|sds_plus,,XPO1,1.0,XPO1
+Świder do Gleby 40D SDS MAX,2,78.0,0,2,2026-07,2026-07,auger,sds_max,800.0,auger|sds_max,1ZWG40dm,XPO1,1.0,XPO1
+"WERHE Świder glebowy do wiertarki 46 mm Ø, 370 mm długości - Świder ogrodowy do wkrętarki akumulatorowej do sadzenia, kwiatów i kopania dołków - Narzędzie do kopania w ogrodzie",8,78.0,8,0,2024-12,2026-04,auger,,370.0,auger|d46|l370,,WRO5,1.0,WRO5
+"WERHE® Groszkownik SDS MAX 25 zębów dł. 300 mm, kwadrat 40 mm - Młoty nasadowe do młotowiertarek elektrycznych - Nasadki wyburzeniowe, do młotkowania betonu - Dłuto młotkowe",9,76.0,9,0,2025-03,2026-02,chisel_bush,sds_max,300.0,chisel_bush|d40|l300|sds_max,,WRO5,1.0,WRO5
+"WERHE Zestaw świdrów ziemnych Ø40 mm, dł. 80 cm z adapterem SDS Plus – kompatybilny ze standardowymi wiertłami SDS Plus, idealny do budowy ogrodzeń i prac ogrodniczych.",2,75.0,0,2,2026-05,2026-05,adapter,sds_plus,800.0,adapter|d40|sds_plus,,XPO1,1.0,XPO1
+"WERHE® Groszkownik SDS Plus 16 zębów dł. 140 mm, kwadrat 32 mm - Młoty nasadowe do młotowiertarek elektrycznych - Nasadki wyburzeniowe, do młotkowania betonu - Dłuto młotkowe",5,75.0,5,0,2025-02,2026-01,chisel_bush,sds_plus,140.0,chisel_bush|d140|sds_plus,,WRO5,1.0,WRO5
+"WERKON Profesjonalne wiertło do betonu SDS Plus 14 x 600 mm, wiertło udarowe, wiertło do kamienia, wiertło do betonu",10,75.0,0,10,2024-06,2026-05,drill_bit,sds_plus,600.0,drill_bit|d14|l600|sds_plus,,XPO1,1.0,XPO1
+WERHE® Adapter M14 do trzpienia sześciokątnego - Odpowiedni do wkrętarki akumulatorowej lub wiertarki - do otwornicy diamentowej.,7,74.0,7,0,2024-07,2026-03,adapter,hex,150.0,adapter|hex|m14,,WRO5,1.0,WRO5
+"WERHE ® 16,5x35x257 Profesjonalny wzmocniony młot udarowy do wbijania gwoździ w ziemię SDS Max",14,74.0,14,0,2025-02,2026-05,driver_rod,sds_max,35.0,driver_rod|d16.5|l35|sds_max,,WRO5,1.0,WRO5
+"WERHE świder ziemny 60 mm, 80 cm, adapter SDS Max",2,72.0,0,2,2026-06,2026-06,auger,sds_max,800.0,auger|d60|l800|sds_max,,XPO1,1.0,XPO1
+"WERHE świder ziemny 80 mm Ø, 450 mm długości do wiertarki i wkrętarki akumulatorowej – świder ogrodowy do łatwego sadzenia kwiatów, krzewów i wykonywania otworów pod słupki ogrodzeniowe",3,72.0,3,0,2026-05,2026-05,auger,,450.0,auger|d80|l450,,WRO5,1.0,WRO5
+WERHE Profesjonalny słupek przedłużający 400 mm wytrzymały,3,71.0,3,0,2024-06,2024-08,other,,400.0,other,,WRO5,1.0,WRO5
+"WERHE pobijak do słupków SDS Max, Ø 85 mm, do Star Pickets",6,71.0,6,0,2026-06,2026-06,driver_pile,sds_max,150.0,driver_pile|d85|sds_max,,WRO5,1.0,WRO5
+"Zestaw Adapterów SDS Plus i SDS max , 2 bolce z zawleczką",4,70.0,4,0,2026-07,2026-08,set_adapter,sds_max,150.0,set_adapter|sds_max|sds_plus|n3,,WRO5,1.0,WRO5
+"Profesjonalna wiertarka WERHE®, świder do wiertarki Wytrzymała 150 mm - wiertło do pali wiertło precyzyjne wiertło precyzyjne - wiertło do świdra do ziemi",7,70.0,0,7,2024-07,2025-05,auger,,800.0,auger|d150,,XPO1,1.0,XPO1
+"Pobijak 25,5mm SDS Max",3,70.0,3,0,2026-07,2026-08,driver_rod,sds_max,150.0,driver_rod|d25.5|sds_max,"6PO25,5m",WRO5,1.0,WRO5
+Adapter MUFA 1.1/4 do 1/2,2,70.0,2,0,2026-07,2026-07,adapter,unc_1_1_4,150.0,adapter|unc_1_1_4,4A1.1/4-1/2,WRO5,1.0,WRO5
+Świder Ogrodowy 50X450,2,70.0,0,2,2026-07,2026-08,auger,,450.0,auger|d50|l450,1Wo50x450,XPO1,1.0,XPO1
+"WERHE świder ziemny 100 mm, SDS Plus uchwyt, wytrzymały grot do gruntu",3,70.0,0,3,2026-06,2026-06,auger,sds_plus,800.0,auger|d100|sds_plus,,XPO1,1.0,XPO1
+WERKON Profesjonalne wiertło do betonu SDS Plus 25 x 460 mm wiertło do betonu,4,69.0,0,4,2024-06,2025-11,drill_bit,sds_plus,460.0,drill_bit|d25|l460|sds_plus,,XPO1,1.0,XPO1
+"WERHE adapter M16 na 1 1/4 UNC z gwintem wewnętrznym 1/2"" – stal hartowana do wierteł diamentowych, wierteł i wiercenia na mokro w betonie i kamieniu",3,69.0,3,0,2026-02,2026-03,adapter,unc_1_1_4,150.0,adapter|unc_1_1_4,,WRO5,1.0,WRO5
+WERHE Profesjonalne dłuto łopatkowe SDS HEX30 135 x 410 mm – Wytrzymałe dłuto do młotów wyburzeniowych – Beton i korzenie,4,68.0,0,4,2026-03,2026-04,chisel_flat,hex30,410.0,chisel_flat|d135|l410|hex30,,XPO1,1.0,XPO1
+"WERHE Dłuto łopatkowe o szerokości 110 mm i długości 450 mm z uchwytem SDS-Max – do spulchniania i kopania w twardych glebach, ziemi, betonie i asfalcie – wykonane ze stali stopowej.",4,68.0,0,4,2026-03,2026-05,chisel_flat,sds_max,450.0,chisel_flat|d110|l450|sds_max,,XPO1,1.0,XPO1
+WERHE Profi wiertło do wierteł gruntowych 100 mm wiertło runo dobrze wiertło precyzyjne wiertło podwójna helix węglik wolframu eco kolor,8,67.0,0,8,2024-06,2026-04,other,,800.0,other|dbl,,XPO1,1.0,XPO1
+WERHE SDS Plus Profesjonalne wiertło do betonu 20 x 600 mm,6,66.0,0,6,2024-06,2025-11,drill_bit,sds_plus,600.0,drill_bit|d20|l600|sds_plus,,XPO1,1.0,XPO1
+"WERHE Świder ziemny do wiertnicy ⌀200 mm, długość 80 cm - świder do studni, świder do sadzenia drzew, świder do odwiertów, świder do pali, świder do przepustów - z ostrzami z węglików spiekanych",7,66.0,0,7,2024-09,2026-04,auger,,800.0,auger|d200|l800,,XPO1,1.0,XPO1
+"WERHE Wiertło do betonu SDS Plus, do wiertarki udarowej, 25 x 600 mm, do kamienia, poczwórna krawędź Quadro X",6,65.0,0,6,2024-07,2026-04,drill_bit,sds_plus,600.0,drill_bit|d25|l600|sds_plus,,XPO1,1.0,XPO1
+"WERHE Zestaw 10 brzeszczotów do wyrzynarki Professional T744D 180 mm – Bardzo długie brzeszczoty do precyzyjnych cięć w drewnie, kompatybilne z wyrzynarkami BOSCH, METABO, MAKITA oraz z chwytem T.",3,65.0,3,0,2026-04,2026-05,blade_jigsaw,,180.0,blade_jigsaw|T744D|l180,,WRO5,1.0,WRO5
+WERKON Wiertło do betonu 40 x 600 mm Profesjonalny SDS Plus do wiertarki udarowej,10,65.0,0,10,2024-06,2026-05,drill_bit,sds_plus,600.0,drill_bit|d40|l600|sds_plus,,XPO1,1.0,XPO1
+WERKON Profesjonalne wiertło SDS Plus do betonu 12 x 600 mm wiertło udarowe wiertło do kamienia wiertło do betonu,4,65.0,0,4,2024-07,2025-09,drill_bit,sds_plus,600.0,drill_bit|d12|l600|sds_plus,,XPO1,1.0,XPO1
+"WERHE® Groszkownik SDS Plus, 16 zębów, 140 mm – do obróbki betonu i kamienia",5,65.0,5,0,2026-03,2026-05,chisel_bush,sds_plus,140.0,chisel_bush|d140|sds_plus,,WRO5,1.0,WRO5
+"UNF WERHE adapter M14 na 1/2 20, stal, do uchwytu wiertarskiego i mieszadeł",2,65.0,2,0,2026-06,2026-06,adapter,m14,150.0,adapter|m14|unf_1_2,,WRO5,1.0,WRO5
+"Pobijak do uziomów 32,5mm SDS Plus",3,65.0,3,0,2026-07,2026-08,driver_rod,sds_plus,150.0,driver_rod|d32.5|sds_plus,"6PO32,5p",WRO5,1.0,WRO5
+"WERHE adapter gwintowany 1 1/4 UNC na R 1/2 GSPP mufa, do wiertnicy",3,65.0,3,0,2026-06,2026-06,adapter,unc_1_1_4,150.0,adapter|unc_1_1_4,,WRO5,1.0,WRO5
+"WERHE świder ziemny 80 mm Ø, 600 mm długości do wiertarki i wkrętarki akumulatorowej – świder ogrodowy do łatwego sadzenia kwiatów, krzewów i wykonywania otworów pod słupki ogrodzeniowe",3,64.0,0,3,2026-05,2026-05,auger,,600.0,auger|d80|l600,,XPO1,1.0,XPO1
+Wiertarka do betonu WERHE ® Professional SDS PLUS 28 x 600 mm Wiertarka udarowa Wiertarka do kamienia Wiertarka do betonu,5,64.0,0,5,2025-02,2025-06,drill_bit,sds_plus,600.0,drill_bit|d28|l600|sds_plus,,XPO1,1.0,XPO1
+Świder do Gleby 120D SDS Max,4,63.0,0,4,2026-08,2026-08,auger,sds_max,800.0,auger|sds_max,1ZWG120dm,XPO1,1.0,XPO1
+"WERHE® Sprężyna do wiertnicy glebowej, amortyzator sił skrętnych do świdrów glebowych.",14,61.0,14,0,2025-02,2026-05,spring,,150.0,spring,,WRO5,1.0,WRO5
+WERHE Wiertło do betonu SDS MAX 16 x 460 mm - wiertło do muru pasuje do wiertarki - wiertło udarowe do wiercenia w betonie i cegle - poczwórna krawędź tnąca z podwójną spiralą i końcówką z węglików,8,60.0,0,8,2025-02,2025-12,drill_bit,sds_max,460.0,drill_bit|d16|l460|sds_max|dbl,,XPO1,1.0,XPO1
+"WERHE świder ziemny z SDS Max uchwyt, Ø 100 mm, długość 81 cm",2,60.0,0,2,2026-06,2026-06,auger,sds_max,810.0,auger|d100|l810|sds_max,,XPO1,1.0,XPO1
+WERHE Dłuto SDS Plus 30 x 250 mm – Dłuto płaskie do kucia betonu i usuwania płytek – Solidne akcesorium do młotów udarowo-obrotowych i młotów wyburzeniowych,4,60.0,4,0,2026-02,2026-04,chisel_flat,sds_plus,250.0,chisel_flat|d30|l250|sds_plus,,WRO5,1.0,WRO5
+WERKON SDS Max wiertło do betonu 25 x 600 mm wiertło udarowe wiertło do kamienia wiertło do betonu,8,60.0,0,8,2024-07,2026-04,drill_bit,sds_max,600.0,drill_bit|d25|l600|sds_max,,XPO1,1.0,XPO1
+Świder do gleby 100D,3,60.0,0,3,2026-07,2026-08,auger,,800.0,auger,1WG100d,XPO1,1.0,XPO1
+Adapter SDS Max do M14 wewnętrzny (żeński),3,60.0,3,0,2026-07,2026-08,adapter,sds_max,150.0,adapter|sds_max|m14,4Am-M14wew,WRO5,1.0,WRO5
+"WERHE świder ziemny 60 mm Ø, 450 mm długości do wiertarki i wkrętarki akumulatorowej – świder ogrodowy do łatwego sadzenia kwiatów, krzewów i wykonywania otworów pod słupki ogrodzeniowe",2,60.0,0,2,2026-05,2026-05,auger,,450.0,auger|d60|l450,,XPO1,1.0,XPO1
+WERHE świder ziemny podwójna spirala Ø100mm 80cm – świder do słupków z adapterem SDS Plus – solidny i precyzyjny,2,60.0,0,2,2026-05,2026-05,auger,sds_plus,800.0,auger|d100|sds_plus|dbl,,XPO1,1.0,XPO1
+Adapter do świdra STIHL,3,60.0,3,0,2026-07,2026-08,adapter,,150.0,adapter,4AStihl,WRO5,1.0,WRO5
+"WERHE® Groszkownik SDS Plus 16 zębów dł. 220 mm, kwadrat 36 mm - Młoty nasadowe do młotowiertarek elektrycznych - Nasadki wyburzeniowe, do młotkowania betonu - Dłuto młotkowe",7,60.0,7,0,2025-05,2025-11,chisel_bush,sds_plus,220.0,chisel_bush|d36|l220|sds_plus,,WRO5,1.0,WRO5
+Przedłużka do świdra 200mm,2,60.0,2,0,2026-07,2026-08,extension,,200.0,extension|l200,5PR200,WRO5,1.0,WRO5
+Przedłużka do świdra 800mm,3,60.0,0,3,2026-07,2026-08,extension,,800.0,extension|l800,5PR800,XPO1,1.0,XPO1
+Nożyki T744D 2op,2,60.0,2,0,2026-07,2026-07,blade_jigsaw,,150.0,blade_jigsaw|T744D|n2,,WRO5,1.0,WRO5
+Przedłużka 750mm SDS Max do SDS Max,4,59.0,0,4,2026-07,2026-08,extension,sds_max,750.0,extension|l750|sds_max,5PR750m-m,XPO1,1.0,XPO1
+"WERHE Świder glebowy do wiertarki 60 mm Ø, 220 mm długości - Świder ogrodowy do wkrętarki akumulatorowej do sadzenia, kwiatów i kopania dołków - Narzędzie do kopania w ogrodzie",7,59.0,7,0,2024-12,2026-03,auger,,220.0,auger|d60,,WRO5,1.0,WRO5
+"WERHE dłuto płaskie SDS Max 75 x 600 mm, dłuto szerokie do betonu i muru",5,58.0,0,5,2026-06,2026-06,chisel_flat,sds_max,600.0,chisel_flat|d75|l600|sds_max,,XPO1,1.0,XPO1
+"WERHE profesjonalne wiertło do ziemi 120 mm, precyzyjne wiertło punktowe",4,58.0,0,4,2026-02,2026-04,auger,,800.0,auger|d120,,XPO1,1.0,XPO1
+"WERHE dłuto łopatowe SDS Hex 30 mm, 135 x 410 mm, do betonu korzenie",2,58.0,0,2,2026-06,2026-06,chisel_flat,hex30,410.0,chisel_flat|d135|l410|hex30,,XPO1,1.0,XPO1
+"WERHE świder ziemny 100 x 600 mm do wkrętarki i wiertarki, świder ogrodowy",3,57.0,0,3,2026-06,2026-06,auger,,600.0,auger|d100|l600,,XPO1,1.0,XPO1
+"WERHE uchwyt typu T do świdra ziemnego, stal, długość 56 cm, uchwyt 20 mm",3,57.0,0,3,2026-06,2026-06,handle,shank20,560.0,handle|l560|shank20,,XPO1,1.0,XPO1
+WERHE Profesjonalne wiertło SDS Plus do betonu 10 x 600 mm wiertło udarowe wiertło do kamienia wiertło do betonu,7,57.0,0,7,2025-04,2025-12,drill_bit,sds_plus,600.0,drill_bit|d10|l600|sds_plus,,XPO1,1.0,XPO1
+"WERHE ® Profesjonalna – 5 x brzeszczoty do piły szablastej do drewna i gałęzi – C 240 mm S1531L bardzo długie – wysokiej jakości stal HCS – szybkie cięcie grubych warstw – kompatybilne z Bosch, Makita lisi ogon",8,57.0,8,0,2024-06,2025-10,blade_recip,,240.0,blade_recip|S1531L|l240|n5,,WRO5,1.0,WRO5
+"WERHE świder ziemny 50 mm z adapter SDS Plus, długość 80 cm",2,56.0,0,2,2026-06,2026-06,auger,sds_plus,800.0,auger|d50|l800|sds_plus,,XPO1,1.0,XPO1
+WERHE świder ziemny Ø 150 mm z adapter SDS Plus,2,56.0,0,2,2026-06,2026-06,auger,sds_plus,800.0,auger|d150|sds_plus,,XPO1,1.0,XPO1
+Świder do gleby 150H,4,56.0,0,4,2026-07,2026-08,auger,,800.0,auger,1WG150h,XPO1,1.0,XPO1
+WERHE® Bruzdownik Skrzydełkowy SDS MAX 60 x 300 mm - Dłuto kanałowe do młotowiertarki - Dłuto do kucia w cegle i betonie,9,56.0,9,0,2025-01,2026-05,chisel_gouge,sds_max,300.0,chisel_gouge|d60|l300|sds_max,,WRO5,1.0,WRO5
+"WERHE ® Profi SDS Plus dłuto spiczaste, 400 mm młotek udarowy beton",6,56.0,0,6,2024-07,2025-11,chisel_flat,sds_plus,400.0,chisel_flat|l400|sds_plus,,XPO1,1.0,XPO1
+Dłuto do betonu 75x600 Sds max,4,56.0,0,4,2026-07,2026-08,chisel_flat,sds_max,600.0,chisel_flat|d75|l600|sds_max,3DB75x600m,XPO1,1.0,XPO1
+"WERHE świder ziemny Ø 60 mm, długość 80 cm, do wiertarki, węglik spiekany",2,56.0,0,2,2026-06,2026-06,auger,,800.0,auger|d60|l800,,XPO1,1.0,XPO1
+"WERHE Profesjonalny brzeszczot do piły szablastej do kamienia - C 455 mm S2243HM najmocniejszy brzeszczot do lisa – idealnie nadaje się do nacinania na ścianie w cegle, gazobetonie, drewnie",3,55.0,3,0,2025-09,2026-05,blade_recip,,455.0,blade_recip|S2243HM,,WRO5,1.0,WRO5
+WERHE ® Dłuto łopatkowe Professional HEX28 50 x 400 mm Uchwyt sześciokątny 28 mm do młota wyburzeniowego Dłuto płaskie płaskie,8,55.0,8,0,2024-10,2026-03,chisel_flat,hex28,400.0,chisel_flat|d50|l400|hex28,,WRO5,1.0,WRO5
+Wbijak do pali 50x70x220mm HEX30,3,55.0,3,0,2026-07,2026-08,driver_pile,hex30,70.0,driver_pile|d50|l70|hex30,6PO50x220h30,WRO5,1.0,WRO5
+WERHE ® Profesjonalne Wiertło do betonu SDS Max 30 x 600 mm Wiertarka udarowa Wiertarka do kamienia Wiertarka do betonu,9,54.0,0,9,2024-09,2026-04,drill_bit,sds_max,600.0,drill_bit|d30|l600|sds_max,,XPO1,1.0,XPO1
+WERHE świder ziemny z podwójną spiralą 120 mm 80 cm z adapter do świdra do,4,54.0,0,4,2026-06,2026-06,auger,,800.0,auger|d120|l800|dbl,,XPO1,1.0,XPO1
+WERKON Profesjonalne wiertło do betonu SDS Plus 18 x 600 mm wiertło udarowe wiertło do kamienia wiertło do betonu wiertło,5,54.0,0,5,2024-06,2026-04,drill_bit,sds_plus,600.0,drill_bit|d18|l600|sds_plus,,XPO1,1.0,XPO1
+"WERHE® Professional HEX28 Ø13,5mm 22x260mm gwoździarka do wbijania gwoździ uziemiających Gwoździarka do wbijania gwoździ uziemiający - Młotek udarowy Gwoździarka do wbijania sztyftów",13,53.0,13,0,2024-09,2026-02,driver_rod,hex28,260.0,driver_rod|d13.5|l260|hex28,,WRO5,1.0,WRO5
+"WERHE Uchwyt do świdra ziemnego – bardzo długi, 70 cm, do bezpiecznego wiercenia ręcznego – kompatybilny z mocowaniem 20 mm",3,53.0,0,3,2026-04,2026-05,other,,700.0,other,,XPO1,1.0,XPO1
+"WERHE® Adapter M14 do świdra glebowego, gwint wewnętrzny M14, Wiertnica DO GLEBY, CIĘCIE, do maszyny polerującej",7,53.0,7,0,2024-08,2026-03,adapter,m14,150.0,adapter|m14,,WRO5,1.0,WRO5
+WERHE® Bruzdownik Skrzydełkowy SDS PLUS 60 x 250 mm - Dłuto kanałowe do młotowiertarki - Dłuto do kucia w cegle i betonie,11,52.0,11,0,2025-01,2026-04,chisel_gouge,sds_plus,250.0,chisel_gouge|d60|l250|sds_plus,,WRO5,1.0,WRO5
+"WERHE świder ziemny 40 mm SDS Max uchwyt, 80 cm",2,52.0,0,2,2026-06,2026-06,auger,sds_max,800.0,auger|d40|l800|sds_max,,XPO1,1.0,XPO1
+"WERHE świder ziemny 60 mm Ø, 600 mm długości do wiertarki i wkrętarki akumulatorowej – świder ogrodowy do łatwego sadzenia kwiatów, krzewów i wykonywania otworów pod słupki ogrodzeniowe",2,51.0,0,2,2026-05,2026-05,auger,,600.0,auger|d60|l600,,XPO1,1.0,XPO1
+WERHE® Bruzdownik Skrzydełkowy SDS PLUS 60 x 400 mm - Dłuto kanałowe do młotowiertarki - Dłuto do kucia w cegle i betonie,10,51.0,0,10,2025-01,2026-05,chisel_gouge,sds_plus,400.0,chisel_gouge|d60|l400|sds_plus,,XPO1,1.0,XPO1
+Adapter Sds Plus + Zawleczka,3,50.0,3,0,2026-07,2026-08,adapter,sds_plus,150.0,adapter|sds_plus,,WRO5,1.0,WRO5
+"Adapter WERHE® do obrotowych kluczy udarowych 1/2"" na 1/2-20UNF cala - Stosować we wszystkich uchwytach wiertarskich z gwintem wewnętrznym 1/2-20UNF.",5,50.0,5,0,2025-01,2026-04,adapter,unf_1_2,150.0,adapter|unf_1_2,,WRO5,1.0,WRO5
+"Zestaw Dłut , Szpic , 25 , 50 x 600mm SDS PLUS",5,50.0,0,5,2026-07,2026-08,set_chisel,sds_plus,600.0,set_chisel|sds_plus|n50,,XPO1,1.0,XPO1
+Wiertło do betonu 40x600mm sds plus,8,50.0,0,8,2026-07,2026-08,drill_bit,sds_plus,600.0,drill_bit|d40|l600|sds_plus,2WB40x600p,XPO1,1.0,XPO1
+"Zestaw Dłut , Szpic , 25, 50 x 400mm SDS PLUS",4,50.0,4,0,2026-07,2026-08,set_chisel,sds_plus,400.0,set_chisel|sds_plus|n50,,WRO5,1.0,WRO5
+WERHE brzeszczoty do wyrzynarki T744D 10-częściowy 180 mm,1,50.0,1,0,2026-06,2026-06,blade_jigsaw,,180.0,blade_jigsaw|T744D|l180,,WRO5,1.0,WRO5
+"WERHE świder ziemny 60 mm, długość 600 mm, do wiertarki i wkrętarki",2,50.0,0,2,2026-06,2026-06,auger,,600.0,auger|d60|l600,,XPO1,1.0,XPO1
+WERHE pobijak do uziomów do uziomów głębinowych SDS Max,3,50.0,3,0,2026-06,2026-06,driver_rod,sds_max,150.0,driver_rod|sds_max,,WRO5,1.0,WRO5
+"WERHE sznurek murarski na szpuli Ø1,8 mm, długość 150 m z uchwytem – czerwony sznurek brukarski – pleciona polipropylenowa żyłka budowlana – odporna na sęki, rozdarcia i trwała",4,50.0,4,0,2026-02,2026-04,string,,150.0,string|d1.8,,WRO5,1.0,WRO5
+"WERHE® Adapter redukcyjny 1/2"" UNC do 1/2"" UNC do wiertła rdzeniowego do otwornic do betonu. - Z otworem na płyn do wiercenia na mokro.",8,50.0,8,0,2024-06,2025-12,adapter,,150.0,adapter,,WRO5,1.0,WRO5
+"WERHE ® Profesjonalne, 5 x drewniane brzeszczoty do wyrzynarki - C 152 mm T544D bardzo długie - szybkie cięcie grube warstwy - kompatybilne z wyrzynarkami Bosch, Metabo, Milwaukee, Makita",1,50.0,1,0,2024-07,2024-07,blade_jigsaw,,152.0,blade_jigsaw|T544D|l152|n5,,WRO5,1.0,WRO5
+"WERHE adapter do świdra ziemnego SDS Plus, stal, do Bosch, Makita, Einhell",1,50.0,1,0,2026-06,2026-06,adapter,sds_plus,150.0,adapter|sds_plus,,WRO5,1.0,WRO5
+"WERHE Świder glebowy do wiertarki 80 mm Ø, 350 mm długości - Świder ogrodowy do wkrętarki akumulatorowej do sadzenia, kwiatów i kopania dołków - Narzędzie do kopania w ogrodzie",7,50.0,7,0,2024-12,2026-04,auger,,350.0,auger|d80|l350,,WRO5,1.0,WRO5
+Świder Ogrodowy 40X450,1,50.0,0,1,2026-07,2026-07,auger,,450.0,auger|d40|l450,1Wo40x450,XPO1,1.0,XPO1
+"Gwoździarka 20,2mm SDS Plus",1,50.0,1,0,2026-07,2026-07,other,sds_plus,150.0,other|sds_plus,"6PO20,2pk",WRO5,1.0,WRO5
+"WERHE ® 20,2x25x162 Professional Peg Driver Jack Hammer Picket Post Driver SDS Max",2,50.0,2,0,2024-07,2024-07,driver_pile,sds_max,25.0,driver_pile|d20.2|l25|sds_max,,WRO5,1.0,WRO5
+Nożyki do wyrzynarki T344CB,2,50.0,2,0,2026-07,2026-08,blade_jigsaw,,150.0,blade_jigsaw|T344CB,7NT344CB,WRO5,1.0,WRO5
+"WERHE zestaw dłut SDS Plus, 600 mm, 3-częściowy",5,50.0,0,5,2026-06,2026-06,set_chisel,sds_plus,600.0,set_chisel|sds_plus|n3,,XPO1,1.0,XPO1
+WERHE M14 adapter do świdra ziemnego,1,50.0,1,0,2026-06,2026-06,adapter,m14,150.0,adapter|m14,,WRO5,1.0,WRO5
+WERHE ® Profesjonalne wiertło SDS Plus do betonu 18 x 600 mm wiertło udarowe wiertło do kamienia wiertło do betonu,2,49.0,0,2,2024-10,2024-11,drill_bit,sds_plus,600.0,drill_bit|d18|l600|sds_plus,,XPO1,1.0,XPO1
+WERHE świder ziemny 150 mm adapter SDS Max,1,49.0,0,1,2026-06,2026-06,auger,sds_max,800.0,auger|d150|sds_max,,XPO1,1.0,XPO1
+Szypa SDS Max 110x460mm,5,49.0,0,5,2026-08,2026-08,other,sds_max,460.0,other|sds_max,3S110m,XPO1,1.0,XPO1
+WERKON Profesjonalne wiertło do betonu SDS Plus 18 x 460 mm wiertło udarowe wiertło do kamienia wiertło do betonu wiertło,5,48.0,0,5,2024-07,2026-04,drill_bit,sds_plus,460.0,drill_bit|d18|l460|sds_plus,,XPO1,1.0,XPO1
+WERHE Przedłużka M14 250 mm – do szlifierek kątowych i polerek – dociera do głębokich i trudno dostępnych miejsc – wykonana z hartowanej stali,2,48.0,2,0,2026-04,2026-05,extension,m14,250.0,extension|l250|m14,,WRO5,1.0,WRO5
+"WERHE® 32,5x42x260 mm profesjonalny wkrętak do gwoździ szlifowanych do wbijania prętów do głębokiego uziemienia - młotek pneumatyczny wkrętarka słupkowa sześciokątna 30 mm",9,48.0,9,0,2024-07,2026-05,driver_rod,hex,42.0,driver_rod|d32.5|l42|hex,,WRO5,1.0,WRO5
+"WERHE świder ziemny 40 mm z adapter Hex, świder do słupków",3,48.0,0,3,2026-06,2026-06,auger,hex,800.0,auger|d40|hex,,XPO1,1.0,XPO1
+WERHE Adapter SDS MAX do M14e zewnętrzny,7,48.0,7,0,2024-07,2026-05,adapter,sds_max,150.0,adapter|sds_max,,WRO5,1.0,WRO5
+WERHE profesjonalny zestaw dłut sześciokątnych SDS 3 sztuki 30 35 50 x 410 mm płaski czubek z zimną końcówką do młotka do rozbiórki,13,47.0,0,13,2024-09,2026-05,set_chisel,hex,410.0,set_chisel|hex|n50,,XPO1,1.0,XPO1
+WERHE SDS Max wiertło do betonu 32 x 600 mm wiertło udarowe wiertło do kamienia wiertło do betonu,6,47.0,0,6,2024-12,2026-03,drill_bit,sds_max,600.0,drill_bit|d32|l600|sds_max,,XPO1,1.0,XPO1
+WERKON SDS Max wiertło do betonu 32 x 600 mm wiertło udarowe wiertło do kamienia wiertło do betonu,5,47.0,0,5,2024-09,2025-12,drill_bit,sds_max,600.0,drill_bit|d32|l600|sds_max,,XPO1,1.0,XPO1
+WERKON Wiertło udarowe SDS Plus 16 x 600 mm Quadro X głowica krzyżowa beton kamień murarz,6,47.0,0,6,2024-07,2026-02,drill_bit,sds_plus,600.0,drill_bit|d16|l600|sds_plus,,XPO1,1.0,XPO1
+"WERHE pobijak do uziomów SDS Max Ø 13,5 mm, długość 165 mm",1,47.0,1,0,2026-06,2026-06,driver_rod,sds_max,165.0,driver_rod|d13.5|l165|sds_max,,WRO5,1.0,WRO5
+WERHE ® Professional HEX28 dłuto płaskie 35 x 400 mm uchwyt sześciokątny 28 mm do młota wyburzeniowego dłuto płaskie płaskie,11,47.0,11,0,2024-12,2026-05,chisel_flat,hex28,400.0,chisel_flat|d35|l400|hex28,,WRO5,1.0,WRO5
+WERHE ® przedłużenie wiercenia 300 mm SDS Max do SDS Max Shank do adaptera nagrywanie,2,46.0,2,0,2024-06,2024-08,adapter,sds_max,300.0,adapter|sds_max,,WRO5,1.0,WRO5
+Wiertło do betonu 32x600mm Sds plus,6,46.0,0,6,2026-07,2026-08,drill_bit,sds_plus,600.0,drill_bit|d32|l600|sds_plus,2WB32x600p,XPO1,1.0,XPO1
+WERHE profesjonalne sześciokątne dłuto sześciokątne 35 x 410 mm gniazdo sześciokątne 30 mm do szerokości młota rozbiórkowego,6,46.0,0,6,2024-09,2026-04,chisel_flat,hex,410.0,chisel_flat|d35|l410|hex,,XPO1,1.0,XPO1
+Dłuto do betonu 20/25x600 SDS Plus,3,45.0,0,3,2026-07,2026-08,chisel_flat,sds_plus,600.0,chisel_flat|d25|l600|sds_plus,3DB25x600p,XPO1,1.0,XPO1
+"WERHE świder ziemny ⌀120 mm, 80 cm długości – do precyzyjnego kopania pod słupki ogrodzeniowe, sadzenie drzew, fundamenty i przepusty – solidny z ostrzami z węglika spiekanego",2,45.0,0,2,2026-05,2026-05,auger,,800.0,auger|d120,,XPO1,1.0,XPO1
+"WERHE świder ziemny 120 mm, ostrza z węglika, stal hartowana, uchwyt 20 mm",2,45.0,0,2,2026-06,2026-06,auger,shank20,800.0,auger|d120|shank20,,XPO1,1.0,XPO1
+WERHE® Profesjonalny adapter SDS Plus do M14 do szczotki drucianej płyty trzymającej tarczę,7,45.0,7,0,2024-07,2026-04,adapter,sds_plus,150.0,adapter|sds_plus|m14,,WRO5,1.0,WRO5
+"WERHE świder ziemny Ø 120 mm, podwójna spirala",2,45.0,0,2,2026-06,2026-06,auger,,800.0,auger|d120|dbl,,XPO1,1.0,XPO1
+WERHE® Dłuto SDS Plus 50 x 150 mm - Dłuto płaskie do kucia betonu - Dłuto do usuwania płytek - Akcesoria do młotowiertarek i młotów wyburzeniowych,5,45.0,5,0,2025-02,2025-11,chisel_flat,sds_plus,150.0,chisel_flat|d50|l150|sds_plus,,WRO5,1.0,WRO5
+WERHE świder ziemny podwójna spirala Ø120mm 80cm – świder do słupków z adapterem SDS Plus – solidny i precyzyjny,3,45.0,0,3,2026-05,2026-05,auger,sds_plus,800.0,auger|d120|sds_plus|dbl,,XPO1,1.0,XPO1
+"WERHE Sznur murarski na szpuli Ø1,8 mm długość 150 m z uchwytem – sznur brukarski czerwony – sznur budowlany z plecionego polipropylenu – odporny na węzły, zerwanie i obciążenia",5,45.0,5,0,2025-04,2025-11,string,,1.8,string|d1.8,,WRO5,1.0,WRO5
+WERHE Profesjonalne wiertło SDS Plus do betonu 18 x 460 mm wiertło udarowe wiertło do kamienia wiertło do betonu,4,45.0,0,4,2024-07,2025-02,drill_bit,sds_plus,460.0,drill_bit|d18|l460|sds_plus,,XPO1,1.0,XPO1
+Wiertło SDS Plus 32mm Ø - Bardzo długie 32x600 mm - Idealne do szybkiego wiercenia w betonie - Wysokiej jakości końcówka z węglików spiekanych - Bez odprysków w stali zbrojeniowej 32x600mm,6,45.0,0,6,2024-09,2026-03,drill_bit,sds_plus,600.0,drill_bit|d32|l600|sds_plus,,XPO1,1.0,XPO1
+"WERHE ® Professional - 5 x drewniane ostrza do wyrzynarki - C 132 mm T344D długi - szybkie cięcie grube warstwy - kompatybilne z wyrzynarkami Bosch, Metabo, Milwaukee, Makita",3,44.0,3,0,2025-01,2026-03,other,,132.0,other,,WRO5,1.0,WRO5
+Świder do gleby 80D,2,44.0,0,2,2026-07,2026-08,auger,,800.0,auger,1WG80d,XPO1,1.0,XPO1
+"WERHE ® 16,5x35x257 Profesjonalny wbijak do gwoździ, wbijak do słupów, dłutownica HEX do wyburzania, młot wyburzeniowy.",6,44.0,6,0,2024-06,2026-03,driver_rod,hex,35.0,driver_rod|d16.5|l35|hex,,WRO5,1.0,WRO5
+"Werhe® Zestaw wierteł do betonu 5szt 6, 8, 10, 12, 14 x 210 Młotowiertarka Wiertło do kamienia Wiertło do betonu",5,43.0,5,0,2025-02,2026-04,set_drill,,210.0,set_drill|n5,,WRO5,1.0,WRO5
+WERKON 10 x profesjonalny brzeszczot do wyrzynarki 180 mm trzonek T T744D ekstra długi brzeszczoty do drewna,6,43.0,6,0,2024-09,2025-12,blade_jigsaw,,180.0,blade_jigsaw|T744D|l180|n10,,WRO5,1.0,WRO5
+WERHE® Dłuto SDS Plus 40 x 150 - Dłuto płaskie do kucia betonu - Dłuto do usuwania płytek - Akcesoria do młotowiertarek i młotów wyburzeniowych,7,43.0,7,0,2025-02,2025-12,chisel_flat,sds_plus,150.0,chisel_flat|d40|l150|sds_plus,,WRO5,1.0,WRO5
+"WERHE® Groszkownik SDS Plus 12 zębów dł. 150 mm, okrąg ⌀35 mm - Młoty nasadowe do młotowiertarek elektrycznych - Nasadki wyburzeniowe, do młotkowania betonu - Dłuto młotkowe",9,42.0,9,0,2025-03,2026-05,chisel_bush,sds_plus,150.0,chisel_bush|d35|sds_plus,,WRO5,1.0,WRO5
+"WERHE Świder glebowy do wiertarki 80 mm Ø, 300 mm długości - Świder ogrodowy do wkrętarki akumulatorowej do sadzenia, kwiatów i kopania dołków - Narzędzie do kopania w ogrodzie",6,42.0,6,0,2024-12,2026-04,auger,,300.0,auger|d80,,WRO5,1.0,WRO5
+WERHE SDS Max wiertło do betonu 25 x 600 mm wiertło udarowe wiertło do kamienia wiertło do betonu,4,42.0,0,4,2024-10,2025-06,drill_bit,sds_max,600.0,drill_bit|d25|l600|sds_max,,XPO1,1.0,XPO1
+"WERHE ® 10,5x14x160 Profesjonalny wbijak do gwoździ młot pneumatyczny SDS Plus",8,42.0,8,0,2024-08,2026-04,driver_rod,sds_plus,14.0,driver_rod|d10.5|l14|sds_plus,,WRO5,1.0,WRO5
+Świder do Gleby 150H SDS MAX,2,42.0,0,2,2026-08,2026-08,auger,sds_max,800.0,auger|sds_max,,XPO1,1.0,XPO1
+"WERHE świder ziemny 150 mm, podwójna spirala, adapter SDS Max",1,42.0,0,1,2026-06,2026-06,auger,sds_max,800.0,auger|d150|sds_max|dbl,,XPO1,1.0,XPO1
+Nożyki T544D,2,40.0,2,0,2026-07,2026-08,blade_jigsaw,,150.0,blade_jigsaw|T544D,7NT544D,WRO5,1.0,WRO5
+"WERHE świder ziemny 100 mm, 80 cm, do wiertarki, z ostrzy z węglika",2,40.0,0,2,2026-06,2026-06,auger,,800.0,auger|d100|l800,,XPO1,1.0,XPO1
+Nożyki T1044D,3,40.0,3,0,2026-07,2026-08,blade_jigsaw,,150.0,blade_jigsaw|T1044D,7NT1044D,WRO5,1.0,WRO5
+WERHE bolce szybkozłączne WERHE do świdrów ziemnych – zestaw 5 bolców blokujących ze stali sprężynowej z zawleczką – uniwersalne do stabilnego mocowania wiertła,2,40.0,2,0,2026-03,2026-05,spring,,150.0,spring,,WRO5,1.0,WRO5
+"WERHE przedłużka świdra ziemnego 20 cm, uchwyt 20 mm",4,40.0,4,0,2026-06,2026-06,extension,shank20,200.0,extension|l200|shank20,,WRO5,1.0,WRO5
+"WERHE Profesjonalny brzeszczot do wyrzynarki do drewna, C 250 mm, T1044D Jumbo podłużny, szybkie cięcie grubych warstw, kompatybilne z wyrzynarkami Bosch, Metabo, Milwaukee, Makita",2,40.0,2,0,2025-12,2025-12,blade_jigsaw,,250.0,blade_jigsaw|T1044D|l250,,WRO5,1.0,WRO5
+"WERHE® Adapter redukcyjny 1/2"" BSPP do 1/2"" BSPP do wiertła rdzeniowego do otwornic do betonu. - Z otworem na płyn do wiercenia na mokro.",4,40.0,4,0,2026-02,2026-05,adapter,,150.0,adapter,,WRO5,1.0,WRO5
+"Pobijak do uziomów 25,5mm SDS Plus",2,40.0,2,0,2026-07,2026-07,driver_rod,sds_plus,150.0,driver_rod|d25.5|sds_plus,"6PO25,5p",WRO5,1.0,WRO5
+"WERHE Profesjonalne - 2 x drewniane dwustronne ostrza do wyrzynarki - C 116 mm T344CB - różne kształty, szybkie, ciasne cięcie, czyste warstwy - dla ambitnych artystów, projektantów, inżynierów",2,40.0,2,0,2026-03,2026-04,other,,116.0,other,,WRO5,1.0,WRO5
+"Pobijak 13,5x35x260mm SDS MAX Premium",3,40.0,3,0,2026-07,2026-08,driver_rod,sds_max,35.0,driver_rod|d13.5|l35|sds_max,"6PO13,5mP",WRO5,1.0,WRO5
+"Pobijak sds plus 16,5mm",2,40.0,2,0,2026-07,2026-08,driver_rod,sds_plus,150.0,driver_rod|d16.5|sds_plus,"6PO16,5p",WRO5,1.0,WRO5
+Przedłużka 1000mm SDS Max do SDS Max,4,40.0,0,4,2026-08,2026-08,extension,sds_max,1000.0,extension|l1000|sds_max,5PR1000m-m,XPO1,1.0,XPO1
+Świder do Gleby 100H SDS Max,2,40.0,0,2,2026-07,2026-08,auger,sds_max,800.0,auger|sds_max,,XPO1,1.0,XPO1
+"WERHE ® Profesjonalne - 2 x drewniane ostrza do wyrzynarki - C 250 mm T1044D Jumbo Long - Szybkie cięcie grubych warstw - kompatybilne z wyrzynarkami Bosch, Metabo, Milwaukee, Makita",2,40.0,2,0,2024-06,2024-07,other,,250.0,other,,WRO5,1.0,WRO5
+"WERHE adapter do Stihl świder ziemny BT 106/120/121/130/131, stal, Ø 20 mm",1,40.0,1,0,2026-06,2026-06,adapter,,150.0,adapter|d20,,WRO5,1.0,WRO5
+WERHE adapter na SDS Plus M14 gwint wewnętrzny,2,40.0,2,0,2026-06,2026-06,adapter,sds_plus,150.0,adapter|sds_plus|m14,,WRO5,1.0,WRO5
+"WERHE adapter do świdra ziemnego Hex, stal hartowana",2,40.0,2,0,2026-06,2026-06,adapter,hex,150.0,adapter|hex,,WRO5,1.0,WRO5
+"WERHE pobijak do uziomów SDS Max Ø 32,5 mm, do prętów uziemiających",1,40.0,1,0,2026-06,2026-06,driver_rod,sds_max,150.0,driver_rod|d32.5|sds_max,,WRO5,1.0,WRO5
+"WERHE ® Wbijak gwoździ SDS Plus 16,5 mm do młotowiertarek WERHE – Wydajne narzędzie do wbijania gwoździ i prętów – Wytrzymała stal chromowo-wanadowa",2,40.0,2,0,2026-03,2026-03,driver_rod,sds_plus,150.0,driver_rod|d16.5|sds_plus,,WRO5,1.0,WRO5
+WERHE uchwyt do ślimaka dobrze nawiercana konstrukcja 70 cm bardzo długi uchwyt,4,40.0,0,4,2024-06,2024-09,auger,,700.0,auger|l700,,XPO1,1.0,XPO1
+Świder do Gleby 100D SDS MAX,2,40.0,0,2,2026-07,2026-07,auger,sds_max,800.0,auger|sds_max,1ZWG100dm,XPO1,1.0,XPO1
+Młotek Gumowy SDS PLUS,2,40.0,2,0,2026-07,2026-08,other,sds_plus,150.0,other|sds_plus,6POpg,WRO5,1.0,WRO5
+"WERHE dłuto łopatowe 110 mm x 410 mm, SDS Max uchwyt, stal stopowa",3,39.0,0,3,2026-06,2026-06,chisel_flat,sds_max,410.0,chisel_flat|d110|l410|sds_max,,XPO1,1.0,XPO1
+"WERHE® 25,5x35x260 mm profesjonalny wkrętak do gwoździ szlifowanych do wbijania prętów do głębokiego uziemienia - młotek pneumatyczny wkrętarka słupkowa sześciokątna 30 mm",6,39.0,6,0,2024-07,2026-02,driver_rod,hex,35.0,driver_rod|d25.5|l35|hex,,WRO5,1.0,WRO5
+"WERHE szpicak SDS Hex do młota wyburzeniowego, Ø 30 mm, długość 410 mm",3,39.0,0,3,2026-06,2026-06,chisel_point,hex30,410.0,chisel_point|d30|l410|hex30,,XPO1,1.0,XPO1
+Szypa HEX30 135x410mm,3,39.0,0,3,2026-08,2026-08,other,hex30,410.0,other|hex30,3S135h30,XPO1,1.0,XPO1
+Świder Ogrodowy 100X600,2,39.0,0,2,2026-07,2026-07,auger,,600.0,auger|d100|l600,1Wo100x600,XPO1,1.0,XPO1
+"WERHE świder ziemny 100 mm Ø, 600 mm długości do wiertarki i wkrętarki akumulatorowej – świder ogrodowy do łatwego sadzenia kwiatów, krzewów i wykonywania otworów pod słupki ogrodzeniowe",2,38.0,0,2,2026-05,2026-05,auger,,600.0,auger|d100|l600,,XPO1,1.0,XPO1
+WERHE® Dłuto SDS Plus 30 x 250 mm - Dłuto płaskie do kucia betonu - Dłuto do usuwania płytek - Akcesoria do młotowiertarek i młotów wyburzeniowych,6,37.0,6,0,2025-02,2025-11,chisel_flat,sds_plus,250.0,chisel_flat|d30|l250|sds_plus,,WRO5,1.0,WRO5
+WERHE Profi SDS Plus wiertarka do betonu 18 x 600 mm wiertło młotkowe wiertło do betonu,1,37.0,0,1,2024-06,2024-06,drill_bit,sds_plus,600.0,drill_bit|d18|l600|sds_plus,,XPO1,1.0,XPO1
+"WERHE® Adapter 1 1/4” UNC do wiertła ziemnego do wiertarki. Do połączenia wiertła rdzeniowego z wiertłem do studni, wiertła rdzeniowego z wiertłem do pali.",5,37.0,5,0,2024-09,2025-06,adapter,unc_1_1_4,150.0,adapter|unc_1_1_4,,WRO5,1.0,WRO5
+Werhe SDS Max 50 mm – Wytrzymały wkrętak ze stali chromowo-wanadowej do pali i słupków – Kompatybilny z młotami wyburzeniowymi dla profesjonalistów i majsterkowiczów,4,37.0,4,0,2026-04,2026-05,other,sds_max,150.0,other|sds_max,,WRO5,1.0,WRO5
+Przedłużka 200mm do wiertnic 1.1/4,3,36.0,3,0,2026-07,2026-08,extension,unc_1_1_4,200.0,extension|l200|unc_1_1_4,5PR1.1/4x200,WRO5,1.0,WRO5
+WERHE Profi 20 x 600 mm SDS Plus płaski dłuto cegły dłuto płaskie szerokie dłuto,4,36.0,0,4,2025-10,2026-03,chisel_flat,sds_plus,600.0,chisel_flat|d20|l600|sds_plus,,XPO1,1.0,XPO1
+Przedłużka 1180mm SDS Max do SDS Max,4,36.0,0,4,2026-07,2026-08,extension,sds_max,1180.0,extension|l1180|sds_max,5PR1180m-m,XPO1,1.0,XPO1
+WERHE Profi SDS Plus Wiertło do betonu 25 x 460 mm Wiertło do młotów Wiertło do kamienia Wiertło do betonu,4,36.0,0,4,2024-09,2026-04,drill_bit,sds_plus,460.0,drill_bit|d25|l460|sds_plus,,XPO1,1.0,XPO1
+Świder do Gleby 120D SDS Plus,1,36.0,0,1,2026-07,2026-07,auger,sds_plus,800.0,auger|sds_plus,1ZWG120dp,XPO1,1.0,XPO1
+"WERHE Świder ziemny o średnicy 40 mm i długości 80 cm do wiercenia – wiertło do precyzyjnego kopania słupków ogrodzeniowych, sadzenia drzew, fundamentów i przepustów- z ostrzami z węglików spiekanych",1,36.0,0,1,2026-05,2026-05,auger,,800.0,auger|d40|l800,,XPO1,1.0,XPO1
+Świder do Gleby 60D SDS MAX,1,36.0,0,1,2026-08,2026-08,auger,sds_max,800.0,auger|sds_max,1ZWG60Dm,XPO1,1.0,XPO1
+Świder Do gleby 150D,1,35.0,0,1,2026-07,2026-07,auger,,800.0,auger,1WG150d,XPO1,1.0,XPO1
+WERHE SDS Plus Wiertło do Betonu 16 x 600 mm Udarowe do Kamienia,3,35.0,0,3,2025-08,2025-10,drill_bit,sds_plus,600.0,drill_bit|d16|l600|sds_plus,,XPO1,1.0,XPO1
+"WERHE® Groszkownik SDS MAX 25 zębów dł. 300 mm, kwadrat 40 mm - do obróbki betonu i kamienia",3,35.0,3,0,2026-04,2026-05,chisel_bush,sds_max,300.0,chisel_bush|d40|l300|sds_max,,WRO5,1.0,WRO5
+WERHE SDS Plus wiertło do betonu 16 x 600 mm wiertło udarowe wiertło do kamienia wiertło do betonu,2,35.0,0,2,2024-10,2024-11,drill_bit,sds_plus,600.0,drill_bit|d16|l600|sds_plus,,XPO1,1.0,XPO1
+Adapter HEX 8 mm na M14 Zewnętrzny,3,35.0,3,0,2026-07,2026-08,adapter,hex,150.0,adapter|hex|m14,4AHex-M14zew,WRO5,1.0,WRO5
+WERHE® Bruzdownik Skrzydełkowy SDS MAX 60 x 400 mm - Dłuto kanałowe do młotowiertarki - Dłuto do kucia w cegle i betonie,6,35.0,0,6,2025-01,2026-03,chisel_gouge,sds_max,400.0,chisel_gouge|d60|l400|sds_max,,XPO1,1.0,XPO1
+WERHE świder ziemny 150 mm z podwójną spiralą,2,35.0,0,2,2026-06,2026-06,auger,,800.0,auger|d150|dbl,,XPO1,1.0,XPO1
+"WERHE® Groszkownik SDS Plus 25 zębów dł. 300 mm, kwadrat 40 mm – do obróbki betonu i kamienia",4,35.0,4,0,2026-03,2026-05,chisel_bush,sds_plus,300.0,chisel_bush|d40|l300|sds_plus,,WRO5,1.0,WRO5
+"Max WERHE adapter SDS Max na SDS, przedłużka do wiertła 190 mm, ze stali",1,35.0,1,0,2026-06,2026-06,adapter,sds_max,190.0,adapter|sds_max,,WRO5,1.0,WRO5
+"WERHE Adapter do uchwytu wiertarskiego SDS Plus 1/2-20UNF – adapter do wierteł do betonu, pił otwornic i wiertarek udarowych – Wysokiej jakości materiały zapewniają trwałość i wszechstronność",2,35.0,2,0,2026-03,2026-04,adapter,sds_plus,150.0,adapter|sds_plus|unf_1_2,,WRO5,1.0,WRO5
+Groszkownik 300mm 40x40mm 25 zębów SDS MAX,2,35.0,2,0,2026-07,2026-08,chisel_bush,sds_max,40.0,chisel_bush|d40|l40|sds_max,6GR25x300m,WRO5,1.0,WRO5
+"WERHE® Adapter 1 1/4” UNC ziemnego do wiertarki. Do połączenia wiertła rdzeniowego, wiertła rdzeniowego z wiertłem do pali.",6,34.0,6,0,2025-07,2026-01,adapter,unc_1_1_4,150.0,adapter|unc_1_1_4,,WRO5,1.0,WRO5
+"WERHE świder ziemny Ø 80 mm z adaptera sześciokątnego, stal, do wiertarek",1,33.0,0,1,2026-06,2026-06,auger,hex,800.0,auger|d80|hex,,XPO1,1.0,XPO1
+"WERHE ® Profesjonalny brzeszczot do piły szablastej do kamienia - C 305 mm S1243HM najmocniejszy brzeszczot do lisa – idealny do nacinania na ścianie w cegle, gazobetonie, drewnie – kompatybilny z",6,33.0,6,0,2024-08,2026-02,blade_recip,,305.0,blade_recip|S1243HM|l305,,WRO5,1.0,WRO5
+"WERHE® Pobijak do kotew gruntowych HEX28 Ø13,5 mm 22x260 mm – Wytrzymała stal do prętów uziomowych i uziemień – Kompatybilny z młotami pneumatycznymi – Precyzyjne wbijanie dla profesjonalistów.",3,32.0,3,0,2026-03,2026-05,driver_rod,hex28,260.0,driver_rod|d13.5|l260|hex28,,WRO5,1.0,WRO5
+"WERHE ® 13,5x22x145 Profesjonalny wkrętak do gwoździ Jack Hammer - Wkrętak do gwoździarki SDS Max",5,32.0,5,0,2024-06,2026-03,other,sds_max,145.0,other|sds_max,,WRO5,1.0,WRO5
+"Profesjonalne dłuto szpadowe SDS Plus dłuto płaskie 50 x 600 mm dłuto szerokie, płaskie, szerokie dłuto",5,32.0,0,5,2024-09,2026-02,chisel_flat,sds_plus,600.0,chisel_flat|d50|l600|sds_plus,,XPO1,1.0,XPO1
+WERHE Wiertło udarowe SDS Max do betonu 40 x 600 mm wiertło udarowe wiertło do betonu,3,32.0,0,3,2024-06,2024-06,drill_bit,sds_max,600.0,drill_bit|d40|l600|sds_max,,XPO1,1.0,XPO1
+WERHE® SDS Max 55 mm wbijak do słupków – Do szybkiego wbijania palików Star-Pitch młotem wyburzeniowym – Wytrzymała konstrukcja ze stali chromowo-wanadowej,3,31.0,3,0,2026-04,2026-05,driver_pile,sds_max,150.0,driver_pile|d55|sds_max,,WRO5,1.0,WRO5
+"Zestaw 35,50 x 410 Hex 30",5,31.0,0,5,2026-07,2026-07,other,hex30,410.0,other|hex30,3DB35x410h30;3DB50x410h30,XPO1,1.0,XPO1
+"WERHE ® SDS Plus zestaw dłut 400 mm 3-częściowy 20, 50 mm dłuta",4,31.0,0,4,2024-06,2024-10,set_chisel,sds_plus,400.0,set_chisel|sds_plus|n3,,XPO1,1.0,XPO1
+"Wiertarka WERHE z uchwytem SDS Max, wytrzymała wiertarka 100 mm, wiertło 100 mm",1,30.0,0,1,2025-09,2025-09,other,sds_max,100.0,other|sds_max,,XPO1,1.0,XPO1
+"WERHE pobijak do uziomów SDS Max, średnica wewnętrzna 20,2 mm, 257 mm, stal",2,30.0,2,0,2026-06,2026-06,driver_rod,sds_max,257.0,driver_rod|d20.2|sds_max,,WRO5,1.0,WRO5
+"WERHE adapter M14 do świdra ziemnego, stal hartowana",1,30.0,1,0,2026-06,2026-06,adapter,m14,150.0,adapter|m14,,WRO5,1.0,WRO5
+WERHE Wiertło do betonu SDS PLUS 12 x 600 mm – wiertło udarowe do betonu i cegły – 4 ostrza,3,30.0,0,3,2025-09,2025-11,drill_bit,sds_plus,600.0,drill_bit|d12|l600|sds_plus,,XPO1,1.0,XPO1
+"WERHE Świder ziemny do wiertarki z adapterem SDS Plus ⌀200 mm, długość 80 cm - świder do studni, świder do sadzenia drzew, świder do otworów ziemnych, świder do pali, świder do przepustów",4,30.0,0,4,2025-02,2025-04,auger,sds_plus,800.0,auger|d200|l800|sds_plus,,XPO1,1.0,XPO1
+"WERHE adapter do świdra ziemnego SDS Max, uchwyt 20 mm, stal",1,30.0,1,0,2026-06,2026-06,adapter,sds_max,150.0,adapter|sds_max|shank20,,WRO5,1.0,WRO5
+WERHE adapter M14 na chwycie sześciokątnym do wkrętarki i wiertarki,1,30.0,1,0,2026-06,2026-06,adapter,hex,150.0,adapter|hex|m14,,WRO5,1.0,WRO5
+"WERHE Świder glebowy do wiertarki 80 mm Ø, 250 mm długości - Świder ogrodowy do wkrętarki akumulatorowej do sadzenia, kwiatów i kopania dołków - Narzędzie do kopania w ogrodzie",5,30.0,5,0,2024-12,2026-04,auger,,250.0,auger|d80,,WRO5,1.0,WRO5
+Adapter Mufa 1.1/4 do M18,2,30.0,2,0,2026-07,2026-07,adapter,m18,150.0,adapter|m18|unc_1_1_4,4A1.1/4-M18,WRO5,1.0,WRO5
+Świder Ogrodowy 60X450,1,30.0,0,1,2026-07,2026-07,auger,,450.0,auger|d60|l450,1Wo60x450,XPO1,1.0,XPO1
+Nożyki T225B,1,30.0,1,0,2026-08,2026-08,blade_jigsaw,,150.0,blade_jigsaw|T225B,7NT225B,WRO5,1.0,WRO5
+"WERHE zestaw dłut SDS Plus, 400 mm, 3-częściowy",2,30.0,2,0,2026-06,2026-06,set_chisel,sds_plus,400.0,set_chisel|sds_plus|n3,,WRO5,1.0,WRO5
+Świder do gleby 200H,3,30.0,0,3,2026-07,2026-08,auger,,800.0,auger,1WG200h,XPO1,1.0,XPO1
+"WERHE 2 x brzeszczoty do wyrzynarki do drewna 250 mm T1044D Jumbo długie – szybkie cięcie grubych warstw – kompatybilne z wyrzynarkami Bosch, Makita",1,30.0,1,0,2026-04,2026-04,blade_jigsaw,,250.0,blade_jigsaw|T1044D|l250|n2,,WRO5,1.0,WRO5
+"WERHE SDS Plus zestaw dłut 600 mm, 3-częściowy dłuto, 25, 50 mm, ostrze ze stali hartowanej, metalowy uchwyt, narzędzie do rozbiórki",3,30.0,0,3,2026-03,2026-03,set_chisel,sds_plus,600.0,set_chisel|sds_plus|n3,,XPO1,1.0,XPO1
+"WERHE groszkownik SDS Plus 16 zębów, 140 mm, do betonu, granit i kamień",1,30.0,1,0,2026-06,2026-06,chisel_bush,sds_plus,140.0,chisel_bush|d140|sds_plus,,WRO5,1.0,WRO5
+WERHE Profesjonalne wiertło do betonu SDS Plus 16 x 460 mm wiertło udarowe wiertło do kamienia wiertło do betonu wiertło,1,30.0,0,1,2024-06,2024-06,drill_bit,sds_plus,460.0,drill_bit|d16|l460|sds_plus,,XPO1,1.0,XPO1
+"WERHE® Adapter do diamentowych wierteł rdzeniowych - 1 1/4"" cala UNC na HEX - do wkrętarek akumulatorowych - dodatkowo z gwintem wewnętrznym 1/2˝ BSPP",3,30.0,3,0,2025-12,2026-01,adapter,hex,150.0,adapter|hex|unc_1_1_4,,WRO5,1.0,WRO5
+"WERHE świder ziemny 60 x 450 mm do wkrętarki i wiertarki, świder ogrodowy",1,30.0,0,1,2026-06,2026-06,auger,,450.0,auger|d60|l450,,XPO1,1.0,XPO1
+WERKON 5 x brzeszczot do wyrzynarki WERKON 152 mm trzpień T T344D ekstra długie brzeszczoty do wyrzynarki,2,30.0,2,0,2025-01,2025-11,blade_jigsaw,,152.0,blade_jigsaw|T344D|l152|n5,,WRO5,1.0,WRO5
+Pobijak SDS Max 50x70x220 mm,2,30.0,2,0,2026-08,2026-08,driver_rod,sds_max,70.0,driver_rod|d50|l70|sds_max,6PO50x220m,WRO5,1.0,WRO5
+"WERHE świder ziemny 80 x 450 mm do wkrętarki i wiertarki, świder ogrodowy",1,30.0,1,0,2026-06,2026-06,auger,,450.0,auger|d80|l450,,WRO5,1.0,WRO5
+WERHE Profesjonalne wiertło SDS Plus do betonu 12 x 460 mm wiertło udarowe wiertło do kamienia wiertło do betonu,2,30.0,0,2,2024-08,2025-02,drill_bit,sds_plus,460.0,drill_bit|d12|l460|sds_plus,,XPO1,1.0,XPO1
+WERHE Przedłużka M14 120 mm – do szlifierek kątowych i polerek – dociera do trudno dostępnych miejsc – wykonana z wytrzymałej stali,1,30.0,1,0,2026-04,2026-04,extension,m14,120.0,extension|l120|m14,,WRO5,1.0,WRO5
+WERHE ® Profesjonalny adapter świder do Stihl BT 106°C BT 120°C BT 121 BT 130 BT 131 wiertło biegunowe,1,30.0,1,0,2024-07,2024-07,adapter,,150.0,adapter,,WRO5,1.0,WRO5
+WERHE sworzeń szybkiej wymiany z zawleczką do świdra ziemnego,1,30.0,1,0,2026-06,2026-06,pin,,150.0,pin,,WRO5,1.0,WRO5
+"WERHE przedłużka świdra ziemnego 1000 mm, stal, 20 mm uchwyt z zawleczką",1,30.0,0,1,2026-06,2026-06,extension,shank20,1000.0,extension|l1000|shank20,,XPO1,1.0,XPO1
+"WERHE płyta ubijająca HEX30 do młota wyburzeniowego, 150x150 mm",2,30.0,2,0,2026-06,2026-06,tamper,hex30,150.0,tamper|d150|l150|hex30,,WRO5,1.0,WRO5
+Groszkownik 140mm 16 zębów SDS Plus kwadratowy,2,30.0,2,0,2026-07,2026-07,chisel_bush,sds_plus,140.0,chisel_bush|d140|sds_plus,6GR16x140p,WRO5,1.0,WRO5
+Adapter WERHE® do wierteł diamentowych wiertło koronowe wiertło koronowe - 1 1/4 cala UNC na SDS Max - dodatkowo z gwintem wewnętrznym 1/2 cala,3,30.0,3,0,2024-08,2025-08,adapter,sds_max,150.0,adapter|sds_max|unc_1_1_4,,WRO5,1.0,WRO5
+WERKON Profesjonalny adapter ślimakowy do wiertarki Stihl BT 106 BT 120 BT 121 BT 130 BT 131 biegun,3,30.0,3,0,2025-08,2025-09,adapter,,150.0,adapter,,WRO5,1.0,WRO5
+Adapter SDS PLUS do M14 wewnętrzny (żeński),1,30.0,1,0,2026-07,2026-07,adapter,sds_plus,150.0,adapter|sds_plus|m14,4Ap-M14wew,WRO5,1.0,WRO5
+WERKON Profesjonalne wiertło do betonu SDS Plus 14 x 460 mm wiertło udarowe wiertło do kamienia wiertło do betonu wiertło,4,29.0,0,4,2024-06,2025-03,drill_bit,sds_plus,460.0,drill_bit|d14|l460|sds_plus,,XPO1,1.0,XPO1
+WERHE ® Profesjonalne Wiertło do betonu SDS Max 40 x 460 mm Wiertarka udarowa Wiertarka do kamienia Wiertarka do betonu,6,29.0,0,6,2024-08,2025-10,drill_bit,sds_max,460.0,drill_bit|d40|l460|sds_max,,XPO1,1.0,XPO1
+Świder do gleby 50D,2,29.0,0,2,2026-07,2026-08,auger,,800.0,auger,1WG50d,XPO1,1.0,XPO1
+Groszkownik 150mm 12 zębów SDS Plus okrągły,2,28.0,2,0,2026-07,2026-08,chisel_bush,sds_plus,150.0,chisel_bush|d150|sds_plus,6GR12x150p,WRO5,1.0,WRO5
+"WERHE® Professional HEX28 Ø20,2mm 28x260mm wbijak do gwoździ uziemiających - wbijak młotkowy do gwoździ wbijak do gwoździ",7,28.0,7,0,2024-09,2026-02,driver_rod,hex28,260.0,driver_rod|d20.2|l260|hex28,,WRO5,1.0,WRO5
+"WERKON SDS Plus 5-częściowy zestaw wierteł do betonu 6, 8, 10, 12, 14 x 210 mm wiertło udarowe do betonu",4,28.0,4,0,2024-07,2025-09,set_drill,sds_plus,210.0,set_drill|sds_plus|n14,,WRO5,1.0,WRO5
+WERHE ® Professional SDS HEX Szpiczaste dłuto łopatkowe 135 x 440 mm Uchwyt sześciokątny 30 mm do młota wyburzeniowego Dłuto plastikowe etui,6,28.0,0,6,2024-09,2026-05,chisel_point,hex30,440.0,chisel_point|d135|l440|hex30,,XPO1,1.0,XPO1
+Dłuto do betonu 50x600 SDS Plus,4,28.0,0,4,2026-07,2026-08,chisel_flat,sds_plus,600.0,chisel_flat|d50|l600|sds_plus,3DB50x600p,XPO1,1.0,XPO1
+Adapter Wiertnica WERHE do m22 - do wiertnicy wiertniczej do wiercenia otwornicą do betonu - adapter do świdra spalinowego lub elektrycznego do wierteł rdzeniowych z korbowodami do muru cementowego,6,28.0,6,0,2025-02,2026-04,adapter,,150.0,adapter,,WRO5,1.0,WRO5
+Dłuto do betonu 75x400mm HEX28,3,27.0,3,0,2026-07,2026-08,chisel_flat,hex28,400.0,chisel_flat|d75|l400|hex28,3DB75x400h28,WRO5,1.0,WRO5
+WERHE ® 65 A 65x80x235mm Młot udarowy gwiazdkowy do młotów wyburzeniowych Dłuto do młotów wyburzeniowych,7,27.0,7,0,2024-09,2026-03,chisel_flat,,80.0,chisel_flat|d65|l80,,WRO5,1.0,WRO5
+WERHE przedłużka do wiertła SDS Max 1180 mm do młotowiertarki,3,27.0,0,3,2026-06,2026-06,extension,sds_max,1180.0,extension|l1180|sds_max,,XPO1,1.0,XPO1
+WERHE Przedłużka do wiertarki 1180 mm – adapter SDS Max do głębokiego wiercenia – solidny i kompatybilny,3,27.0,0,3,2026-04,2026-05,extension,sds_max,1180.0,extension|l1180|sds_max,,XPO1,1.0,XPO1
+"Profesjonalne dłuto SDS HEX zestaw 3-częściowy 35,50 x 410 mm płaskie dłuto łopatkowe dłuto szpiczaste sześciokątne mocowanie 30 mm płaski spat szpic do młotka łamanego",7,26.0,5,2,2026-02,2026-05,set_chisel,hex30,410.0,set_chisel|hex30|n50,,WRO5,0.714,WRO5
+Ubijaczka Srebrna Hex 150x150mm HEX30,1,25.0,1,0,2026-08,2026-08,other,hex30,150.0,other|hex30,"6U8,6h30",WRO5,1.0,WRO5
+WERHE® Professional HEX28 Ø55mm 70x260mm gwoździarka do wbijania gwoździ uziemiających - wbijak młotkowy do gwoździ wbijakowych,8,25.0,8,0,2024-09,2026-05,driver_rod,hex28,260.0,driver_rod|d55|l260|hex28,,WRO5,1.0,WRO5
+"WERHE® adapter 1 1/4” UNC na trzpień 20 mm – Solidny adapter przejściowy wykonany z wysokiej jakości stali do wierteł rdzeniowych i wierteł ziemnych, kompatybilny z wiertłami diamentowymi.",2,25.0,2,0,2026-03,2026-05,adapter,unc_1_1_4,150.0,adapter|unc_1_1_4,,WRO5,1.0,WRO5
+WERHE profesjonalne SDS Plus płaskie dłuto płaskie 60 x 250 mm szerokości dłuto płaskie,3,25.0,3,0,2026-03,2026-05,chisel_flat,sds_plus,250.0,chisel_flat|d60|l250|sds_plus,,WRO5,1.0,WRO5
+WERHE ® Profesjonalne 5 szt. SDS Plus wiertło do betonu 6 x 160 mm kamień młotkowy Quadro X poczwórne cięcie poprzeczne,3,25.0,3,0,2024-06,2026-03,drill_bit,sds_plus,160.0,drill_bit|d6|l160|sds_plus,,WRO5,1.0,WRO5
+"WERHE® Kafar HEX30 do wbijania rur ze stali nierdzewnej Ø125mm 145x250mm do młota wyburzeniowego - wbijak do słupków, wbijak do słupków ogrodzeniowych - kafar do budowy ogrodzeń i zagęszczania gruntu",9,25.0,9,0,2025-03,2026-05,driver_rod,hex30,250.0,driver_rod|d125|l250|hex30,,WRO5,1.0,WRO5
+"WERHE® Dłuto udarowe SDS PLUS, 4 zęby, 150 mm – do obróbki betonu i kamienia",3,25.0,3,0,2026-03,2026-05,chisel_flat,sds_plus,150.0,chisel_flat|d150|sds_plus,,WRO5,1.0,WRO5
+WERHE ® Professional 5 szt. SDS Plus wiertło do betonu 6 x 260 mm kamień młotkowy Quadro X Quadruple cięcie krzyżowe,4,25.0,4,0,2025-02,2026-01,drill_bit,sds_plus,260.0,drill_bit|d6|l260|sds_plus,,WRO5,1.0,WRO5
+"WERHE® Brzeszczot do wyrzynarki T118G 5 szt. do cięcia metalu - do precyzyjnego cięcia bardzo cienkich blach, płyt (0.5-1.5 mm) - brzeszczot do metalu do wyrzynarki z uchwytem w kształcie litery T",3,25.0,3,0,2025-03,2025-12,blade_jigsaw,,150.0,blade_jigsaw|T118G|n5,,WRO5,1.0,WRO5
+"WERHE Sznur murarski na szpuli Ø1,8 mm długość 150 m z uchwytem – sznur brukarski żółty – sznur budowlany z plecionego polipropylenu – odporny na węzły, zerwanie i obciążenia",4,25.0,4,0,2025-04,2025-10,string,,1.8,string|d1.8,,WRO5,1.0,WRO5
+"WERHE świder ziemny 46 x 370 mm do wkrętarki i wiertarki, świder ogrodowy",1,25.0,1,0,2026-06,2026-06,auger,,370.0,auger|d46|l370,,WRO5,1.0,WRO5
+Adapter WERHE® do świder ziemnych o średnicy do 1/2-20UNF - do stosowania w świdrach ziemnych benzynowych i elektrycznych - do wszystkich uchwytów wiertarskich z gwintem zewnętrznym 1/2 20UNF,5,25.0,5,0,2025-02,2026-03,adapter,unf_1_2,150.0,adapter|unf_1_2,,WRO5,1.0,WRO5
+"WERHE świder ziemny 100 mm Ø, 300 mm długości do wiertarki i wkrętarki akumulatorowej – świder ogrodowy do łatwego sadzenia kwiatów, krzewów i wykonywania otworów pod słupki ogrodzeniowe",2,25.0,2,0,2026-05,2026-05,auger,,300.0,auger|d100,,WRO5,1.0,WRO5
+"WERHE świder ziemny 100 mm Ø, 450 mm długości do wiertarki i wkrętarki akumulatorowej – świder ogrodowy do łatwego sadzenia kwiatów, krzewów i wykonywania otworów pod słupki ogrodzeniowe",1,25.0,0,1,2026-05,2026-05,auger,,450.0,auger|d100|l450,,XPO1,1.0,XPO1
+Dłuto do betonu 60 x 250 SDS PLUS,2,25.0,2,0,2026-07,2026-08,chisel_flat,sds_plus,250.0,chisel_flat|d60|l250|sds_plus,3DB60x250p,WRO5,1.0,WRO5
+"WERHE przedłużka do świdra ziemnego, 600 mm, uchwyt 20 mm, stal z zawleczką",1,25.0,0,1,2026-06,2026-06,extension,shank20,600.0,extension|l600|shank20,,XPO1,1.0,XPO1
+"WERHE Świder ziemny do wiertarki z adapterem SDS Max ⌀200 mm, długość 80 cm - świder do studni, świder do sadzenia drzew, świder do otworów ziemnych, świder do pali, świder do przepustów",3,24.0,0,3,2025-02,2025-03,auger,sds_max,800.0,auger|d200|l800|sds_max,,XPO1,1.0,XPO1
+WERHE SDS Max wiertło do betonu 32 x 460 mm wiertło udarowe wiertło do kamienia wiertło do betonu,3,24.0,0,3,2024-08,2024-10,drill_bit,sds_max,460.0,drill_bit|d32|l460|sds_max,,XPO1,1.0,XPO1
+WERKON SDS Max wiertło do betonu 20 x 600 mm wiertło udarowe wiertło do kamienia wiertło do betonu,5,24.0,0,5,2024-10,2025-09,drill_bit,sds_max,600.0,drill_bit|d20|l600|sds_max,,XPO1,1.0,XPO1
+WERHE® Adapter od wiertła benzynowego do gwintu wewnętrznego m14 - Wiertło benzynowe - Adapter do mieszarki do zapraw,7,24.0,7,0,2024-10,2026-04,adapter,m14,150.0,adapter|m14,,WRO5,1.0,WRO5
+"WERHE® Groszkownik dłutowy SDS Plus 4 zęby dł. 150 mm, prostokąt 40x7 mm - Młoty nasadowe do młotowiertarek elektrycznych - Nasadki wyburzeniowe, do młotkowania betonu - Dłuto młotkowe",4,24.0,4,0,2025-03,2026-01,chisel_bush,sds_plus,40.0,chisel_bush|d7|l40|sds_plus,,WRO5,1.0,WRO5
+"Gwint adaptera WERHE® 5/8 na M14 - do mieszarek i betoniarek - pasuje do głowicy mieszającej M14 i mieszadeł 5/8""",5,24.0,5,0,2025-02,2026-03,adapter,m14,150.0,adapter|m14,,WRO5,1.0,WRO5
+"Zestaw szpic , 35 , 50x410 Hex30",6,24.0,3,3,2026-07,2026-08,set_chisel,hex30,410.0,set_chisel|hex30|n3,,WRO5,0.5,WRO5
+"WERHE Zestaw 2 dłut 35/50 x 410 mm, SDS Hex (trzpień sześciokątny) ze stali narzędziowej – Dłuta płaskie do kucia i usuwania materiału z betonu i muru za pomocą młota wyburzeniowego",4,24.0,0,4,2026-02,2026-05,other,hex30,410.0,other|hex30,,XPO1,1.0,XPO1
+WERHE Profesjonalne wiertło do wiertnic ziemnych 200 mm podwójny wał wiertło do słupków wiertło do studni wytrzymała końcówka wiertnicza,2,24.0,0,2,2026-04,2026-05,other,,800.0,other|dbl,,XPO1,1.0,XPO1
+"WERHE ® Professional – 5 x drewno i metal ostrza do wyrzynarki – 200 mm S1022VFN bardzo trwałe – szybkie paleta i plastikowe piły do piły do paznokci – kompatybilne z wyrzynarkami Bosch, Makita",5,23.0,5,0,2025-03,2026-04,other,,150.0,other,,WRO5,1.0,WRO5
+"WERHE pobijak do uziomów SDS Plus, 32,5 mm, do prętów uziemiających, stal",1,23.0,1,0,2026-06,2026-06,driver_rod,sds_plus,150.0,driver_rod|d32.5|sds_plus,,WRO5,1.0,WRO5
+WERHE SDS Max wiertło do betonu 20 x 460 mm wiertło udarowe wiertło do kamienia wiertło do betonu,4,23.0,0,4,2024-09,2025-06,drill_bit,sds_max,460.0,drill_bit|d20|l460|sds_max,,XPO1,1.0,XPO1
+Dłuto do betonu 50x600 Sds max,2,23.0,0,2,2026-07,2026-08,chisel_flat,sds_max,600.0,chisel_flat|d50|l600|sds_max,3DB50x600m,XPO1,1.0,XPO1
+Adapter WERHE m14 do m22 - Do mieszadeł do zaprawy do wiercenia otworów piłą do betonu - ADAPTER SKOKOWY do wiertarek rdzeniowych z prętami łączącymi do murów z bloczków cementowych.,6,23.0,6,0,2024-06,2026-01,adapter,m14,150.0,adapter|m14,,WRO5,1.0,WRO5
+WERHE profesjonalne dłuto łopatkowe SDS 50 x 410 mm sześciokątne gniazdo sześciokątne 30 mm płaskie do młota rozbiórkowego,5,23.0,0,5,2025-10,2026-04,chisel_flat,hex,410.0,chisel_flat|d50|l410|hex,,XPO1,1.0,XPO1
+"WERHE® Groszkownik SDS MAX 16 zębów dł. 220 mm, kwadrat 36 mm - Młoty nasadowe do młotowiertarek elektrycznych - Nasadki wyburzeniowe, do młotkowania betonu - Dłuto młotkowe",6,22.0,6,0,2025-03,2026-02,chisel_bush,sds_max,220.0,chisel_bush|d36|l220|sds_max,,WRO5,1.0,WRO5
+"Adapter WERHE® do diamentowych wierteł rdzeniowych Wiertło rdzeniowe - 1 1/4"" cala UNC do SDS Plus - dodatkowo z gwintem wewnętrznym 1/2˝ cala.",4,22.0,4,0,2024-07,2025-08,adapter,sds_plus,150.0,adapter|sds_plus|unc_1_1_4,,WRO5,1.0,WRO5
+WERHE SDS Max wiertło do betonu 20 x 600 mm wiertło udarowe wiertło do kamienia wiertło do betonu,3,22.0,0,3,2024-08,2024-12,drill_bit,sds_max,600.0,drill_bit|d20|l600|sds_max,,XPO1,1.0,XPO1
+WERHE profesjonalny zestaw dłut sześciokątnych SDS 30 35 x 410 mm gniazdo z zimną końcówką płaskie szerokie do młota rozbiórkowego,6,22.0,0,6,2025-10,2026-05,set_chisel,hex,410.0,set_chisel|hex|n35,,XPO1,1.0,XPO1
+WERHE Profi SDS Plus Wiertło do betonu 32 x 460 mm Wiertło do młotów Wiertło do kamienia Wiertło do betonu,4,22.0,0,4,2024-09,2025-03,drill_bit,sds_plus,460.0,drill_bit|d32|l460|sds_plus,,XPO1,1.0,XPO1
+WERHE® 65x85x210 Młot udarowy z głowicą gwiazdową do młotów wyburzeniowych SDS Max Młotowiertarka,5,21.0,5,0,2025-02,2026-03,other,sds_max,210.0,other|sds_max,,WRO5,1.0,WRO5
+Szpic do betonu Szpic x 410mm HEX30,2,21.0,0,2,2026-08,2026-08,chisel_point,hex30,410.0,chisel_point|l410|hex30,3DBx410h30,XPO1,1.0,XPO1
+"WERHE świder ziemny Ø 150 mm, długość 80 cm, uchwyt 20 mm, ostrza z węglika",1,21.0,0,1,2026-06,2026-06,auger,shank20,800.0,auger|d150|l800|shank20,,XPO1,1.0,XPO1
+"T118AHM WERHE® brzeszczot do wyrzynarki do cięcia metalu - do precyzyjnego cięcia cienkich blach (1,6-3,2mm) - brzeszczot do wyrzynarki",2,20.0,2,0,2025-04,2026-02,blade_jigsaw,,150.0,blade_jigsaw|T118AHM,,WRO5,1.0,WRO5
+"Pobijak 16,5mm SDS Max",1,20.0,1,0,2026-07,2026-07,driver_rod,sds_max,150.0,driver_rod|d16.5|sds_max,"6PO16,5m",WRO5,1.0,WRO5
+Szpic do betonu 600mm SDS PLUS,2,20.0,0,2,2026-08,2026-08,chisel_point,sds_plus,600.0,chisel_point|l600|sds_plus,3DBx600p,XPO1,1.0,XPO1
+"WERKON Zestaw 10 brzeszczotów do wyrzynarki Professional T744D 180 mm – Bardzo długie brzeszczoty do precyzyjnych cięć w drewnie, kompatybilne z wyrzynarkami BOSCH, METABO, MAKITA oraz z chwytem T.",2,20.0,2,0,2026-03,2026-04,blade_jigsaw,,180.0,blade_jigsaw|T744D|l180,,WRO5,1.0,WRO5
+Pobijak 50mm hex30,1,20.0,1,0,2026-07,2026-07,driver_rod,hex30,150.0,driver_rod|d50|hex30,6PO50x220h30,WRO5,1.0,WRO5
+WERHE ® Profesjonalne 5 x brzeszczoty do piły szablastej do drewna i gałęzi – C 240 mm S1531L – bardzo długie – wysokiej jakości stal HCS – szybkie cięcie grubych warstw,3,20.0,3,0,2025-12,2026-03,blade_recip,,240.0,blade_recip|S1531L|l240|n5,,WRO5,1.0,WRO5
+"WERHE zestaw adapterów do świdra ziemnego, SDS Plus/SDS Max młotowiertarka",1,20.0,1,0,2026-06,2026-06,set_adapter,sds_max,150.0,set_adapter|sds_max|sds_plus|n3,,WRO5,1.0,WRO5
+"WERHE pobijak do uziomów do uziomów głębinowych, SDS Max, 13,5x35x260 mm",2,20.0,2,0,2026-06,2026-06,driver_rod,sds_max,35.0,driver_rod|d13.5|l35|sds_max,,WRO5,1.0,WRO5
+"WERHE przedłużka do wiertła SDS Max, 500 mm",1,20.0,0,1,2026-06,2026-06,extension,sds_max,500.0,extension|l500|sds_max,,XPO1,1.0,XPO1
+Świder ogrodowy 40X220,1,20.0,1,0,2026-07,2026-07,auger,,220.0,auger|d40|l220,1Wo40x220,WRO5,1.0,WRO5
+"WERHE® Groszkownik SDS Plus, 16 zębów, 220 mm – do obróbki betonu i kamienia",3,20.0,3,0,2026-03,2026-05,chisel_bush,sds_plus,220.0,chisel_bush|l220|sds_plus,,WRO5,1.0,WRO5
+"WERHE M14 adapter do świdra ziemnego, stal hartowana",1,20.0,1,0,2026-06,2026-06,adapter,m14,150.0,adapter|m14,,WRO5,1.0,WRO5
+Przedłużka m14 25cm,2,20.0,2,0,2026-07,2026-07,extension,m14,250.0,extension|l250|m14,5PRM14x250,WRO5,1.0,WRO5
+"WERHE groszkownik SDS Plus, 25 zębów, 300 mm, do betonu, kamień i granit",1,20.0,1,0,2026-06,2026-06,chisel_bush,sds_plus,300.0,chisel_bush|l300|sds_plus,,WRO5,1.0,WRO5
+Przedłużka 300mm SDS Max do SDS Max,2,20.0,2,0,2026-07,2026-08,extension,sds_max,300.0,extension|l300|sds_max,5PR300m-m,WRO5,1.0,WRO5
+"WERHE brzeszczoty do wyrzynarki T544D, HCS, 152 mm, do drewna, chwyt typu T",1,20.0,1,0,2026-06,2026-06,blade_jigsaw,,152.0,blade_jigsaw|T544D|l152,,WRO5,1.0,WRO5
+"WERHE brzeszczoty do wyrzynarki T344CB, chwyt typu T, 116 mm",1,20.0,1,0,2026-06,2026-06,blade_jigsaw,,116.0,blade_jigsaw|T344CB|l116,,WRO5,1.0,WRO5
+"WERHE świder ziemny 50 x 220 mm do wkrętarki i wiertarki, świder ogrodowy",1,20.0,1,0,2026-06,2026-06,auger,,220.0,auger|d50|l220,,WRO5,1.0,WRO5
+"WERHE świder ziemny Ø 100 mm, wiertło z podwójną spiralą z grotu z węglika",1,20.0,0,1,2026-06,2026-06,auger,,800.0,auger|d100|dbl,,XPO1,1.0,XPO1
+"WERHE świder ziemny z podwójną spiralą Ø 100 mm, 80 cm, zielony",1,20.0,0,1,2026-06,2026-06,auger,,800.0,auger|d100|dbl,,XPO1,1.0,XPO1
+"WERHE świder ziemny Ø 100 mm, podwójna spirala, świder do słupków",1,20.0,0,1,2026-06,2026-06,auger,,800.0,auger|d100|dbl,,XPO1,1.0,XPO1
+WERHE Profesjonalne wiertło SDS Plus do betonu 14 x 460 mm wiertło udarowe wiertło do kamienia wiertło do betonu,2,20.0,0,2,2024-09,2024-12,drill_bit,sds_plus,460.0,drill_bit|d14|l460|sds_plus,,XPO1,1.0,XPO1
+WERHE Profesjonalne wiertło SDS Plus do betonu 10 x 460 mm wiertło udarowe wiertło do kamienia wiertło do betonu,3,20.0,0,3,2024-11,2026-03,drill_bit,sds_plus,460.0,drill_bit|d10|l460|sds_plus,,XPO1,1.0,XPO1
+WERHE M14 przedłużka 250 mm z twardej stali do szlifierki kątowej/polerki,1,20.0,1,0,2026-06,2026-06,extension,m14,250.0,extension|l250|m14,,WRO5,1.0,WRO5
+"WERHE M14 przedłużka 120 mm do szlifierki kątowej i polerek, twarda stal",1,20.0,1,0,2026-06,2026-06,extension,m14,120.0,extension|l120|m14,,WRO5,1.0,WRO5
+Przedłużka do świdra glebowego 5000mm,5,20.0,0,5,2026-07,2026-08,extension,,5000.0,extension|l5000,,XPO1,1.0,XPO1
+Przedłużka m14 12cm,1,20.0,1,0,2026-07,2026-07,extension,m14,120.0,extension|l120|m14,5PRM14x120,WRO5,1.0,WRO5
+Przedłużka 500mm SDS Max do SDS Max,1,20.0,0,1,2026-08,2026-08,extension,sds_max,500.0,extension|l500|sds_max,5PR500m-m,XPO1,1.0,XPO1
+WERHE® Brzeszczot do wyrzynarki T318BF 5 szt. do cięcia metalu - do precyzyjnego cięcia średnich i grubych blach (2.5-6 mm) - brzeszczot do metalu do wyrzynarki z uchwytem w kształcie litery T,2,20.0,2,0,2025-03,2026-03,blade_jigsaw,,150.0,blade_jigsaw|T318BF|n5,,WRO5,1.0,WRO5
+WERHE® Adapter do wiertła diamentowego wiertła rdzeniowego - 1 1/4 cala UNC na M16 - dodatkowo z gwintem wewnętrznym 1/2 BSPP,1,20.0,1,0,2026-01,2026-01,adapter,unc_1_1_4,150.0,adapter|unc_1_1_4,,WRO5,1.0,WRO5
+"WERHE świder ziemny 46 mm Ø, 370 mm długości do wiertarki i wkrętarki akumulatorowej – świder ogrodowy do łatwego sadzenia kwiatów, krzewów i wykonywania otworów pod słupki ogrodzeniowe",1,20.0,1,0,2026-05,2026-05,auger,,370.0,auger|d46|l370,,WRO5,1.0,WRO5
+"WERHE świder ziemny 100 x 450 mm do wkrętarki i wiertarki, świder ogrodowy",1,20.0,0,1,2026-06,2026-06,auger,,450.0,auger|d100|l450,,XPO1,1.0,XPO1
+"WERHE świder ziemny 100 x 250 mm do wkrętarki i wiertarki, świder ogrodowy",1,20.0,1,0,2026-06,2026-06,auger,,250.0,auger|d100|l250,,WRO5,1.0,WRO5
+"WERHE świder ziemny 100 mm Ø, 250 mm długości do wiertarki i wkrętarki akumulatorowej – świder ogrodowy do łatwego sadzenia kwiatów, krzewów i wykonywania otworów pod słupki ogrodzeniowe",1,20.0,1,0,2026-05,2026-05,auger,,250.0,auger|d100,,WRO5,1.0,WRO5
+WERHE dłuta SDS Plus 50 x 150 mm – Dłuto płaskie do kucia betonu i usuwania płytek – Solidne akcesorium do młotów udarowo-obrotowych i młotów wyburzeniowych,2,20.0,2,0,2026-03,2026-05,chisel_flat,sds_plus,150.0,chisel_flat|d50|l150|sds_plus,,WRO5,1.0,WRO5
+"WERHE pobijak do uziomów SDS Plus, Ø 25,5 mm, do prętów uziemiających, stal",1,20.0,1,0,2026-06,2026-06,driver_rod,sds_plus,150.0,driver_rod|d25.5|sds_plus,,WRO5,1.0,WRO5
+WERHE adapter stalowy 1 1/4 UNC na 20 mm chwyt do wiertła koronowego,1,20.0,1,0,2026-06,2026-06,adapter,unc_1_1_4,150.0,adapter|unc_1_1_4|shank20,,WRO5,1.0,WRO5
+"WERHE ® Wbijak gwoździ SDS Plus 13,5 mm do młotowiertarek – Wydajne narzędzie do wbijania gwoździ i prętów – Wytrzymała stal chromowo-wanadowa",1,20.0,1,0,2026-03,2026-03,driver_rod,sds_plus,150.0,driver_rod|d13.5|sds_plus,,WRO5,1.0,WRO5
+Adapter Sds Max + zawleczka,1,20.0,1,0,2026-08,2026-08,adapter,sds_max,150.0,adapter|sds_max,,WRO5,1.0,WRO5
+"WERHE szybki sworzeń do świdra ziemnego z zawleczką, stal sprężynowa",1,20.0,1,0,2026-06,2026-06,pin,,150.0,pin,,WRO5,1.0,WRO5
+Świder Ogrodowy 80X600,1,20.0,0,1,2026-07,2026-07,auger,,600.0,auger|d80|l600,1Wo80x600,XPO1,1.0,XPO1
+Wiertło do betonu 20x600mm Sds plus,2,20.0,0,2,2026-07,2026-08,drill_bit,sds_plus,600.0,drill_bit|d20|l600|sds_plus,2WB20x600p,XPO1,1.0,XPO1
+Zawleczka bolec 5 Sztuk,1,20.0,1,0,2026-08,2026-08,pin,,150.0,pin|n5,,WRO5,1.0,WRO5
+Świder Ogrodowy 50X220,2,20.0,2,0,2026-07,2026-08,auger,,220.0,auger|d50|l220,1Wo50x220,WRO5,1.0,WRO5
+Świder Ogrodowy 100X450,1,20.0,0,1,2026-07,2026-07,auger,,450.0,auger|d100|l450,1Wo100x450,XPO1,1.0,XPO1
+Adapter z M16 do 1.1/4,1,20.0,1,0,2026-07,2026-07,adapter,unc_1_1_4,150.0,adapter|unc_1_1_4,4AM16-1.1/4,WRO5,1.0,WRO5
+"Adapter udar 1/2"" wewnętrzny do 1/2-20-UNF",1,20.0,1,0,2026-07,2026-07,adapter,unf_1_2,150.0,adapter|unf_1_2,4AK1/2-1/2-20UNF,WRO5,1.0,WRO5
+Wiertarka do betonu WERHE ® Professional SDS PLUS 28 x 600 mm Wiertarka udarowa Wiertarka do betonu,3,19.0,0,3,2025-11,2026-02,drill_bit,sds_plus,600.0,drill_bit|d28|l600|sds_plus,,XPO1,1.0,XPO1
+"Pobijak 20,2x35x260mm SDS MAX Premium",2,19.0,2,0,2026-08,2026-08,driver_rod,sds_max,35.0,driver_rod|d20.2|l35|sds_max,"6PO20,2mP",WRO5,1.0,WRO5
+WERHE® Professional HEX28 Ø85mm 100x260mm wbijak do gwoździ uziemiających Elektrody uziemiające - Młotek udarowy Wbijak do gwoździ uziemiających,7,19.0,7,0,2024-09,2026-04,driver_rod,hex28,260.0,driver_rod|d85|l260|hex28,,WRO5,1.0,WRO5
+Świder do gleby 200D,2,18.0,0,2,2026-07,2026-07,auger,,800.0,auger,1WG200d,XPO1,1.0,XPO1
+"WERHE® Groszkownik SDS MAX 16 zębów dł. 200 mm, kwadrat 32 mm - Młoty nasadowe do młotowiertarek elektrycznych - Nasadki wyburzeniowe, do młotkowania betonu - Dłuto młotkowe",5,18.0,5,0,2025-03,2026-01,chisel_bush,sds_max,200.0,chisel_bush|d32|l200|sds_max,,WRO5,1.0,WRO5
+Świder Ogrodowy 100X300,1,18.0,1,0,2026-07,2026-07,auger,,300.0,auger|d100|l300,1Wo100x300,WRO5,1.0,WRO5
+WERHE dłuto łopatkowe HEX28 75x400 mm,2,18.0,2,0,2026-06,2026-06,chisel_flat,hex28,400.0,chisel_flat|d75|l400|hex28,,WRO5,1.0,WRO5
+WERHE SDS Plus zestaw dłut 600 mm – bardzo długi 3-częściowy zestaw z dłutami spiczastymi i płaskimi 25/50 mm – wytrzymała stal do betonu i muru,2,18.0,0,2,2026-04,2026-05,set_chisel,sds_plus,600.0,set_chisel|sds_plus|n3,,XPO1,1.0,XPO1
+"WERHE® Kafar HEX30 do wbijania rur ze stali nierdzewnej Ø105mm 120x250mm do młota wyburzeniowego - wbijak do słupków, wbijak do słupków ogrodzeniowych - kafar do budowy ogrodzeń i zagęszczania gruntu",6,17.0,6,0,2025-03,2026-04,driver_rod,hex30,250.0,driver_rod|d105|l250|hex30,,WRO5,1.0,WRO5
+HEX WERHE adapter do wiertnic ziemnych – sześciokątny adapter do wiertarek akumulatorowych – kompatybilny z wiertnicą ziemną 40–200 mm,1,17.0,1,0,2026-01,2026-01,adapter,hex,150.0,adapter|hex,,WRO5,1.0,WRO5
+"WERHE ® 16,5x25x145 Profesjonalny wkrętak do gwoździ Jack Hammer - Wkrętak do gwoździ SDS Max",5,17.0,5,0,2024-08,2026-03,other,sds_max,145.0,other|sds_max,,WRO5,1.0,WRO5
+"WERHE dłuto łopatkowe SDS Plus 50x400 mm, dłuto płaskie ze stali hartowanej",2,17.0,0,2,2026-06,2026-06,chisel_flat,sds_plus,400.0,chisel_flat|d50|l400|sds_plus,,XPO1,1.0,XPO1
+"WERHE pobijak do słupków HEX30, Ø 70 mm, do młota wyburzeniowego, pale",2,17.0,2,0,2026-06,2026-06,driver_pile,hex30,150.0,driver_pile|d70|hex30,,WRO5,1.0,WRO5
+WERHE® Zestaw brzeszczotów 5 cz. S1022VFN/S1531L/S1543HM metal/drewno/matryca,3,16.0,3,0,2025-09,2026-03,other,,150.0,other,,WRO5,1.0,WRO5
+WERHE® SDS Max 50 mm – Do szybkiego wbijania palików Star-Pitch młotem wyburzeniowym – Wytrzymała konstrukcja ze stali chromowo-wanadowej,2,16.0,2,0,2026-05,2026-05,driver_rod,sds_max,150.0,driver_rod|d50|sds_max,,WRO5,1.0,WRO5
+"WERHE dłuto do młota SDS Plus 4 zęby, 150 mm, do betonu i obróbki kamienia",2,16.0,2,0,2026-06,2026-06,chisel_flat,sds_plus,150.0,chisel_flat|d150|sds_plus,,WRO5,1.0,WRO5
+WERHE Wiertło SDS PLUS do betonu 40 x 600 mm – Wiertło udarowe do betonu i cegły – 4 krawędzie tnące,3,16.0,0,3,2026-05,2026-06,drill_bit,sds_plus,600.0,drill_bit|d40|l600|sds_plus,,XPO1,1.0,XPO1
+WERHE® Szpic SDS Plus 14 x 150 mm – Szpicak do kucia betonu - Dłuto do usuwania płytek - Akcesoria do młotowiertarek i młotów wyburzeniowych,4,16.0,4,0,2025-02,2025-11,chisel_point,sds_plus,150.0,chisel_point|d14|l150|sds_plus,,WRO5,1.0,WRO5
+WERKON SDS Max dłuto płaskie 50 x 400 mm dłuto szerokie płaskie szerokie dłuto,4,16.0,0,4,2026-02,2026-06,chisel_flat,sds_max,400.0,chisel_flat|d50|l400|sds_max,,XPO1,1.0,XPO1
+Ubijaczka Czarna Hex 250x200mm HEX30,3,16.0,3,0,2026-07,2026-08,other,hex30,200.0,other|hex30,"6U6,6h30",WRO5,1.0,WRO5
+Groszkownik 300mm 40x40mm 25 zębów SDS PLUS,1,15.0,1,0,2026-07,2026-07,chisel_bush,sds_plus,40.0,chisel_bush|d40|l40|sds_plus,6GR25x300p,WRO5,1.0,WRO5
+Dłuto do betonu 20x400 Sds plus,1,15.0,0,1,2026-08,2026-08,chisel_flat,sds_plus,400.0,chisel_flat|d20|l400|sds_plus,3DB20x400p,XPO1,1.0,XPO1
+Dłuto do betonu 50 x 250 SDS PLUS,2,15.0,2,0,2026-07,2026-07,chisel_flat,sds_plus,250.0,chisel_flat|d50|l250|sds_plus,3DB50x250p,WRO5,1.0,WRO5
+WERHE® Brzeszczot do wyrzynarki T218A 5 szt. do cięcia metalu - do cięcia po łukach cienkich blach (1-3 mm) - brzeszczot do metalu do wyrzynarki z uchwytem w kształcie litery T,2,15.0,2,0,2025-03,2025-09,blade_jigsaw,,150.0,blade_jigsaw|T218A|n5,,WRO5,1.0,WRO5
+WERHE Dłuta płaskie SDS Plus 50 x 400 mm,4,15.0,0,4,2024-09,2026-02,other,sds_plus,400.0,other|sds_plus,,XPO1,1.0,XPO1
+WERHE® Brzeszczot do wyrzynarek do cięcia drewna 2379/1 - do giętych cięć w laminacie i płytach wiórowych - brzeszczoty do pił do wyrzynarek z uchwytem T - akcesoria do wyrzynarek,2,15.0,2,0,2025-04,2026-01,other,,150.0,other,,WRO5,1.0,WRO5
+"Max WERHE przedłużka do wiertła SDS Max na SDS, 300 mm, stal",1,15.0,1,0,2026-06,2026-06,extension,sds_max,300.0,extension|l300|sds_max,,WRO5,1.0,WRO5
+"WERHE® Młotek gumowy SDS Max do młota udarowego o średnicy ⌀36 mm – gumowy bijak idealny do prac przy blachach, kostce brukowej, palach",2,15.0,2,0,2026-02,2026-03,other,sds_max,150.0,other|d36|sds_max,,WRO5,1.0,WRO5
+WERHE® Dłuto SDS Plus 30 x 150 mm - Dłuto płaskie do kucia betonu - Dłuto do usuwania płytek - Akcesoria do młotowiertarek i młotów wyburzeniowych,2,15.0,2,0,2025-02,2025-03,chisel_flat,sds_plus,150.0,chisel_flat|d30|l150|sds_plus,,WRO5,1.0,WRO5
+WERHE ® Professional 5 szt. SDS Plus wiertło do betonu 6 x 110 mm kamień młotkowy Quadro X Quadruple cięcie krzyżowe,2,15.0,2,0,2025-02,2025-06,drill_bit,sds_plus,110.0,drill_bit|d6|l110|sds_plus,,WRO5,1.0,WRO5
+WERHE ® Profesjonalny 5 szt. SDS Plus wiertło do betonu 6 x 210 mm młotek kamień beton Quadro X poczwórne cięcie przecinak,2,15.0,2,0,2024-10,2025-02,drill_bit,sds_plus,210.0,drill_bit|d6|l210|sds_plus,,WRO5,1.0,WRO5
+Zawleczki szybkie 5sztuk,1,15.0,1,0,2026-07,2026-07,pin,,150.0,pin|n5,,WRO5,1.0,WRO5
+"WERHE szpicak SDS Plus, 600 mm, stal hartowana, do betonu, mur",1,15.0,0,1,2026-06,2026-06,chisel_point,sds_plus,600.0,chisel_point|l600|sds_plus,,XPO1,1.0,XPO1
+WERHE ® Profesjonalne 5-cz. SDS Plus wiertło do betonu 12 x 210 mm młotek kamień beton Quadro X czterokrotne ostrze krzyżowe,2,15.0,2,0,2025-02,2026-04,drill_bit,sds_plus,210.0,drill_bit|d12|l210|sds_plus,,WRO5,1.0,WRO5
+WERHE ® Profesjonalny Adapter Śrubowy do Stihl BT 106 °C BT 120 °C BT 121 BT 130 BT 131 Wiertła Słupowego,1,15.0,1,0,2026-01,2026-01,adapter,,150.0,adapter,,WRO5,1.0,WRO5
+"WERHE dłuto płaskie SDS Max 50 x 600 mm, twarda stal do betonu i muru",1,15.0,0,1,2026-06,2026-06,chisel_flat,sds_max,600.0,chisel_flat|d50|l600|sds_max,,XPO1,1.0,XPO1
+WERHE® Szpic SDS Plus 14 x 250 mm – Szpicak do kucia betonu - Dłuto do usuwania płytek - Akcesoria do młotowiertarek i młotów wyburzeniowych,3,15.0,3,0,2025-02,2025-10,chisel_point,sds_plus,250.0,chisel_point|d14|l250|sds_plus,,WRO5,1.0,WRO5
+"WERHE® Profesjonalny wbijak do kotew gruntowych HEX28 20,2 mm – solidna stal do prętów uziomowych - kompatybilny z młotami wyburzeniowymi HEX28",2,15.0,2,0,2026-03,2026-04,driver_rod,hex28,150.0,driver_rod|d20.2|hex28,,WRO5,1.0,WRO5
+"WERHE ® SDS Plus zestaw dłut 400 mm ekstra długi i twardy 3-częściowy 20, 50 mm końcówka dłuta",1,15.0,0,1,2026-05,2026-05,set_chisel,sds_plus,400.0,set_chisel|sds_plus|n3,,XPO1,1.0,XPO1
+"WERHE pobijak do uziomów SDS Max 16,5 mm, stal hartowana do młotowiertarek",2,15.0,2,0,2026-06,2026-06,driver_rod,sds_max,150.0,driver_rod|d16.5|sds_max,,WRO5,1.0,WRO5
+"WERHE® Profesjonalny wbijak do gwoździ uziemiających HEX28 Ø32,5mm 45x260mm do wbijania elektrod uziemiających Elektrody uziemiające - wbijak młotkowy wbijak sztyftowy wbijak sztyftowy",3,15.0,3,0,2024-09,2026-03,driver_rod,hex28,260.0,driver_rod|d32.5|l260|hex28,,WRO5,1.0,WRO5
+Profesjonalny dłuto szpiczaste SDS Max 600 mm dłuto punktowe dłuto młot rozbiórki,2,15.0,0,2,2025-10,2026-05,chisel_flat,sds_max,600.0,chisel_flat|l600|sds_max,,XPO1,1.0,XPO1
+"WERHE świder ziemny 50 mm, ostrza z węglika, 80 cm, do wiertarek",1,15.0,0,1,2026-06,2026-06,auger,,800.0,auger|d50|l800,,XPO1,1.0,XPO1
+WERHE Profesjonalne wiertło SDS Plus do betonu 12 x 600 mm wiertło udarowe wiertło do kamienia wiertło do betonu,2,15.0,0,2,2024-09,2025-03,drill_bit,sds_plus,600.0,drill_bit|d12|l600|sds_plus,,XPO1,1.0,XPO1
+"WERHE® Groszkownik dłutowy SDS MAX 4 zęby dł. 200 mm, prostokąt 40x7 mm - Młoty nasadowe do młotowiertarek elektrycznych - Nasadki wyburzeniowe, do młotkowania betonu - Dłuto młotkowe",4,15.0,4,0,2025-02,2025-12,chisel_bush,sds_max,40.0,chisel_bush|d7|l40|sds_max,,WRO5,1.0,WRO5
+WERHE ® Professional 5 szt. SDS Plus wiertło do betonu 8 x 210 mm młotek kamień beton Quadro X Quadruple cięcie krzyżowe,2,15.0,2,0,2025-02,2025-04,drill_bit,sds_plus,210.0,drill_bit|d8|l210|sds_plus,,WRO5,1.0,WRO5
+"WERHE® Brzeszczoty do piły szablastej długość 305 mm 8TPI - brzeszczot z węglików spiekanych - do cięcia żeliwa, stali stopowej, grubego metalu",2,15.0,2,0,2025-02,2025-10,blade_recip,,305.0,blade_recip|l305,,WRO5,1.0,WRO5
+WERKON wiertło do betonu SDS Max 40x600 mm z ostrza krzyżowego z węglika,2,14.0,0,2,2026-06,2026-06,drill_bit,sds_max,600.0,drill_bit|d40|l600|sds_max,,XPO1,1.0,XPO1
+WERKON Profi SDS Max dłuto płaskie 75 x 400 mm szerokie dłuto płaskie szerokie dłuto,3,14.0,3,0,2025-12,2026-05,chisel_flat,sds_max,400.0,chisel_flat|d75|l400|sds_max,,WRO5,1.0,WRO5
+WERKON Profesjonalne wiertło do betonu SDS Plus 20 x 460 mm wiertło udarowe wiertło do kamienia wiertło do betonu,3,14.0,0,3,2024-09,2026-03,drill_bit,sds_plus,460.0,drill_bit|d20|l460|sds_plus,,XPO1,1.0,XPO1
+"WERKON zestaw dłut SDS Hex 3-częściowy, 410 mm",3,14.0,3,0,2026-06,2026-06,set_chisel,hex30,410.0,set_chisel|hex30|n3,,WRO5,1.0,WRO5
+WERHE świder ziemny 150 mm z ostrzami z węglika spiekanego – Wytrzymała stal do sadzenia drzew i budowy ogrodzeń – kompatybilny z SDS Max – Dla profesjonalistów i majsterkowiczów,2,14.0,0,2,2026-05,2026-05,auger,sds_max,800.0,auger|d150|sds_max,,XPO1,1.0,XPO1
+WERHE profesjonalny zestaw dłut sześciokątnych SDS 30 50 x 410 mm gniazdo z zimną końcówką płaskie szerokie do młota rozbiórkowego,5,14.0,0,5,2024-08,2025-12,set_chisel,hex,410.0,set_chisel|hex|n50,,XPO1,1.0,XPO1
+"WERHE płyta ubijająca do młotów elektrycznych, 30 mm sześciokąt, 26 cm",3,14.0,3,0,2026-06,2026-06,tamper,hex30,260.0,tamper|hex30,,WRO5,1.0,WRO5
+Wiertło do betonu 40x600 sds max,2,14.0,0,2,2026-07,2026-07,drill_bit,sds_max,600.0,drill_bit|d40|l600|sds_max,2WB40x600m,XPO1,1.0,XPO1
+"WERHE przedłużka do wiertła 750 mm, adapter SDS Max, długość robocza 610 mm",1,14.0,0,1,2026-06,2026-06,extension,sds_max,610.0,extension|l610|sds_max,,XPO1,1.0,XPO1
+WERHE profesjonalna wiertarka do ślimaka 150 mm Pełna Stal podwójny wałek runo dobrze wytrzymałe z adapterem SDS Plus - TO JEST ZWYKŁA,1,14.0,0,1,2024-07,2024-07,auger,sds_plus,800.0,auger|d150|sds_plus|dbl,,XPO1,1.0,XPO1
+WERHE® Bruzdownik Skrzydełkowy SDS MAX 60 x 600 mm - Dłuto kanałowe do młotowiertarki - Dłuto do kucia w cegle i betonie,3,14.0,0,3,2025-01,2026-03,chisel_gouge,sds_max,600.0,chisel_gouge|d60|l600|sds_max,,XPO1,1.0,XPO1
+"WERHE Świder ziemny do wiertarki z adapterem HEX ⌀50 mm, długość 80 cm - świder do studni, świder do sadzenia drzew, świder do otworów ziemnych, świder do pali, świder do przepustów",1,14.0,0,1,2026-05,2026-05,auger,hex,800.0,auger|d50|l800|hex,,XPO1,1.0,XPO1
+WERHE ® Profesjonalne Wiertło SDS Plus Do Betonu 18 x 600 mm Udarowe i Do Kamienia,3,13.0,0,3,2025-09,2026-04,drill_bit,sds_plus,600.0,drill_bit|d18|l600|sds_plus,,XPO1,1.0,XPO1
+"WERHE świder ziemny 60 mm, adapter Hex, wiertło ręczne do sadzenia drzew",1,13.0,0,1,2026-06,2026-06,auger,hex,800.0,auger|d60|hex,,XPO1,1.0,XPO1
+WERHE Profi dłuto płaskie płaskie 20 x 400 mm SDS Plus,3,13.0,0,3,2025-10,2026-05,chisel_flat,sds_plus,400.0,chisel_flat|d20|l400|sds_plus,,XPO1,1.0,XPO1
+"Zestaw Szpic , 35 x 410 hex30",3,13.0,0,3,2026-08,2026-08,set_chisel,hex30,410.0,set_chisel|hex30|n35,,XPO1,1.0,XPO1
+Świder do Gleby 60D HEX,1,13.0,0,1,2026-08,2026-08,auger,hex,800.0,auger|hex,,XPO1,1.0,XPO1
+WERHE® Dłuto SDS Plus 50 x 250 mm - Dłuto płaskie do kucia betonu - Dłuto do usuwania płytek - Akcesoria do młotowiertarek i młotów wyburzeniowych,3,13.0,3,0,2025-02,2025-10,chisel_flat,sds_plus,250.0,chisel_flat|d50|l250|sds_plus,,WRO5,1.0,WRO5
+WERHE nasadka świdra ziemnego Ø 200 mm podwójna spirala,1,12.0,0,1,2026-06,2026-06,other,,800.0,other|d200|dbl,,XPO1,1.0,XPO1
+"WERHE® Groszkownik HEX30 25 zębów dł. 300 mm, kwadrat 40 mm Wytrzymałe dłuto do prac betonowych – Kwadratowe",2,12.0,2,0,2026-03,2026-03,chisel_bush,hex30,300.0,chisel_bush|d40|l300|hex30,,WRO5,1.0,WRO5
+"WERHE® Dłuto udarowe SDS MAX, 4 zęby, 200 mm – do obróbki betonu i kamienia",3,12.0,3,0,2026-03,2026-05,chisel_flat,sds_max,200.0,chisel_flat|l200|sds_max,,WRO5,1.0,WRO5
+"WERHE® Groszkownik HEX30 16 zębów dł. 220 mm, kwadrat 36 mm - Młoty nasadowe do elektrycznych młotów wyburzeniowych - Nasadki wyburzeniowe, do młotkowania betonu - Dłuto młotkowe",4,12.0,4,0,2025-02,2025-12,chisel_bush,hex30,220.0,chisel_bush|d36|l220|hex30,,WRO5,1.0,WRO5
+"WERHE® Groszkownik HEX30 25 zębów dł. 300 mm, kwadrat 40 mm - Młoty nasadowe do elektrycznych młotów wyburzeniowych - Nasadki wyburzeniowe, do młotkowania betonu - Dłuto młotkowe",3,12.0,3,0,2025-03,2025-12,chisel_bush,hex30,300.0,chisel_bush|d40|l300|hex30,,WRO5,1.0,WRO5
+"WERHE Profesjonalny zestaw dłut sześciokątnych SDS, 2 sztuki, 35, 50 mm, płaska krawędź ze stali stopowej, nasadka do młota wyburzeniowego",2,12.0,0,2,2024-09,2024-10,set_chisel,hex,,set_chisel|hex|n3,,XPO1,1.0,XPO1
+Wiertło do gleby 50D Hex,1,12.0,0,1,2026-07,2026-07,auger,hex,800.0,auger|hex,,XPO1,1.0,XPO1
+"WERHE zestaw dłut płaskich 35/50 x 410 mm, SDS Hex, do betonu i muru",2,12.0,0,2,2026-06,2026-06,set_chisel,hex30,410.0,set_chisel|hex30|n50,,XPO1,1.0,XPO1
+"WERHE przedłużka 200 mm, 1 1/4 cala UNC, do koronki wiertniczej, otwornica",1,12.0,1,0,2026-06,2026-06,extension,unc_1_1_4,200.0,extension|l200|unc_1_1_4,,WRO5,1.0,WRO5
+Wbijak do pali 65x80x235 HEX30,1,12.0,1,0,2026-07,2026-07,driver_pile,hex30,80.0,driver_pile|d65|l80|hex30,6PO65x235h30,WRO5,1.0,WRO5
+Świder do Gleby 50D SDS MAX,1,12.0,0,1,2026-07,2026-07,auger,sds_max,800.0,auger|sds_max,1ZWG50dm,XPO1,1.0,XPO1
+WERHE ® Professional SDS PLUS 30 x 600 mm Wiertarka udarowa Wiertarka do kamienia Wiertarka do betonu,3,11.0,0,3,2025-07,2026-04,drill_bit,sds_plus,600.0,drill_bit|d30|l600|sds_plus,,XPO1,1.0,XPO1
+WERHE ® Professional SDS Max Dłuto szpiczaste 105 x 440 mm SDS Max Nagrywanie 18 mm do Wiertarka Młot Młotek Dłuto Plastikowa walizka,3,11.0,0,3,2025-07,2026-05,chisel_flat,sds_max,440.0,chisel_flat|d105|l440|sds_max,,XPO1,1.0,XPO1
+WERHE® Profesjonalny gwoździowkrętak HEX30 Ø10mm męski 270x30mm do wbijania gwoździ uziemiających Pobijak do wbijania gwoździ uziemiających,3,11.0,3,0,2025-09,2026-05,driver_rod,hex30,270.0,driver_rod|d10|l270|hex30,,WRO5,1.0,WRO5
+WERHE profesjonalne dłuto łopatkowe SDS Plus 50 x 600 mm szerokości dłuto płaskie szerokie,3,11.0,0,3,2026-02,2026-05,chisel_flat,sds_plus,600.0,chisel_flat|d50|l600|sds_plus,,XPO1,1.0,XPO1
+Wiertło do Betonu 16x600mm SDS Max,2,11.0,0,2,2026-07,2026-08,drill_bit,sds_max,600.0,drill_bit|d16|l600|sds_max,2WB16x600m,XPO1,1.0,XPO1
+Wiertło do betonu 18x600mm SDS MAX,2,11.0,0,2,2026-07,2026-08,drill_bit,sds_max,600.0,drill_bit|d18|l600|sds_max,2WB18x600m,XPO1,1.0,XPO1
+"WERHE® Professional HEX28 Ø16,5mm 25x260mm gwoździarka do wbijania gwoździ uziemiających Gwoździarka do wbijania gwoździ uziemiających - Młotek udarowy Gwoździarka do wbijania sztyftów",4,11.0,4,0,2024-09,2026-01,driver_rod,hex28,260.0,driver_rod|d16.5|l260|hex28,,WRO5,1.0,WRO5
+WERHE ® Professional SDS Max Moil Shank Zestaw dłut trzcinowych 3 sztuki 18 25 50 x 400 mm płaski czubek z zimną końcówką do młotka do rozbiórki,4,11.0,0,4,2024-12,2026-05,set_chisel,sds_max,400.0,set_chisel|sds_max|n50,,XPO1,1.0,XPO1
+"WERHE® Groszkownik SDS MAX, 16 zębów, 220 mm – do obróbki betonu i kamienia",3,11.0,3,0,2026-03,2026-05,chisel_bush,sds_max,220.0,chisel_bush|l220|sds_max,,WRO5,1.0,WRO5
+WERKON Profesjonalne wiertło do betonu SDS Plus 16 x 460 mm wiertło udarowe wiertło do kamienia wiertło do betonu wiertło,1,11.0,0,1,2025-02,2025-02,drill_bit,sds_plus,460.0,drill_bit|d16|l460|sds_plus,,XPO1,1.0,XPO1
+Werhe® 10 szt. Szybka wymiana śrub do wierteł ziemnych. Śruba zabezpieczająca z zawleczką. Wykonany z wysokiej jakości stali sprężynowej. Śruba nadaje się do wszystkich uniwersalnych wierteł ziemnych.,3,11.0,3,0,2025-10,2026-03,pin,,150.0,pin|n10,,WRO5,1.0,WRO5
+Dłuto do betonu 50x400 Sds max,1,10.0,0,1,2026-07,2026-07,chisel_flat,sds_max,400.0,chisel_flat|d50|l400|sds_max,3DB50x400m,XPO1,1.0,XPO1
+Wbijak do pali 55x75x220mm SDS Max,1,10.0,1,0,2026-07,2026-07,driver_pile,sds_max,75.0,driver_pile|d55|l75|sds_max,6PO55x200m,WRO5,1.0,WRO5
+Bruzdownik motylkowy 400mm SDS Plus,1,10.0,0,1,2026-07,2026-07,chisel_gouge,sds_plus,400.0,chisel_gouge|l400|sds_plus,3Brm400p,XPO1,1.0,XPO1
+Groszkownik 200mm 4 zębów SDS Max,1,10.0,1,0,2026-08,2026-08,chisel_bush,sds_max,200.0,chisel_bush|l200|sds_max,6GR4x200m,WRO5,1.0,WRO5
+"WERHE SDS Plus na M14 adapter, stal",1,10.0,1,0,2026-06,2026-06,adapter,sds_plus,150.0,adapter|sds_plus|m14,,WRO5,1.0,WRO5
+Młotek Gumowy SDS MAX,1,10.0,1,0,2026-07,2026-07,other,sds_max,150.0,other|sds_max,6POmg,WRO5,1.0,WRO5
+"Gwoździarka 13,5mm SDS Plus",1,10.0,1,0,2026-08,2026-08,other,sds_plus,150.0,other|sds_plus,"6PO13,5pk",WRO5,1.0,WRO5
+"Gwoździarka 16,5mm SDS Plus",1,10.0,1,0,2026-07,2026-07,other,sds_plus,150.0,other|sds_plus,"6PO16,5pk",WRO5,1.0,WRO5
+"Gwoździarka 10,5mm SDS Plus",1,10.0,1,0,2026-07,2026-07,other,sds_plus,150.0,other|sds_plus,"6PO10,5pk",WRO5,1.0,WRO5
+Nożyki T344D,1,10.0,1,0,2026-07,2026-07,blade_jigsaw,,150.0,blade_jigsaw|T344D,7NT344D,WRO5,1.0,WRO5
+Nożyki T718GF,1,10.0,1,0,2026-07,2026-07,blade_jigsaw,,150.0,blade_jigsaw|T718GF,7NT718GF,WRO5,1.0,WRO5
+"Pobijak 13,5mm HEX30",1,10.0,1,0,2026-07,2026-07,driver_rod,hex30,150.0,driver_rod|d13.5|hex30,"6PO13,5h30",WRO5,1.0,WRO5
+"WERKON brzeszczoty do wyrzynarki T744D, 180 mm, HCS stal, zestaw 10 szt.",1,10.0,1,0,2026-06,2026-06,blade_jigsaw,,180.0,blade_jigsaw|T744D|l180|n10,,WRO5,1.0,WRO5
+Adapter do świdrów (20mm) - M14 Gwint Wewnętrzny,1,10.0,1,0,2026-08,2026-08,adapter,m14,150.0,adapter|m14,4AM14wew-WG,WRO5,1.0,WRO5
+WERHE Profesjonalne wiertło do betonu SDS Plus 25 x 260 mm młotek beton kwadratowy X poczwórne cięcie krzyżowe,1,10.0,1,0,2025-11,2025-11,drill_bit,sds_plus,260.0,drill_bit|d25|l260|sds_plus,,WRO5,1.0,WRO5
+"WERHE Profesjonalny brzeszczot do wyrzynarki do drewna, C 180 mm, T744D, ekstra długie, szybkie cięcie grubych warstw, kompatybilne z wyrzynarkami Bosh, Metabo, Makita",1,10.0,1,0,2026-01,2026-01,blade_jigsaw,,180.0,blade_jigsaw|T744D|l180,,WRO5,1.0,WRO5
+WERHE Professional SDS Plus wiertarka do betonu 6 x 160 mm,1,10.0,1,0,2024-06,2024-06,drill_bit,sds_plus,160.0,drill_bit|d6|l160|sds_plus,,WRO5,1.0,WRO5
+WERHE ® profesjonalne ostrze wielofunkcyjne 210 x 30 mm 60Z zębatka uniwersalna piła okrągła,2,10.0,2,0,2026-04,2026-05,other,,150.0,other,,WRO5,1.0,WRO5
+"WERHE adapter M14 do świdrów ziemnych – Wytrzymały adapter do mieszadła ze stali hartowanej do wiertnic glebowych – Wszechstronne zastosowanie do ogrodzeń, słupków i drzew",1,10.0,1,0,2026-05,2026-05,adapter,m14,150.0,adapter|m14,,WRO5,1.0,WRO5
+"WERHE adapter M14 na chwycie sześciokątnym 8 mm, do wkrętarki, wiertarka",1,10.0,1,0,2026-06,2026-06,adapter,hex,150.0,adapter|hex|m14,,WRO5,1.0,WRO5
+"WERHE świder ziemny 80 mm Ø, 300 mm długości do wiertarki i wkrętarki akumulatorowej – świder ogrodowy do łatwego sadzenia kwiatów, krzewów i wykonywania otworów pod słupki ogrodzeniowe",1,10.0,1,0,2026-05,2026-05,auger,,300.0,auger|d80,,WRO5,1.0,WRO5
+Groszkownik 220mm 35x35mm 16 zębów SDS Plus,1,10.0,1,0,2026-07,2026-07,chisel_bush,sds_plus,35.0,chisel_bush|d35|l35|sds_plus,6GR16x220p,WRO5,1.0,WRO5
+Groszkownik 220mm 35x35mm 16 zębów SDS Max,1,10.0,1,0,2026-08,2026-08,chisel_bush,sds_max,35.0,chisel_bush|d35|l35|sds_max,6GR16x220m,WRO5,1.0,WRO5
+WERHE® brzeszczot do wyrzynarki drewno 2379 - do precyzyjnego cięcia w laminacie i płytach wiórowych - brzeszczoty do wyrzynarek z uchwytem osi T - akcesoria do wyrzynarek,1,10.0,1,0,2025-06,2025-06,blade_jigsaw,,150.0,blade_jigsaw,,WRO5,1.0,WRO5
+"Zestaw wierteł do betonu 6,5x260 5szt SDS PLUS",2,10.0,2,0,2026-08,2026-08,set_drill,sds_plus,260.0,set_drill|sds_plus|n5,,WRO5,1.0,WRO5
+"Adapter Mufa 1.1/4"" do 20mm",1,10.0,1,0,2026-08,2026-08,adapter,unc_1_1_4,150.0,adapter|unc_1_1_4,4A1.1/4-WG,WRO5,1.0,WRO5
+Adapter M14 + Zawleczka prosta,1,10.0,1,0,2026-08,2026-08,adapter,m14,150.0,adapter|m14,,WRO5,1.0,WRO5
+Adapter Głowka SDS Plus z 1/2-20UNF #1,1,10.0,1,0,2026-07,2026-07,adapter,sds_plus,150.0,adapter|sds_plus|unf_1_2,4Ap1/2-20UNF,WRO5,1.0,WRO5
+"WERHE świder ziemny 40 x 220 mm do wkrętarki i wiertarki, świder ogrodowy",1,10.0,1,0,2026-06,2026-06,auger,,220.0,auger|d40|l220,,WRO5,1.0,WRO5
+"Pobijak 20,2x28x260mm HEX28",2,10.0,2,0,2026-07,2026-08,driver_rod,hex28,28.0,driver_rod|d20.2|l28|hex28,"6PO20,2h28",WRO5,1.0,WRO5
+WERHE® SDS Plus Męski wbijak do kołków uziemiających Ø10 mm 125 mm – Solidne stalowe narzędzie do prętów uziemiających – Precyzyjne i trwałe,2,10.0,2,0,2025-09,2025-10,driver_rod,sds_plus,125.0,driver_rod|d10|sds_plus,,WRO5,1.0,WRO5
+WERHE® SDS Plus Męski pobijak do uziomów Ø12 mm 125 mm – Wytrzymałe narzędzie stalowe do prętów uziemiających – Precyzyjne i trwałe,2,10.0,2,0,2025-09,2025-10,driver_rod,sds_plus,125.0,driver_rod|d12|sds_plus,,WRO5,1.0,WRO5
+"WERHE® Zestaw 5 brzeszczotów WERHE® T118A do wyrzynarki – Precyzyjne cięcie cienkich blach (1-3 mm) – Brzeszczot HSS do metalu z trzpieniem T, trwały i wszechstronny",1,10.0,1,0,2026-03,2026-03,other,,150.0,other,,WRO5,1.0,WRO5
+WERHE® Profesjonalny gwoździowkrętak SDS Max Ø12mm męski 150x18mm do wbijania gwoździ uziemiających Pobijak do wbijania gwoździ uziemiających,2,10.0,2,0,2025-09,2025-10,driver_rod,sds_max,150.0,driver_rod|d12|l150|sds_max,,WRO5,1.0,WRO5
+"WERHE® Professional HEX28 Ø25,5mm 35x260mm gwoździarka do wbijania gwoździ uziemiających uziomy prętowe uziomy prętowe - młotek podnośnikowy wbijak gwoździarka do gwoździ uziemiających",3,10.0,3,0,2024-09,2025-09,driver_rod,hex28,260.0,driver_rod|d25.5|l260|hex28,,WRO5,1.0,WRO5
+WERHE Wiertło SDS PLUS do betonu 16 x 460 mm – Wiertło udarowe do betonu i cegły – 4 krawędzie tnące,1,10.0,0,1,2026-05,2026-05,drill_bit,sds_plus,460.0,drill_bit|d16|l460|sds_plus,,XPO1,1.0,XPO1
+"WERHE SDS Max na SDS Plus adapter, stal chromowo-wanadowa",2,10.0,2,0,2026-06,2026-06,adapter,sds_max,150.0,adapter|sds_max|sds_plus,,WRO5,1.0,WRO5
+"WERHE Świder ziemny 100 mm z uchwytem SDS Plus, wytrzymała końcówka wiertła do runa wiertła wiertła wiertła z podwójnym wałem",1,10.0,0,1,2024-06,2024-06,auger,sds_plus,800.0,auger|d100|sds_plus|dbl,,XPO1,1.0,XPO1
+WERHE® SDS Max 65 mm wbijak do słupków – Do szybkiego wbijania palików Star-Pitch młotem wyburzeniowym – Wytrzymała konstrukcja ze stali chromowo-wanadowej,1,10.0,1,0,2026-05,2026-05,driver_pile,sds_max,150.0,driver_pile|d65|sds_max,,WRO5,1.0,WRO5
+WERHE® Brzeszczot do wyrzynarki T118A 5 szt. do cięcia metalu - do precyzyjnego cięcia cienkich blach (1-3 mm) - brzeszczot do metalu do wyrzynarki z uchwytem w kształcie litery T,1,10.0,1,0,2025-03,2025-03,blade_jigsaw,,150.0,blade_jigsaw|T118A|n5,,WRO5,1.0,WRO5
+WERHE® Brzeszczot do wyrzynarki T127D 5 szt. do cięcia metalu - do precyzyjnego cięcia aluminiowych blach (3-15 mm) - brzeszczot do metalu do wyrzynarki z uchwytem w kształcie litery T,1,10.0,1,0,2025-06,2025-06,blade_jigsaw,,150.0,blade_jigsaw|T127D|n5,,WRO5,1.0,WRO5
+WERHE Dłuta SDS Plus 50 x 250 mm – Dłuto płaskie do kucia betonu i usuwania płytek – Solidne akcesorium do młotów udarowo-obrotowych i młotów wyburzeniowych,1,10.0,1,0,2026-03,2026-03,chisel_flat,sds_plus,250.0,chisel_flat|d50|l250|sds_plus,,WRO5,1.0,WRO5
+WERHE Dłuto SDS Plus 30 x 150 mm – Dłuto płaskie do kucia betonu i usuwania płytek – Solidne akcesorium do młotów udarowo-obrotowych i młotów wyburzeniowych,1,10.0,1,0,2026-03,2026-03,chisel_flat,sds_plus,150.0,chisel_flat|d30|l150|sds_plus,,WRO5,1.0,WRO5
+"WERHE Profesjonalne Wiertło SDS Plus 14 x 460 mm Do Betonu, Kamienia - Wiertło Udarowe",3,10.0,0,3,2025-07,2026-04,drill_bit,sds_plus,460.0,drill_bit|d14|l460|sds_plus,,XPO1,1.0,XPO1
+"WERHE brzeszczoty do wyrzynarki do drewna, zestaw 2 szt., chwyt typu T, HCS",1,10.0,1,0,2026-06,2026-06,blade_jigsaw,,150.0,blade_jigsaw|n2,,WRO5,1.0,WRO5
+"WERHE brzeszczot do piły szablastej do cegły, węglik spiekany, 305 mm",1,10.0,1,0,2026-06,2026-06,blade_recip,,305.0,blade_recip|l305,,WRO5,1.0,WRO5
+"WERHE adapter M18 na 1 1/4 cala UNC do koronek diamentowych, stal, 115 mm",1,10.0,1,0,2026-06,2026-06,adapter,m18,115.0,adapter|m18|unc_1_1_4,,WRO5,1.0,WRO5
+"WERHE dłuto płaskie SDS Plus 20 x 400 mm, stal hartowana, beton, mur",1,10.0,0,1,2026-06,2026-06,chisel_flat,sds_plus,400.0,chisel_flat|d20|l400|sds_plus,,XPO1,1.0,XPO1
+WERHE ® Wiertło do betonu Professional SDS Plus 10 x 160 mm Wiertarka udarowa Wiertarka do kamienia Wiertarka do betonu,1,10.0,1,0,2025-02,2025-02,drill_bit,sds_plus,160.0,drill_bit|d10|l160|sds_plus,,WRO5,1.0,WRO5
+Sznur Murarski 150m Czerwony,1,10.0,1,0,2026-07,2026-07,string,,150.0,string,,WRO5,1.0,WRO5
+WERHE® Profesjonalny gwoździowkrętak SDS Max Ø10mm męski 150x18mm do wbijania gwoździ uziemiających Pobijak do wbijania gwoździ uziemiających,2,10.0,2,0,2025-09,2025-10,driver_rod,sds_max,150.0,driver_rod|d10|l150|sds_max,,WRO5,1.0,WRO5
+Szypa HEX30 440mm Szpiczasta,2,10.0,0,2,2026-07,2026-08,chisel_point,hex30,440.0,chisel_point|l440|hex30,3S135h30s,XPO1,1.0,XPO1
+WERHE® Brzeszczot do wyrzynarki drewno 2379-5 - do giętego i precyzyjnego cięcia w laminacie i płytach wiórowych - brzeszczoty do wyrzynarek z uchwytem na oś T - akcesoria do wyrzynarek,1,10.0,1,0,2025-07,2025-07,blade_jigsaw,,150.0,blade_jigsaw,,WRO5,1.0,WRO5
+"WERHE® Brzeszczot do wyrzynarki do drewna T119BO – do cięcia krzywizn, miękkie drewno (2-15 mm), brzeszczoty do wyrzynarki z uchwytem T – akcesoria do wyrzynarki",1,10.0,1,0,2025-04,2025-04,blade_jigsaw,,150.0,blade_jigsaw|T119BO,,WRO5,1.0,WRO5
+"WERHE® Brzeszczot do wyrzynarki T218A, opakowanie 5 szt. – Precyzyjne brzeszczoty do metalu do cięcia po łuku cienkich blach (1-3 mm)",1,10.0,1,0,2026-03,2026-03,blade_jigsaw,,150.0,blade_jigsaw|T218A|n5,,WRO5,1.0,WRO5
+WERHE ® Professional 5 szt. SDS Plus wiertło do betonu 14 x 210 mm młotek kamień beton quadro X Quadruple cięcie krzyżowe,1,10.0,1,0,2025-02,2025-02,drill_bit,sds_plus,210.0,drill_bit|d14|l210|sds_plus,,WRO5,1.0,WRO5
+WERHE ® Professional 5 szt. SDS Plus wiertło do betonu 10 x 210 mm młotek kamień beton quadro X Quadruple cięcie krzyżowe,1,10.0,1,0,2025-02,2025-02,drill_bit,sds_plus,210.0,drill_bit|d10|l210|sds_plus,,WRO5,1.0,WRO5
+WERHE pobijak do słupków SDS Max 50 mm do Star Pickets i słupków,1,10.0,1,0,2026-06,2026-06,driver_pile,sds_max,150.0,driver_pile|d50|sds_max,,WRO5,1.0,WRO5
+"WERHE® Groszkownik SDS MAX 12 zębów dł. 200 mm, okrąg ⌀35 mm - Młoty nasadowe do młotowiertarek elektrycznych - Nasadki wyburzeniowe, do młotkowania betonu - Dłuto młotkowe",3,10.0,3,0,2025-03,2025-12,chisel_bush,sds_max,200.0,chisel_bush|d35|sds_max,,WRO5,1.0,WRO5
+"WERHE groszkownik SDS Plus, 12 zębów z węglika, 150 mm",1,10.0,1,0,2026-06,2026-06,chisel_bush,sds_plus,150.0,chisel_bush|d150|sds_plus,,WRO5,1.0,WRO5
+"WERHE ® Profesjonalny brzeszczot do piły szablastej do kamienia C 455 mm S2243HM – najmocniejszy brzeszczot do lisa – idealnie nadaje się do nacinania na ścianie w cegle, gazobetonie, drewnie",1,10.0,1,0,2025-11,2025-11,blade_recip,,455.0,blade_recip|S2243HM,,WRO5,1.0,WRO5
+"WERHE ® Professional - 10 x drewniane ostrza do wyrzynarki - C 152 mm T544D bardzo długi - szybkie cięcie grube warstwy - kompatybilne z wyrzynarkami Bosch, Metabo, Milwaukee, Makita",1,10.0,1,0,2025-10,2025-10,other,,152.0,other,,WRO5,1.0,WRO5
+Wiertło do betonu 14x600mm SDS Plus,3,10.0,0,3,2026-07,2026-08,drill_bit,sds_plus,600.0,drill_bit|d14|l600|sds_plus,2WB14x600p,XPO1,1.0,XPO1
+Wiertło do betonu 6x160 sds plus,1,10.0,1,0,2026-08,2026-08,drill_bit,sds_plus,160.0,drill_bit|d6|l160|sds_plus,2WB6x160p,WRO5,1.0,WRO5
+Świder Ogrodowy 80X350,1,10.0,1,0,2026-07,2026-07,auger,,350.0,auger|d80|l350,1Wo80x350,WRO5,1.0,WRO5
+WERHE wiertło udarowe SDS Plus 20x600 mm,1,10.0,0,1,2026-06,2026-06,drill_bit,sds_plus,600.0,drill_bit|d20|l600|sds_plus,,XPO1,1.0,XPO1
+WERHE wiertło do betonu SDS Plus 32x600 mm wiertło udarowe z węglika,1,10.0,0,1,2026-06,2026-06,drill_bit,sds_plus,600.0,drill_bit|d32|l600|sds_plus,,XPO1,1.0,XPO1
+Adapter SDS Plus do M14 Gwint Zewntętrzny (męski),1,10.0,1,0,2026-08,2026-08,adapter,sds_plus,150.0,adapter|sds_plus|m14,4Ap-M14zew,WRO5,1.0,WRO5
+Wiertarka do betonu WERHE ® Professional SDS PLUS 30 x 600 mm Wiertarka udarowa Wiertarka do kamienia Wiertarka do betonu,2,9.0,0,2,2024-08,2025-04,drill_bit,sds_plus,600.0,drill_bit|d30|l600|sds_plus,,XPO1,1.0,XPO1
+"WERHE ® Profesjonalny wbijak do gwoździ uziemiających SDS Max–stal zbrojeniowa do słupków i prętów uziemiających – średnica wewnętrzna 20,2 mm, długość 257 mm – kompatybilna ze młotowiertarkami",2,9.0,2,0,2026-03,2026-05,driver_rod,sds_max,257.0,driver_rod|d20.2|l257|sds_max,,WRO5,1.0,WRO5
+WERHE Wiertło do betonu SDS MAX 18 x 460 mm – Wiertło udarowe do betonu i cegły – 4 krawędzie tnące,2,9.0,0,2,2026-05,2026-05,drill_bit,sds_max,460.0,drill_bit|d18|l460|sds_max,,XPO1,1.0,XPO1
+Dłuto do betonu 50x400mm HEX28,1,9.0,1,0,2026-08,2026-08,chisel_flat,hex28,400.0,chisel_flat|d50|l400|hex28,3DB50x400h28,WRO5,1.0,WRO5
+"WERHE dłuto do młota SDS Max 4 zęby, 200 mm, węglik spiekany",2,9.0,2,0,2026-06,2026-06,chisel_flat,sds_max,200.0,chisel_flat|l200|sds_max,,WRO5,1.0,WRO5
+"WERHE dłuto płaskie SDS Plus 25 x 600 mm, dłuto szerokie do obróbki metalu",1,9.0,0,1,2026-06,2026-06,chisel_flat,sds_plus,600.0,chisel_flat|d25|l600|sds_plus,,XPO1,1.0,XPO1
+WERHE Ubijak podłogowy ze stali Ø250 mm HEX30 – okrągła płyta ubijająca do zagęszczania podłoża – przygotowanie powierzchni – ubijak do betonu – narzędzie do młotów wyburzeniowych,4,9.0,4,0,2025-04,2026-03,tamper,hex30,150.0,tamper|d250|hex30,,WRO5,1.0,WRO5
+WERHE Wiertło SDS PLUS do betonu 32 x 600 mm – Wiertło udarowe do betonu i cegły – 4 krawędzie tnące,1,9.0,0,1,2026-05,2026-05,drill_bit,sds_plus,600.0,drill_bit|d32|l600|sds_plus,,XPO1,1.0,XPO1
+"WERHE dłuto łopatkowe HEX28, 35x400 mm, uchwyt sześciokątny 28 mm",1,9.0,1,0,2026-06,2026-06,chisel_flat,hex28,400.0,chisel_flat|d35|l400|hex28,,WRO5,1.0,WRO5
+WERHE Wiertło SDS PLUS do betonu 28 x 600 mm – Wiertło udarowe do betonu i cegły – 4 krawędzie tnące,1,8.0,0,1,2026-05,2026-05,drill_bit,sds_plus,600.0,drill_bit|d28|l600|sds_plus,,XPO1,1.0,XPO1
+Wiertło do Betonu 28 x 600mm SDS Plus,2,8.0,0,2,2026-07,2026-08,drill_bit,sds_plus,600.0,drill_bit|d28|l600|sds_plus,2WB28x600p,XPO1,1.0,XPO1
+Wiertło do betonu 32x600 sds max,2,8.0,0,2,2026-07,2026-08,drill_bit,sds_max,600.0,drill_bit|d32|l600|sds_max,2WB32x600m,XPO1,1.0,XPO1
+Wbijak do pali 65x85x220 Max,1,8.0,1,0,2026-07,2026-07,driver_pile,,85.0,driver_pile|d65|l85,6PO65x235m,WRO5,1.0,WRO5
+Wiertło do betonu 18x600mm Sds plus,2,8.0,0,2,2026-07,2026-08,drill_bit,sds_plus,600.0,drill_bit|d18|l600|sds_plus,2WB18x600p,XPO1,1.0,XPO1
+"WERHE Groszkownik SDS MAX, 12 zębów, 200 mm – dłuto do obróbki betonu i kamienia",1,8.0,1,0,2026-03,2026-03,chisel_bush,sds_max,200.0,chisel_bush|l200|sds_max,,WRO5,1.0,WRO5
+WERHE Profi SDS Plus dłuto płaskie 50 x 250 mm dłuto płaskie,2,8.0,2,0,2024-10,2026-04,chisel_flat,sds_plus,250.0,chisel_flat|d50|l250|sds_plus,,WRO5,1.0,WRO5
+"Pobijak 25,5mm HEX30",1,8.0,1,0,2026-08,2026-08,driver_rod,hex30,150.0,driver_rod|d25.5|hex30,"6PO25,5h30",WRO5,1.0,WRO5
+WERHE Wiertło do betonu SDS MAX 20 x 600 mm – wiertło udarowe do betonu i cegły – 4 ostrza,2,7.0,0,2,2025-10,2026-03,drill_bit,sds_max,600.0,drill_bit|d20|l600|sds_max,,XPO1,1.0,XPO1
+Dłuto do betonu 35x410 Hex30,2,7.0,0,2,2026-07,2026-08,chisel_flat,hex30,410.0,chisel_flat|d35|l410|hex30,3DB35x410h30,XPO1,1.0,XPO1
+WERHE ® Professional SDS Max Moil Shank zestaw dłut punktowych 2 sztuki 18 25 x 400 mm płaski czubek z zimną końcówką do młotka rozbiórkowego,2,7.0,0,2,2026-02,2026-04,set_chisel,sds_max,400.0,set_chisel|sds_max|n25,,XPO1,1.0,XPO1
+"WERHE dłuto SDS Hex, szpic dłuto płaskie, 410 mm, do młota wyburzeniowego",2,7.0,0,2,2026-06,2026-06,chisel_flat,hex30,410.0,chisel_flat|l410|hex30,,XPO1,1.0,XPO1
+Wiertło do Betonu 30 x 600mm SDS Plus,2,6.0,0,2,2026-07,2026-08,drill_bit,sds_plus,600.0,drill_bit|d30|l600|sds_plus,2WB30x600p,XPO1,1.0,XPO1
+WERHE Wiertło Profi do wiertarki ziemnej 180 mm wiertło runo precyzyjne wiertło,1,6.0,0,1,2025-02,2025-02,other,,800.0,other,,XPO1,1.0,XPO1
+Dłuto z zębami 100x275 SDS PLUS,1,6.0,1,0,2026-07,2026-07,chisel_flat,sds_plus,275.0,chisel_flat|d100|l275|sds_plus,3DZB100x275p,WRO5,1.0,WRO5
+WERHE Wiertło SDS PLUS do betonu 20 x 600 mm – Wiertło udarowe do betonu i cegły – 4 krawędzie tnące,1,6.0,0,1,2026-05,2026-05,drill_bit,sds_plus,600.0,drill_bit|d20|l600|sds_plus,,XPO1,1.0,XPO1
+WERHE® Profesjonalny gwoździowkrętak HEX28 Ø12mm męski 270x28mm do wbijania gwoździ uziemiających Pobijak do wbijania gwoździ uziemiających,2,6.0,2,0,2025-09,2025-10,driver_rod,hex28,270.0,driver_rod|d12|l270|hex28,,WRO5,1.0,WRO5
+Dłuto do betonu 40 x 150mm SDS Plus Czerwone,1,6.0,1,0,2026-07,2026-07,chisel_flat,sds_plus,150.0,chisel_flat|d40|l150|sds_plus,3DB40x150pP,WRO5,1.0,WRO5
+Groszkownik 150mm 4 zębów SDS Plus,1,6.0,1,0,2026-07,2026-07,chisel_bush,sds_plus,150.0,chisel_bush|d150|sds_plus,6GR4x150p,WRO5,1.0,WRO5
+WERHE® Profesjonalny gwoździowkrętak HEX28 Ø10mm męski 270x28mm do wbijania gwoździ uziemiających Pobijak do wbijania gwoździ uziemiających,2,6.0,2,0,2025-09,2025-10,driver_rod,hex28,270.0,driver_rod|d10|l270|hex28,,WRO5,1.0,WRO5
+WERHE® Profesjonalny gwoździowkrętak HEX30 Ø12mm męski 270x30mm do wbijania gwoździ uziemiających Pobijak do wbijania gwoździ uziemiających,2,6.0,2,0,2025-09,2025-10,driver_rod,hex30,270.0,driver_rod|d12|l270|hex30,,WRO5,1.0,WRO5
+"WERHE świder ziemny 200 mm z ostrzy z węglika, do wiertarki",1,6.0,0,1,2026-06,2026-06,auger,,800.0,auger|d200,,XPO1,1.0,XPO1
+"Zestaw dłut szpic, 20, 50 x 600 SDS MAX",1,6.0,0,1,2026-07,2026-07,set_chisel,sds_max,600.0,set_chisel|sds_max|n50,,XPO1,1.0,XPO1
+"WERHE sznurek na szpuli Ø1,8 mm, długość 150 m z uchwytem – żółta żyłka brukarska – pleciony polipropylenowy sznurek budowlany – odporny na sęki, rozdarcia i trwały",1,5.0,1,0,2026-05,2026-05,string,,150.0,string|d1.8,,WRO5,1.0,WRO5
+Adapter z wiertnicy do gwintu m22 (8),1,5.0,1,0,2026-08,2026-08,adapter,,150.0,adapter,4Aw-M22,WRO5,1.0,WRO5
+Groszkownik 200mm 12 zębów SDS Max okrągły,1,5.0,1,0,2026-08,2026-08,chisel_bush,sds_max,200.0,chisel_bush|l200|sds_max,6GR12x200m,WRO5,1.0,WRO5
+Groszkownik 200mm 16 zębów SDS Max kwadratowy,1,5.0,1,0,2026-08,2026-08,chisel_bush,sds_max,200.0,chisel_bush|l200|sds_max,6GR16x200m,WRO5,1.0,WRO5
+Adapter WERHE® do wierteł diamentowych wiertło koronowe wiertło koronowe - 1 1/4 cala UNC na SDS Max - dodatkowo z gwintem wewnętrznym 1/2 BSPP,1,5.0,1,0,2026-03,2026-03,adapter,sds_max,150.0,adapter|sds_max|unc_1_1_4,,WRO5,1.0,WRO5
+WERKON Profesjonalne wiertło do betonu SDS Plus 16 x 460 mm wiertło udarowe wiertło do kamienia wiertło do betonu wiertło Quadro X poczwórne ostrze krzyżowe 16 x 460,1,5.0,0,1,2026-03,2026-03,drill_bit,sds_plus,460.0,drill_bit|d16|l460|sds_plus,,XPO1,1.0,XPO1
+"WERKON wiertło do betonu SDS Plus 40 x 600 mm, wiertło udarowe do żelbetu",1,5.0,0,1,2026-06,2026-06,drill_bit,sds_plus,600.0,drill_bit|d40|l600|sds_plus,,XPO1,1.0,XPO1
+Adapter z 5/8 do m14,1,5.0,1,0,2026-08,2026-08,adapter,m14,150.0,adapter|m14,4A5/8-M14,WRO5,1.0,WRO5
+Wiertło do betonu 16x600mm Sds Plus,1,5.0,0,1,2026-08,2026-08,drill_bit,sds_plus,600.0,drill_bit|d16|l600|sds_plus,2WB16x600p,XPO1,1.0,XPO1
+Wbijak do pali 55x70x260mm HEX28,1,5.0,1,0,2026-08,2026-08,driver_pile,hex28,70.0,driver_pile|d55|l70|hex28,6PO55x260h28,WRO5,1.0,WRO5
+Nożyki T218A,1,5.0,1,0,2026-08,2026-08,blade_jigsaw,,150.0,blade_jigsaw|T218A,7NT218A,WRO5,1.0,WRO5
+WERHE zestaw dłut SDS Max 3-częściowy,1,5.0,0,1,2026-06,2026-06,set_chisel,sds_max,,set_chisel|sds_max|n3,,XPO1,1.0,XPO1
+"WERHE wiertło udarowe SDS Plus Ø 20 mm, długość 600 mm",1,5.0,0,1,2026-06,2026-06,drill_bit,sds_plus,600.0,drill_bit|d20|l600|sds_plus,,XPO1,1.0,XPO1
+"WERHE wiertło udarowe do betonu SDS Plus, kamień, cegła, Ø 16 mm",1,5.0,0,1,2026-06,2026-06,drill_bit,sds_plus,,drill_bit|d16|sds_plus,,XPO1,1.0,XPO1
+Zawleczka bolec 10 Sztuk,1,5.0,1,0,2026-08,2026-08,pin,,150.0,pin|n10,,WRO5,1.0,WRO5
+Wiertło do betonu 40x460mm SDS MAX,2,5.0,0,2,2026-07,2026-08,drill_bit,sds_max,460.0,drill_bit|d40|l460|sds_max,2WB40x460m,XPO1,1.0,XPO1
+WERHE ® 20.2x28x145 Profesjonalny wkrętak do gwoździ Jack Hammer - Wkrętak do gwoździarki SDS Max,1,5.0,1,0,2025-07,2025-07,other,sds_max,145.0,other|sds_max,,WRO5,1.0,WRO5
+Wbijak do pali 85x100x260mm HEX28,1,5.0,1,0,2026-08,2026-08,driver_pile,hex28,100.0,driver_pile|d85|l100|hex28,6PO85x260h28,WRO5,1.0,WRO5
+"WERHE wiertło do betonu SDS Max 16x460 mm, do betonu",1,5.0,0,1,2026-06,2026-06,drill_bit,sds_max,460.0,drill_bit|d16|l460|sds_max,,XPO1,1.0,XPO1
+Wiertło do betonu 20x460mm Sds max,1,5.0,0,1,2026-08,2026-08,drill_bit,sds_max,460.0,drill_bit|d20|l460|sds_max,2WB20x460m,XPO1,1.0,XPO1
+"WERHE wiertło do betonu SDS Max, Ø 20 mm, długość 600 mm, 4 ostrza",1,5.0,0,1,2026-06,2026-06,drill_bit,sds_max,600.0,drill_bit|d20|l600|sds_max,,XPO1,1.0,XPO1
+"WERHE wiertło do betonu SDS Plus Ø 25 mm, długość 600 mm",1,5.0,0,1,2026-06,2026-06,drill_bit,sds_plus,600.0,drill_bit|d25|l600|sds_plus,,XPO1,1.0,XPO1
+Wiertło do betonu 25x600mm Sds plus,1,5.0,0,1,2026-07,2026-07,drill_bit,sds_plus,600.0,drill_bit|d25|l600|sds_plus,2WB25x600p,XPO1,1.0,XPO1
+Wiertło do betonu 25x600mm sds max,1,5.0,0,1,2026-07,2026-07,drill_bit,sds_max,600.0,drill_bit|d25|l600|sds_max,2WB25x600m,XPO1,1.0,XPO1
+Wiertło do betonu 20x600 sds max,1,5.0,0,1,2026-07,2026-07,drill_bit,sds_max,600.0,drill_bit|d20|l600|sds_max,2WB20x600m,XPO1,1.0,XPO1
+Wiertło do betonu 30x600mm SDS MAX,1,5.0,0,1,2026-08,2026-08,drill_bit,sds_max,600.0,drill_bit|d30|l600|sds_max,2WB30x600m,XPO1,1.0,XPO1
+"WERHE tarcza pilarska 115 x 22,23 mm, 40 zębów, węglik spiekany, do metalu",1,5.0,1,0,2026-06,2026-06,saw_disc,,150.0,saw_disc,,WRO5,1.0,WRO5
+"WERHE wiertło do betonu SDS Max Ø 40 mm, długość 600 mm, węglik spiekany",1,5.0,0,1,2026-06,2026-06,drill_bit,sds_max,600.0,drill_bit|d40|l600|sds_max,,XPO1,1.0,XPO1
+WERHE Profi SDS Max płaskie dłuto szerokie 25 x 400 mm płaskie dłuto szerokie,1,5.0,0,1,2026-03,2026-03,chisel_flat,sds_max,400.0,chisel_flat|d25|l400|sds_max,,XPO1,1.0,XPO1
+WERHE Profi SDS Plus Wiertło do betonu 32 x 460 mm,2,5.0,0,2,2025-09,2025-11,drill_bit,sds_plus,460.0,drill_bit|d32|l460|sds_plus,,XPO1,1.0,XPO1
+"WERHE Brzeszczoty do wyrzynarki T118B HSS – do grubych blach 2,5–6,0 mm – czyste cięcia metalu bez gratu – 5-pak – trzpień T, 92 mm, podziałka zęba 2,0 mm",1,5.0,1,0,2025-09,2025-09,blade_jigsaw,,92.0,blade_jigsaw|T118B|l92,,WRO5,1.0,WRO5
+"WERHE Brzeszczoty do wyrzynarki T119A HCS – do czystych cięć prostych w drewnie 1,5–15 mm – drobna podziałka 1,2 mm, mało wyrwań – 5-pak – trzpień T, 76 mm",1,5.0,1,0,2025-09,2025-09,blade_jigsaw,,76.0,blade_jigsaw|T119A|l76,,WRO5,1.0,WRO5
+"WERHE Brzeszczoty do wyrzynarki T119B HCS – do czystych cięć prostych w drewnie do 15 mm – 5-pak – trzpień T, 76 mm, podziałka 2,0 mm",1,5.0,1,0,2025-09,2025-09,blade_jigsaw,,76.0,blade_jigsaw|T119B|l76,,WRO5,1.0,WRO5
+WERHE Dłuta SDS Plus 40 x 250 mm – Dłuto płaskie do kucia betonu i usuwania płytek – Solidne akcesorium do młotów udarowo-obrotowych i młotów wyburzeniowych,1,5.0,1,0,2026-03,2026-03,chisel_flat,sds_plus,250.0,chisel_flat|d40|l250|sds_plus,,WRO5,1.0,WRO5
+"Pobijak 16,5x25x260mm HEX28",1,5.0,1,0,2026-08,2026-08,driver_rod,hex28,25.0,driver_rod|d16.5|l25|hex28,"6PO16,5h28",WRO5,1.0,WRO5
+WERHE Wiertło SDS PLUS do betonu 30 x 600 mm – Wiertło udarowe do betonu i cegły – 4 krawędzie tnące,1,5.0,0,1,2026-05,2026-05,drill_bit,sds_plus,600.0,drill_bit|d30|l600|sds_plus,,XPO1,1.0,XPO1
+"WERHE pobijak do uziomów HEX30 Ø wewnętrzna 32,5 mm",1,5.0,1,0,2026-06,2026-06,driver_rod,hex30,150.0,driver_rod|d32.5|hex30,,WRO5,1.0,WRO5
+WERHE adapter do mieszadła M14 na M22,1,5.0,1,0,2026-06,2026-06,adapter,m14,150.0,adapter|m14,,WRO5,1.0,WRO5
+"WERHE® Adapter do wiertła diamentowego wiertła koronowego - 1 1/4"" cala UNC na M18 - dodatkowo z gwintem wewnętrznym 1/2""BSPP cala",1,5.0,1,0,2026-01,2026-01,adapter,m18,150.0,adapter|m18|unc_1_1_4,,WRO5,1.0,WRO5
+WERHE Profesjonalne dłuto ze szpicem SDS Max 400 mm szpiczastym dłuto dłuto udarowe młot dłuto,1,5.0,0,1,2026-03,2026-03,chisel_flat,sds_max,400.0,chisel_flat|l400|sds_max,,XPO1,1.0,XPO1
+WERHE Profesjonalne Wiertło SDS Plus Do Betonu 18 x 460 mm Udarowe Do Kamienia,2,5.0,0,2,2025-09,2025-11,drill_bit,sds_plus,460.0,drill_bit|d18|l460|sds_plus,,XPO1,1.0,XPO1
+"WERHE pobijak do uziomów HEX30, do prętów uziemiających",1,5.0,1,0,2026-06,2026-06,driver_rod,hex30,150.0,driver_rod|hex30,,WRO5,1.0,WRO5
+"Pobijak 20,2mm HEX30",2,5.0,2,0,2026-07,2026-08,driver_rod,hex30,150.0,driver_rod|d20.2|hex30,"6PO20,2h30",WRO5,1.0,WRO5
+"WERHE świder ziemny 80 mm Ø, 250 mm długości do wiertarki i wkrętarki akumulatorowej – świder ogrodowy do łatwego sadzenia kwiatów, krzewów i wykonywania otworów pod słupki ogrodzeniowe",1,5.0,1,0,2026-05,2026-05,auger,,250.0,auger|d80,,WRO5,1.0,WRO5
+WERHE Wiertło SDS PLUS do betonu 10 x 160 mm – Wiertło udarowe do betonu i cegły – 4 krawędzie tnące,1,5.0,1,0,2026-05,2026-05,drill_bit,sds_plus,160.0,drill_bit|d10|l160|sds_plus,,WRO5,1.0,WRO5
+WERHE Profesjonalne Wiertło SDS Plus Do Betonu 16 x 460 mm Udarowe i Do Kamienia,1,5.0,0,1,2026-04,2026-04,drill_bit,sds_plus,460.0,drill_bit|d16|l460|sds_plus,,XPO1,1.0,XPO1
+"WERHE Dłuto zębate SDS Plus 100 mm, długość 175 mm – usuwanie tynku/kleju do płytek – dłuto skrobakowe/zębate do młota udarowego – wymienne ostrze",1,5.0,1,0,2026-02,2026-02,chisel_flat,sds_plus,175.0,chisel_flat|d100|l175|sds_plus,,WRO5,1.0,WRO5
+Nożyki 2379-1,1,5.0,1,0,2026-08,2026-08,blade_jigsaw,,150.0,blade_jigsaw,7NT2379/2,WRO5,1.0,WRO5
+Nożyk T119BO,1,5.0,1,0,2026-08,2026-08,blade_jigsaw,,150.0,blade_jigsaw|T119BO,7NT119BO,WRO5,1.0,WRO5
+Nożyki 2379,1,5.0,1,0,2026-08,2026-08,blade_jigsaw,,150.0,blade_jigsaw,7NT2379/3,WRO5,1.0,WRO5
+"Pobijak 32,5mm HEX30",1,5.0,1,0,2026-07,2026-07,driver_rod,hex30,150.0,driver_rod|d32.5|hex30,"6PO32,5h30",WRO5,1.0,WRO5
+Zestaw wierteł do betonu 12x210 5szt SDS PLUS,1,5.0,1,0,2026-08,2026-08,set_drill,sds_plus,210.0,set_drill|sds_plus|n5,,WRO5,1.0,WRO5
+"Zestaw wierteł do betonu 6,8,10,12,14x 210mm SDS Plus",1,5.0,1,0,2026-08,2026-08,set_drill,sds_plus,210.0,set_drill|sds_plus|n14,2ZWB1x210p,WRO5,1.0,WRO5
+Adapter SDS Max do M14 Z Gwint Zewntętrzny (męski),1,5.0,1,0,2026-08,2026-08,adapter,sds_max,150.0,adapter|sds_max|m14,4Am-M14zew,WRO5,1.0,WRO5
+"WERHE Samoostrzący szpicak 410 mm HEX30 – do młota wyburzeniowego – punktowe kucie beton/kamień/cegła – spiralny kształt wyrzuca pył, mniej zakleszczeń",1,5.0,1,0,2026-02,2026-02,chisel_point,hex30,410.0,chisel_point|l410|hex30,,WRO5,1.0,WRO5
+"WERHE pobijak do uziomów HEX28, Ø 55 mm, długość 260 mm",1,5.0,1,0,2026-06,2026-06,driver_rod,hex28,260.0,driver_rod|d55|l260|hex28,,WRO5,1.0,WRO5
+WERHE Przedłużenie wiertła do gleby 800 mm – wytrzymała konstrukcja stalowa do głębokich wiercenia – uniwersalne mocowanie 20 mm – dla profesjonalistów i majsterkowiczów,1,5.0,0,1,2026-05,2026-05,other,,800.0,other,,XPO1,1.0,XPO1
+"WERHE® Bushhammer HEX30 – 9 zębów, 270 mm – Wytrzymałe dłuto do prac betonowych – Okrągłe",1,5.0,1,0,2026-03,2026-03,chisel_bush,hex30,270.0,chisel_bush|l270|hex30,,WRO5,1.0,WRO5
+WERHE® Dłuto SDS Plus 40 x 250 mm - Dłuto płaskie do kucia betonu - Dłuto do usuwania płytek - Akcesoria do młotowiertarek i młotów wyburzeniowych,1,5.0,1,0,2025-02,2025-02,chisel_flat,sds_plus,250.0,chisel_flat|d40|l250|sds_plus,,WRO5,1.0,WRO5
+"WERHE® Groszkownik HEX30 9 zębów dł. 270 mm, okrąg ⌀45 mm - Młoty nasadowe do elektrycznych młotów wyburzeniowych - Nasadki wyburzeniowe, do młotkowania betonu - Dłuto młotkowe",1,5.0,1,0,2025-03,2025-03,chisel_bush,hex30,270.0,chisel_bush|d45|hex30,,WRO5,1.0,WRO5
+"WERHE® Groszkownik HEX30 16 zębów dł. 220 mm, Wytrzymałe dłuto do prac betonowych – Kwadratowe",1,5.0,1,0,2026-04,2026-04,chisel_bush,hex30,220.0,chisel_bush|l220|hex30,,WRO5,1.0,WRO5
+"WERHE® Groszkownik HEX28 16 zębów dł. 220 mm, kwadrat 36 mm - Młoty nasadowe do elektrycznych młotów wyburzeniowych - Nasadki wyburzeniowe, do młotkowania betonu - Dłuto młotkowe",1,5.0,1,0,2025-03,2025-03,chisel_bush,hex28,220.0,chisel_bush|d36|l220|hex28,,WRO5,1.0,WRO5
+"WERHE dłuto szerokie SDS Plus 60 x 250 mm, stal hartowana, płytki i tynk",1,5.0,1,0,2026-06,2026-06,chisel_flat,sds_plus,250.0,chisel_flat|d60|l250|sds_plus,,WRO5,1.0,WRO5
+"WERHE dłuto szerokie SDS Plus 50x250 mm, dłuto płaskie ze stali hartowanej",1,5.0,1,0,2026-06,2026-06,chisel_flat,sds_plus,250.0,chisel_flat|d50|l250|sds_plus,,WRO5,1.0,WRO5
+"WERHE pobijak do uziomów HEX28, 85 mm, do słupków i prętów uziemiających",1,5.0,1,0,2026-06,2026-06,driver_rod,hex28,150.0,driver_rod|hex28,,WRO5,1.0,WRO5
+"WERHE dłuto łopatkowe SDS Plus 50x600 mm, dłuto płaskie ze stali hartowanej",1,5.0,0,1,2026-06,2026-06,chisel_flat,sds_plus,600.0,chisel_flat|d50|l600|sds_plus,,XPO1,1.0,XPO1
+"WERHE SDS Plus zakrzywione dłuto łopatkowe 75 x 165 mm – do płytek, tynku, kleju i prac podłogowych – ergonomiczne wygięcie do płaskiej pracy – stal hartowana",1,5.0,1,0,2026-05,2026-05,chisel_flat,sds_plus,165.0,chisel_flat|d75|l165|sds_plus,,WRO5,1.0,WRO5
+Brzeszczot do piły szablastej S1531L Do drewna i Gałęzi,1,5.0,1,0,2026-07,2026-07,blade_recip,,150.0,blade_recip|S1531L,7NS1531L,WRO5,1.0,WRO5
+Dłuto Szpic kręcony Hex30 x410mm,1,5.0,1,0,2026-07,2026-07,chisel_flat,hex30,410.0,chisel_flat|d30|l410|hex30,3DBx410h30P,WRO5,1.0,WRO5
+"Gwoździarka 13,5mm SDS Max",1,5.0,1,0,2026-08,2026-08,other,sds_max,150.0,other|sds_max,"6PO13,5mk",WRO5,1.0,WRO5
+Dłuto do Betonu 40x250 SDS PLUS Czerwone,1,5.0,1,0,2026-07,2026-07,chisel_flat,sds_plus,250.0,chisel_flat|d40|l250|sds_plus,3DB40x250pP,WRO5,1.0,WRO5
+"WERHE SDS MAX dłuto stojące, 33 zęby, 240 mm, trójkątny kształt 18 mm, do betonu i obróbki kamienia, 2 rodzaje zębów ze stali, chropowatość podłoża i usuwanie warstw",1,5.0,1,0,2026-03,2026-03,chisel_flat,sds_max,240.0,chisel_flat|d18|l240|sds_max,,WRO5,1.0,WRO5
+"WERHE® Wbijak do kotew gruntowych WERHE HEX28 Ø16,5 mm 25 x 260 mm – solidny wkrętak do prętów uziomowych i uziemień – kompatybilny z młotami wyburzeniowymi HEX28",1,5.0,1,0,2026-03,2026-03,driver_rod,hex28,260.0,driver_rod|d16.5|l260|hex28,,WRO5,1.0,WRO5
+WERHE Wiertło do betonu SDS MAX 16 x 460 mm – Wiertło udarowe do betonu i cegły – 4 krawędzie tnące,1,5.0,0,1,2026-05,2026-05,drill_bit,sds_max,460.0,drill_bit|d16|l460|sds_max,,XPO1,1.0,XPO1
+"WERHE SDS MAX dłuto 16 zębów, 240 mm, kwadrat 18 mm, do betonu i obróbki kamienia, stalowe zęby, chropowatość podłoża i usuwanie warstw",1,5.0,1,0,2026-03,2026-03,chisel_flat,sds_max,240.0,chisel_flat|d18|l240|sds_max,,WRO5,1.0,WRO5
+WERKON Profesjonalne wiertło do betonu SDS Plus 12 x 460 mm wiertło udarowe wiertło do kamienia wiertło do betonu wiertło,1,5.0,0,1,2024-06,2024-06,drill_bit,sds_plus,460.0,drill_bit|d12|l460|sds_plus,,XPO1,1.0,XPO1
+Nożyki 2379/5,1,5.0,1,0,2026-08,2026-08,blade_jigsaw,,150.0,blade_jigsaw,7NT2379/5,WRO5,1.0,WRO5
+WERHE SDS Max wiertło do betonu 25 x 460 mm wiertło udarowe wiertło do kamienia wiertło do betonu,1,5.0,0,1,2024-09,2024-09,drill_bit,sds_max,460.0,drill_bit|d25|l460|sds_max,,XPO1,1.0,XPO1
+Świder Ogrodowy 60X220/ 1Wo60x220,1,4.0,1,0,2026-08,2026-08,auger,,220.0,auger|d60|l220,,WRO5,1.0,WRO5
+WERHE adapter do świdrów spalinowych do M14 gwint wewnętrzny,1,4.0,1,0,2026-06,2026-06,adapter,m14,150.0,adapter|m14,,WRO5,1.0,WRO5
+WERHE ® Profi HEX28 dłuto łopatkowe 135 x 410 mm gniazdo sześciokątne 28 mm do wyburzeń dłuto młotkowe walizka z tworzywa sztucznego,2,4.0,0,2,2025-07,2025-12,chisel_flat,hex28,410.0,chisel_flat|d135|l410|hex28,,XPO1,1.0,XPO1
+"WERHE dłuto łopatkowe HEX28, 50x400 mm, do młota wyburzeniowego",1,4.0,1,0,2026-06,2026-06,chisel_flat,hex28,400.0,chisel_flat|d50|l400|hex28,,WRO5,1.0,WRO5
+WERHE SDS Max wiertło do betonu 32 x 460 mm wiertło udarowe wiertło do betonu,2,4.0,0,2,2025-07,2025-09,drill_bit,sds_max,460.0,drill_bit|d32|l460|sds_max,,XPO1,1.0,XPO1
+"WERHE Wiertło do lodu – 200 × 800 mm – szybkie wiercenie do wędkarstwa podlodowego – ostrza z węglików spiekanych, adapter HEX 10 mm, osłona ostrza – lekka konstrukcja z nylonu i aluminium",1,4.0,0,1,2026-01,2026-01,adapter,hex,800.0,adapter|hex,,XPO1,1.0,XPO1
+WERHE SDS Max wiertło do betonu 20 x 460 mm wiertło udarowe wiertło do betonu,2,4.0,0,2,2025-08,2025-09,drill_bit,sds_max,460.0,drill_bit|d20|l460|sds_max,,XPO1,1.0,XPO1
+Adapter przejście z Wiertnicy do M14W #2,1,4.0,1,0,2026-08,2026-08,adapter,,150.0,adapter,4Aw-M14wew,WRO5,1.0,WRO5
+Wbijak do pali 105x125x235 HEX30,1,4.0,1,0,2026-07,2026-07,driver_pile,hex30,125.0,driver_pile|d105|l125|hex30,6PO105h30,WRO5,1.0,WRO5
+Wiertło do betonu 18x460mm SDS MAX,1,4.0,0,1,2026-08,2026-08,drill_bit,sds_max,460.0,drill_bit|d18|l460|sds_max,2WB18x460m,XPO1,1.0,XPO1
+Bruzdownik motylkowy 250mm SDS Plus,1,4.0,1,0,2026-08,2026-08,chisel_gouge,sds_plus,250.0,chisel_gouge|l250|sds_plus,3Brm250p,WRO5,1.0,WRO5
+"Pobijak 16,5mm HEX30",1,4.0,1,0,2026-07,2026-07,driver_rod,hex30,150.0,driver_rod|d16.5|hex30,"6PO16,5h30",WRO5,1.0,WRO5
+"WERHE Wiertło do lodu – Ø 200 mm – długość 80 cm – szybkie wiercenie do łowienia lodów – ostrza z twardego metalu, ochrona ostrza – lekka konstrukcja z nylonu i aluminium – uchwyt 75 cm",1,4.0,0,1,2026-01,2026-01,other,,800.0,other|d200|l800,,XPO1,1.0,XPO1
+Dłuto do betonu 75x400 sds max,1,3.0,1,0,2026-08,2026-08,chisel_flat,sds_max,400.0,chisel_flat|d75|l400|sds_max,3DB75x400m,WRO5,1.0,WRO5
+Wiertło do betonu 10x460mm SDS PLUS,1,3.0,0,1,2026-08,2026-08,drill_bit,sds_plus,460.0,drill_bit|d10|l460|sds_plus,2WB10x460p,XPO1,1.0,XPO1
+Wiertło do betonu 14x460mm SDS PLUS,1,3.0,0,1,2026-08,2026-08,drill_bit,sds_plus,460.0,drill_bit|d14|l460|sds_plus,2WB14x460p,XPO1,1.0,XPO1
+WERHE profesjonalne SDS Plus płaskie dłuto płaskie 40 x 250 mm szerokości dłuto płaskie,1,3.0,1,0,2024-10,2024-10,chisel_flat,sds_plus,250.0,chisel_flat|d40|l250|sds_plus,,WRO5,1.0,WRO5
+"WERHE zestaw dłut SDS Hex, płaskie i szpic i dłuto łopatkowe, 410 mm",1,3.0,0,1,2026-06,2026-06,set_chisel,hex30,410.0,set_chisel|hex30|n3,,XPO1,1.0,XPO1
+"WERHE wiertło do betonu SDS Max 30x600 mm, wiertło udarowe, 4 ostrza, beton",1,3.0,0,1,2026-06,2026-06,drill_bit,sds_max,600.0,drill_bit|d30|l600|sds_max,,XPO1,1.0,XPO1
+"WERHE sprężyna skrętna do świdra ręcznego, amortyzator ze siatki stalowej",1,3.0,1,0,2026-06,2026-06,spring,,150.0,spring,,WRO5,1.0,WRO5
+Dłuto do betonu 40x250 SDS PLUS,1,3.0,1,0,2026-08,2026-08,chisel_flat,sds_plus,250.0,chisel_flat|d40|l250|sds_plus,3DB40x250p,WRO5,1.0,WRO5
+Adapter SDS Max do 1.1/4,1,3.0,1,0,2026-08,2026-08,adapter,sds_max,150.0,adapter|sds_max|unc_1_1_4,4Am-1.1/4,WRO5,1.0,WRO5
+Adapter SDS Plus do 1.1/4,1,3.0,1,0,2026-08,2026-08,adapter,sds_plus,150.0,adapter|sds_plus|unc_1_1_4,4Ap-1.1/4,WRO5,1.0,WRO5
+Wbijak do pali 125x145x235 HEX30,1,3.0,1,0,2026-07,2026-07,driver_pile,hex30,145.0,driver_pile|d125|l145|hex30,6PO125h30,WRO5,1.0,WRO5
+WERHE ® Professional SDS Max Moil Shank zestaw dłut punktowych 2 sztuki 18 50 x 400 mm płaski czubek szpiczasty na zimno do młotka rozbiórkowego,1,3.0,0,1,2025-10,2025-10,set_chisel,sds_max,400.0,set_chisel|sds_max|n50,,XPO1,1.0,XPO1
+"Pobijak 16,5x35x260mm SDS MAX Premium",1,3.0,1,0,2026-08,2026-08,driver_rod,sds_max,35.0,driver_rod|d16.5|l35|sds_max,"6PO16,5mP",WRO5,1.0,WRO5
+"WERHE Profi SDS Plus wiertło do betonu 20 x 460 mm, wiertło udarowe, wiertło do kamienia, wiertło do betonu",1,3.0,0,1,2025-01,2025-01,drill_bit,sds_plus,460.0,drill_bit|d20|l460|sds_plus,,XPO1,1.0,XPO1
+"Pobijak 25,5x35x260mm HEX28",1,3.0,1,0,2026-08,2026-08,driver_rod,hex28,35.0,driver_rod|d25.5|l35|hex28,"6PO25,5h28",WRO5,1.0,WRO5
+WERHE Profi SDS Max płaskie dłuto szerokie 75 x 400 mm płaskie dłuto szerokie,1,3.0,0,1,2026-02,2026-02,chisel_flat,sds_max,400.0,chisel_flat|d75|l400|sds_max,,XPO1,1.0,XPO1
+"WERHE® Groszkownik SDS MAX, 16 zębów, 200 mm – do obróbki betonu i kamienia",1,3.0,1,0,2026-04,2026-04,chisel_bush,sds_max,200.0,chisel_bush|l200|sds_max,,WRO5,1.0,WRO5
+Sprężyna Amortyzator sił skrętnych,1,3.0,1,0,2026-08,2026-08,spring,,150.0,spring,4ASprezyna,WRO5,1.0,WRO5
+"WERHE pobijak do uziomów HEX28 Ø 16,5 mm, 25x260 mm",1,3.0,1,0,2026-06,2026-06,driver_rod,hex28,260.0,driver_rod|d16.5|l260|hex28,,WRO5,1.0,WRO5
+Tarcza uniwersalna 210x30 mm 60Z,1,3.0,1,0,2026-08,2026-08,saw_disc,,150.0,saw_disc,,WRO5,1.0,WRO5
+WERHE® Groszkownik HEX28 16 zębów dł. 220 mm – Wytrzymałe dłuto do prac betonowych – Kwadratowe,1,3.0,1,0,2026-03,2026-03,chisel_bush,hex28,220.0,chisel_bush|l220|hex28,,WRO5,1.0,WRO5
+"WERHE dłuto łopatkowe SDS Plus 75x250 mm, dłuto płaskie, stal hartowana",1,3.0,1,0,2026-06,2026-06,chisel_flat,sds_plus,250.0,chisel_flat|d75|l250|sds_plus,,WRO5,1.0,WRO5
+Szpic do betonu 600mm SDS MAX,1,3.0,0,1,2026-07,2026-07,chisel_point,sds_max,600.0,chisel_point|l600|sds_max,3DBx600m,XPO1,1.0,XPO1
+Groszkownik 270mm 9 zębów Hex 30 okrągły,1,3.0,1,0,2026-08,2026-08,chisel_bush,hex30,270.0,chisel_bush|l270|hex30,6GR9x270h30,WRO5,1.0,WRO5
+WERKON Wiertło do betonu 25 x 600 mm Profesjonalny SDS Plus do wiertarki udarowej,1,3.0,0,1,2025-10,2025-10,drill_bit,sds_plus,600.0,drill_bit|d25|l600|sds_plus,,XPO1,1.0,XPO1
+Groszkownik 220mm 35x35mm 16 zębów Hex 28,1,3.0,1,0,2026-08,2026-08,chisel_bush,hex28,35.0,chisel_bush|d35|l35|hex28,6GR16x220h28,WRO5,1.0,WRO5
+"Zestaw dłut , Szpic , 25 x 400 SDS MAX",1,2.0,0,1,2026-08,2026-08,set_chisel,sds_max,400.0,set_chisel|sds_max|n25,,XPO1,1.0,XPO1
+Wiertło do betonu 12x600mm SDS Plus,1,2.0,0,1,2026-08,2026-08,drill_bit,sds_plus,600.0,drill_bit|d12|l600|sds_plus,2WB12x600p,XPO1,1.0,XPO1
+"WERHE® Adapter do wierteł diamentowych SDS Plus na gwint 1 1/4"" UNC z gwintem 1/2"" – Wytrzymałe narzędzie do wiercenia",1,2.0,1,0,2026-04,2026-04,adapter,sds_plus,150.0,adapter|sds_plus|unc_1_1_4,,WRO5,1.0,WRO5
+Ubijaczka okrągła 250mm HEX30,1,2.0,1,0,2026-08,2026-08,other,hex30,250.0,other|hex30,"6U9,9h30",WRO5,1.0,WRO5
+"WERHE pobijak do pali HEX30, Ø 65 mm, do pali i rur, budowa ogrodzeń",1,2.0,1,0,2026-06,2026-06,driver_pile,hex30,150.0,driver_pile|d65|hex30,,WRO5,1.0,WRO5
+Adapter do świdra z 25mm do 20mm (makita),1,2.0,1,0,2026-07,2026-07,adapter,,150.0,adapter,4AMakita,WRO5,1.0,WRO5
+"WERHE® młot do palowania HEX30 Ø95mm – Solidny zbijak do budowy ogrodzeń i instalacji solarnych – Łącznik HEX30, 110x250mm",1,2.0,1,0,2025-10,2025-10,other,hex30,250.0,other|d95|hex30,,WRO5,1.0,WRO5
+Groszkownik 270mm 12 zębów Hex 30,1,2.0,1,0,2026-07,2026-07,chisel_bush,hex30,270.0,chisel_bush|l270|hex30,6GR12x270h30,WRO5,1.0,WRO5
+Bruzdownik motylkowy 600mm SDS MAX,1,2.0,0,1,2026-07,2026-07,chisel_gouge,sds_max,600.0,chisel_gouge|l600|sds_max,3Brm600m,XPO1,1.0,XPO1
+Groszkownik 16Z 18x240 mm SDS MAX - Ostry - Kwadrat,1,2.0,1,0,2026-08,2026-08,chisel_bush,sds_max,240.0,chisel_bush|d18|l240|sds_max,6GR16x240m,WRO5,1.0,WRO5
+Adapter Z wiertnicy do 1/2 -20unf zew,1,2.0,1,0,2026-07,2026-07,adapter,unf_1_2,150.0,adapter|unf_1_2,4Aw1/2-1/2-20UNF,WRO5,1.0,WRO5
+Groszkownik 15/18Z x 240 mm SDS MAX - Ostry - Trójkąt,1,2.0,1,0,2026-08,2026-08,chisel_bush,sds_max,240.0,chisel_bush|l240|sds_max,6GR33X250m,WRO5,1.0,WRO5
+"WERHE® Groszkownik HEX30 12 zębów dł. 270 mm, okrąg ⌀45 mm - Młoty nasadowe do elektrycznych młotów wyburzeniowych - Nasadki wyburzeniowe, do młotkowania betonu - Dłuto młotkowe",1,1.0,1,0,2025-10,2025-10,chisel_bush,hex30,270.0,chisel_bush|d45|hex30,,WRO5,1.0,WRO5

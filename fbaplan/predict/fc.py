@@ -106,7 +106,7 @@ class FCPredictor:
         """Length rule with grey-zone sub-rules. Returns (fc, features, certain, why)."""
         S, N = self.params["sortable_fc"], self.params["nonsortable_fc"]
         ft = extract(name or "")
-        fam = family or ft.family or ""
+        fam = (family if family and family != "other" else ft.family) or ""
         L, is_default = estimate_length_mm(name or "", ft)
         n = (name or "").lower()
         thr, lo = float(self.params["threshold_mm"]), float(self.params["gray_lo_mm"])

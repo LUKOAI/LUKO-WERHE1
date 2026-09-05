@@ -22,9 +22,10 @@ FAMILY_PATTERNS: list[tuple[str, str]] = [  # (rodzina, regex rdzeni; poczatek s
     ("set_chisel", r"(?<![a-ząćęłńóśźżäöüß])(meißelsatz|meissel\s*set|meißel\s*set|zestaw dłut|zestaw\s+dlut|chisel set|3-?teilig|3-?tlg|3-?częściowy|3-?czesciowy|zestaw szpic|zestaw dłut)"),
     ("set_drill", r"(?<![a-ząćęłńóśźżäöüß])(zestaw wierteł|bohrer[- ]?set|bohrersatz)"),
     ("set_adapter", r"(?<![a-ząćęłńóśźżäöüß])(zestaw adapterów|adapter[- ]?set|adaptersatz)"),
-    ("blade_jigsaw", r"(?<![a-ząćęłńóśźżäöüß])(stichsägeblatt|stichsägeblätter|stichsägeblätt|brzeszczot(y|ów)? do wyrzynarki|nożyk|nozyk|jigsaw)"),
-    ("blade_recip", r"(?<![a-ząćęłńóśźżäöüß])(säbelsägeblatt|säbelsägeblätter|brzeszczot(y)? do piły szablastej|piły szablastej|reciprocating)"),
-    ("saw_disc", r"(?<![a-ząćęłńóśźżäöüß])(tarcza|kreissägeblatt|sägeblatt für|sägeblatt \d)"),
+    ("mallet", r"(?<![a-ząćęłńóśźżäöüß])(młotek gumowy|mlotek gumowy|gumowy młotek|gumowy mlotek|gummihammer|rubber mallet|młotek z gumy)"),
+    ("blade_jigsaw", r"(?<![a-ząćęłńóśźżäöüß])(stichsägeblatt|stichsägeblätter|stichsägeblätt|brzeszczot(y|ów)? do wyrzynar|ostrz(a|e|y)? do wyrzynar|nożyk|nozyk|jigsaw|\bt\d{2,4}[a-z]{1,3}\b)"),
+    ("blade_recip", r"(?<![a-ząćęłńóśźżäöüß])(säbelsägeblatt|säbelsägeblätter|brzeszczot(y)? do piły szablast|piły szablast|pił szablast|reciprocating|lisi ogon|\bs\d{3,4}[a-z]{1,4}\b|brzeszczot)"),
+    ("saw_disc", r"(?<![a-ząćęłńóśźżäöüß])(tarcza|kreissägeblatt|sägeblatt für|sägeblatt \d|piła okrągła|pila okragla|ostrze wielofunkcyjne|circular saw)"),
     ("grease", r"(?<![a-ząćęłńóśźżäöüß])(smar|fett|schmierfett|grease|mos2)"),
     ("tamper", r"(?<![a-ząćęłńóśźżäöüß])(stampferplatte|płyta ubijająca|plyta ubijajaca|tamper|verdichter|ubijak)"),
     ("driver_pile", r"(?<![a-ząćęłńóśźżäöüß])(wbijak do pali|pobijak do pali|pfahl(ramme|treiber)|post driver|picket|pobijak do słupków|pobijak do slupkow|wbijak do słupków|star picket|zaunpfahl)"),
@@ -245,11 +246,11 @@ def extract(name: str) -> Features:
 # Length estimation (longest side) — used by the FC rule when the catalog has no
 # dimensions. Ported from the historical analysis (docs/analiza/fc_rules.md).
 # --------------------------------------------------------------------------- #
-SHORT_FAMILIES = {"adapter", "driver_rod", "driver_pile", "blade_jigsaw", "blade_recip", "chisel_bush", "grease", "pin",
+SHORT_FAMILIES = {"adapter", "driver_rod", "driver_pile", "blade_jigsaw", "blade_recip", "chisel_bush", "grease", "pin", "mallet",
                   "spring", "string", "set_adapter", "set_drill", "tamper", "saw_disc", "hole_saw"}
 _AUGER_KW = re.compile(r"(świder|swider|ziemn|uziemiaj|wiertnic|gruntow|runo|do ziemi|erdbohrer|ślimak|slimak|auger|"
                        r"earthmover|wiertło do pali|do gleby|lodu|pflanzbohrer)", re.I)
-_NOT_AUGER = re.compile(r"przedłuż|przedluz|słupek|slupek|drążek|drazek|uchwyt do|adapter|bolzen|sworz", re.I)
+_NOT_AUGER = re.compile(r"przedłuż|przedluz|słupek|slupek|drążek|drazek|uchwyt do|adapter|bolzen|sworz|śrub|srub|zawleczk|bolc|sprężyn|sprezyn|szybk\w* wymian", re.I)
 _ADAPTER_IS_AUGER = re.compile(r"^(WERHE\s*®?\s*)?(Wiert|Zestaw świdr)", re.I)
 _NUMF = r"(\d+(?:[.,]\d+)?)"
 

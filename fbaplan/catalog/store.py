@@ -15,9 +15,11 @@ ALIAS_COLUMNS = ["name", "sku", "brand", "confidence", "source"]
 
 
 def _norm(s: str) -> str:
-    s = (s or "").lower().replace("®", " ").replace("™", " ")
-    s = re.sub(r"[\s ]+", " ", s)
-    return s.strip(" -–—|,.;:")
+    """Normalise a name for exact-match lookup: lower case, no brand words / trademark signs."""
+    s = (s or "").lower().replace("\u00ae", " ").replace("\u2122", " ")
+    s = re.sub(r"\b(werhe|werkon)\b", " ", s)
+    s = re.sub(r"[\s\u00a0]+", " ", s)
+    return s.strip(" -\u2013\u2014|,.;:")
 
 
 def load_products(path: Path | str) -> dict[str, Product]:
