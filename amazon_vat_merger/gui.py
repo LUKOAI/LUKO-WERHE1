@@ -14,6 +14,7 @@ import sys
 import threading
 from datetime import datetime
 from pathlib import Path
+from urllib.parse import quote
 
 from . import APP_NAME, APP_SLUG, AUTHOR, COPYRIGHT_YEAR, SUPPORT_EMAIL, __version__
 from .job import run_job
@@ -78,6 +79,7 @@ class _QueueHandler(logging.Handler):
 def main() -> int:
     import tkinter as tk
     from tkinter import filedialog, messagebox, ttk
+    from tkinter import font as tkfont
 
     cfg = load_config()
     root = tk.Tk()
@@ -165,9 +167,12 @@ def main() -> int:
     foot.grid(row=9, column=0, columnspan=4, sticky="ew", pady=(6, 0))
     ttk.Label(foot, text=f"{APP_NAME} v{__version__}  ·  © {COPYRIGHT_YEAR} {AUTHOR}  ·  pomoc i awarie: ",
               foreground="#666666").pack(side="left")
-    mail = ttk.Label(foot, text=SUPPORT_EMAIL, foreground="#0563C1", cursor="hand2", font=("TkDefaultFont", 9, "underline"))
+    link_font = tkfont.nametofont("TkDefaultFont").copy()   # ta sama czcionka co reszta stopki, z podkreśleniem
+    link_font.configure(underline=True)
+    mail = ttk.Label(foot, text=SUPPORT_EMAIL, foreground="#0563C1", cursor="hand2", font=link_font)
     mail.pack(side="left")
-    mail.bind("<Button-1>", lambda _e: open_path(f"mailto:{SUPPORT_EMAIL}?subject={APP_SLUG} v{__version__}"))
+    mail.link_font = link_font  # referencja, żeby obiekt czcionki nie został zwolniony
+    mail.bind("<Button-1>", lambda _e: open_path(f"mailto:{SUPPORT_EMAIL}?subject={quote(f'{APP_NAME} v{__version__}')}"))
 
     def append_log(text: str) -> None:
         log_box.configure(state="normal")

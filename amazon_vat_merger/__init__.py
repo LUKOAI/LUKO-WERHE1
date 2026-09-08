@@ -3,7 +3,7 @@ i buduje arkusz (xlsx / Google Sheets) ze wszystkimi danymi."""
 
 APP_NAME = "LUKO AmaFakt"
 APP_SLUG = "LUKO-AmaFakt"
-__version__ = "0.2.2"
+__version__ = "0.2.3"
 
 AUTHOR = "Netanaliza"
 SUPPORT_EMAIL = "support@netanaliza.com"

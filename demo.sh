@@ -47,7 +47,10 @@ if [ -n "$SHEET_ID" ]; then
 fi
 
 echo ">> python -m amazon_vat_merger ${ARGS[*]}"
-python -m amazon_vat_merger "${ARGS[@]}"
+rc=0
+python -m amazon_vat_merger "${ARGS[@]}" || rc=$?
+# kod 3 = plik xlsx gotowy, tylko wysyłka do Google się nie udała (komunikat wyżej)
+if [ "$rc" -ne 0 ] && [ "$rc" -ne 3 ]; then exit "$rc"; fi
 
 if [ -z "${NO_OPEN:-}" ]; then
   if command -v open >/dev/null 2>&1; then open "$OUT"; elif command -v xdg-open >/dev/null 2>&1; then xdg-open "$OUT" || true; fi

@@ -158,8 +158,10 @@ Każde uruchomienie nadpisuje zakładki o tych samych nazwach (wartości i forma
 zostają. Wartości idą w trybie RAW: tekst jest tekstem bez żadnego prefiksu (kody pocztowe `01234`,
 numery zamówień i SKU nie zamieniają się w liczby), daty jako numery seryjne z formatem daty,
 kwoty jako liczby z formatem `#,##0.00`, stawki VAT `0.0%` (5,5 % nie zaokrągla się do 6 %).
-Formuły RAZEM idą osobnym `batch_update` – jego błąd jest zgłaszany jako błąd zapisu
-(`GoogleSheetsError`); formatowanie idzie drugim, niekrytycznym `batch_update` (tylko ostrzeżenie).
+Formuły (RAZEM i linki kolumny „Zakładka”) idą osobnym `batch_update` – jego błąd jest zgłaszany
+jako błąd zapisu (`GoogleSheetsError`); formatowanie idzie drugim, niekrytycznym `batch_update`
+(tylko ostrzeżenie). HTTP 403 przy zapisie (konto serwisowe z rolą Przeglądający) dostaje ten sam
+komunikat „udostępnij … jako Edytor” co 403 przy otwarciu.
 Klient ma backoff na limit 60 zapisów/min.
 
 Zakładki własnego wzoru (`DE OSS`, `FR Lokalna KOREKTA` …; kod kraju + kategoria, ewentualnie KOREKTA), które istnieją w arkuszu, a nie
@@ -178,11 +180,14 @@ Excela `#'DE OSS'!A5` i po imporcie mogą nie działać – działają przy zapi
 
 ### Linki „Wszystko” → zakładka
 
-Kolumna A („Zakładka”) w `Wszystko` to `Link(tab, row)` (podklasa `Formula`): w xlsx
-`=HYPERLINK("#'DE OSS'!A5","DE OSS")`, w Google Sheets `=HYPERLINK("#gid=<sheetId>&range=A5","DE OSS")`
-– `gid` jest znany dopiero po utworzeniu zakładek, dlatego formuły idą po zapisaniu wszystkich
-wartości; kolejne wiersze tej samej kolumny jadą jednym `updateCells`. Numer wiersza (`MergedRow.tab_row`)
-nadaje `build_group_sheets`, więc `build_sheets` buduje zakładki krajów przed `Wszystko`.
+Kolumna A („Zakładka”) w `Wszystko` to `Link(tab, row, key=numer faktury)` (podklasa `Formula`):
+w xlsx `=HYPERLINK("#'DE OSS'!A"&IFERROR(MATCH("PL6…",'DE OSS'!A:A,0),5),"DE OSS")`, w Google Sheets
+to samo z celem `#gid=<sheetId>&range=A`. Wiersz jest szukany po numerze faktury (kolumna A zakładki),
+więc link przeżywa sortowanie i filtrowanie zakładki; `row` z chwili generowania to cel awaryjny,
+a bez numeru faktury link jest statyczny. `gid` jest znany dopiero po utworzeniu zakładek, dlatego
+formuły idą po zapisaniu wszystkich wartości; kolejne wiersze tej samej kolumny jadą jednym
+`updateCells`. Numer wiersza (`MergedRow.tab_row`) nadaje `build_group_sheets`, więc `build_sheets`
+buduje zakładki krajów przed `Wszystko`.
 
 ### Autor, wersja, kontakt
 

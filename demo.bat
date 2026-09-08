@@ -46,6 +46,8 @@ if not "%SHEET_ID%"=="" (
 
 echo ^>^> python -m amazon_vat_merger !ARGS!
 python -m amazon_vat_merger !ARGS!
-if errorlevel 1 (pause & exit /b 1)
+rem kod 3 = plik xlsx gotowy, tylko wysylka do Google sie nie udala (komunikat wyzej)
+if errorlevel 4 (pause & exit /b 1)
+if errorlevel 1 if not errorlevel 3 (pause & exit /b 1)
 start "" "%OUT%"
 endlocal

@@ -131,7 +131,7 @@ def test_formula_batch_failure_is_an_error():
     sh = FakeSpreadsheet([], fail_batches=[0])
     with pytest.raises(GoogleSheetsError) as ei:
         push_sheets("XYZ", [_razem_sheet()], client=FakeClient(sh))
-    assert "RAZEM" in str(ei.value) and "symulowany" in str(ei.value)
+    assert "RAZEM" in str(ei.value) and "Zakładka" in str(ei.value) and "symulowany" in str(ei.value)
 
 
 def test_formatting_batch_failure_only_warns(caplog):
@@ -223,3 +223,36 @@ def test_master_links_get_gid_and_are_grouped_into_one_request():
     assert vals[1] == {"formulaValue": f'=HYPERLINK("#gid={gid}&range=A5","DE OSS")'}
     assert vals[2] == {"stringValue": "Nieistniejąca"}          # brak zakładki -> zwykły tekst
     assert reqs[1]["updateCells"]["rows"][0]["values"][0]["userEnteredValue"] == {"formulaValue": f'=HYPERLINK("#gid={gid}&range=A6","de oss")'}
+
+
+def test_link_with_key_uses_actual_tab_title_in_match():
+    sh = FakeSpreadsheet(["de oss"])   # istniejąca zakładka pisana małymi literami
+    master = Sheet(name="Wszystko", rows=[["Zakładka"], [Link("DE OSS", 4, key="PL1")]], header_row=1)
+    de = Sheet(name="DE OSS", rows=[["Niemcy"], ["A"], [], ["PL1"]], header_row=2)
+    push_sheets("XYZ", [master, de], client=FakeClient(sh))
+    ws = {w.title: w for w in sh.worksheets()}
+    val = sh.batches[0]["requests"][0]["updateCells"]["rows"][0]["values"][0]["userEnteredValue"]["formulaValue"]
+    assert val == f'=HYPERLINK("#gid={ws["de oss"].id}&range=A"&IFERROR(MATCH("PL1",\'de oss\'!A:A,0),4),"DE OSS")'
+
+
+class APIError(Exception):
+    def __init__(self, code):
+        super().__init__(f"APIError: [{code}]: The caller does not have permission")
+        self.code = code
+
+
+def test_403_on_write_gets_sharing_hint(tmp_path):
+    key = tmp_path / "klucz.json"
+    key.write_text(json.dumps({"client_email": "sa@projekt.iam.gserviceaccount.com"}), encoding="utf-8")
+    sh = FakeSpreadsheet(["Wszystko"])
+    sh.worksheets()[0].clear = lambda: (_ for _ in ()).throw(APIError(403))   # odczyt OK, zapis 403 (rola Przeglądający)
+    with pytest.raises(GoogleSheetsError) as ei:
+        push_sheets("ABC", [Sheet(name="Wszystko", rows=[["A"]], header_row=1)], credentials_path=str(key), client=FakeClient(sh))
+    msg = str(ei.value)
+    assert "sa@projekt.iam.gserviceaccount.com" in msg and "Edytor" in msg and "Przeglądający" in msg and "ABC" in msg
+    # inny kod HTTP -> komunikat ogólny
+    sh2 = FakeSpreadsheet(["Wszystko"])
+    sh2.worksheets()[0].clear = lambda: (_ for _ in ()).throw(APIError(500))
+    with pytest.raises(GoogleSheetsError) as ei:
+        push_sheets("ABC", [Sheet(name="Wszystko", rows=[["A"]], header_row=1)], client=FakeClient(sh2))
+    assert "błąd zapisu do Google Sheets (APIError)" in str(ei.value)

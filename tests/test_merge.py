@@ -106,8 +106,11 @@ def test_build_sheets_structure():
     from amazon_vat_merger.merge import Link
     links = sorted(master.rows[1:], key=lambda r: r[0].tab)
     assert all(isinstance(r[0], Link) for r in links)
-    assert (links[0][0].tab, links[0][0].row, links[0][0].text) == ("DE OSS", 4, "DE OSS")
-    assert str(links[1][0]) == '=HYPERLINK("#\'SE OSS\'!A4","SE OSS")'
+    assert (links[0][0].tab, links[0][0].row, links[0][0].text, links[0][0].key) == ("DE OSS", 4, "DE OSS", "PL6000000000AA")
+    # wiersz szukany po numerze faktury (odporne na sortowanie zakładki), awaryjnie wiersz z generowania
+    assert str(links[1][0]) == '=HYPERLINK("#\'SE OSS\'!A"&IFERROR(MATCH("PL6000000000AB",\'SE OSS\'!A:A,0),4),"SE OSS")'
+    assert Link("DE OSS", 7).__str__() == '=HYPERLINK("#\'DE OSS\'!A7","DE OSS")'   # bez klucza: link statyczny
+    assert Link("DE OSS", 7, key="X").gsheets_formula(55, "de oss") == '=HYPERLINK("#gid=55&range=A"&IFERROR(MATCH("X",\'de oss\'!A:A,0),7),"DE OSS")'
     diag = sheets[3]
     assert diag.rows[0][0].startswith("LUKO AmaFakt v") and "support@netanaliza.com" in diag.rows[0][0]
     assert diag.rows[1] == ["Kategoria", "Element", "Szczegóły"] and diag.header_row == 2

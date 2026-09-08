@@ -7,8 +7,9 @@ Konfiguracja po stronie klienta:
   4. Uruchomić: --sheet-id <ID z URL> --credentials klucz.json
 
 Limity API (60 zapisów/min/użytkownik): na zakładkę idą 2-3 wywołania (clear, update,
-ewentualnie resize). Formuły RAZEM jadą jednym batch_update – to zapis krytyczny: jego błąd
-przerywa wysyłkę z komunikatem. Całe formatowanie jedzie drugim batch_update – niekrytycznym
+ewentualnie resize). Formuły (wiersze RAZEM i linki w kolumnie „Zakładka” arkusza „Wszystko”)
+jadą jednym batch_update – to zapis krytyczny: jego błąd przerywa wysyłkę z komunikatem. Całe
+formatowanie jedzie drugim batch_update – niekrytycznym
 (tylko ostrzeżenie). Klient gspread ma włączony backoff na HTTP 429. Wartości idą w trybie RAW:
 tekst zostaje tekstem (bez prefiksu apostrofu), daty jako numery seryjne z formatem DATE.
 
@@ -91,19 +92,19 @@ def extract_spreadsheet_id(value: str) -> str:
     return m.group(1) if m else (value or "").strip()
 
 
-def _formula_requests(sheet_id: int, sheet: Sheet, tab_ids: dict[str, int] | None = None) -> list[dict]:
+def _formula_requests(sheet_id: int, sheet: Sheet, tabs: dict[str, tuple[int, str]] | None = None) -> list[dict]:
     """updateCells dla komórek-formuł; kolejne wiersze tej samej kolumny idą jednym żądaniem
     (kolumna „Zakładka” w „Wszystko” to jeden link na wiersz – bez grupowania byłyby tysiące żądań).
 
-    `tab_ids` – nazwa zakładki (casefold) -> sheetId, do linków HYPERLINK(#gid=…). Link do zakładki,
-    której nie ma, zostaje zwykłym tekstem.
+    `tabs` – nazwa zakładki (casefold) -> (sheetId, faktyczny tytuł), do linków HYPERLINK(#gid=…).
+    Link do zakładki, której nie ma, zostaje zwykłym tekstem.
     """
-    tab_ids = tab_ids or {}
+    tabs = tabs or {}
     cells: list[tuple[int, int, dict]] = []
     for ri, ci, v in formula_cells(sheet.rows):
         if isinstance(v, Link):
-            gid = tab_ids.get(v.tab.casefold())
-            value = {"formulaValue": v.gsheets_formula(gid)} if gid is not None else {"stringValue": v.text}
+            target = tabs.get(v.tab.casefold())
+            value = {"formulaValue": v.gsheets_formula(*target)} if target is not None else {"stringValue": v.text}
         else:
             value = {"formulaValue": str(v)}
         cells.append((ci, ri, value))
@@ -170,6 +171,21 @@ def _service_account_email(credentials_path: str | None) -> str:
         return ""
 
 
+def _no_access_message(key: str, credentials_path: str | None) -> str:
+    email = _service_account_email(credentials_path) or "konta serwisowego (pole client_email w pliku klucza)"
+    return (f"brak dostępu do arkusza {key} – udostępnij arkusz adresowi {email} jako Edytor "
+            f"(Udostępnij → wpisz adres → Edytor)")
+
+
+def _http_status(exc: BaseException) -> int | None:
+    code = getattr(exc, "code", None)
+    if isinstance(code, int) and code > 0:
+        return code
+    resp = getattr(exc, "response", None)
+    status = getattr(resp, "status_code", None)
+    return status if isinstance(status, int) else None
+
+
 def _open_spreadsheet(client, spreadsheet_id: str, credentials_path: str | None):
     key = extract_spreadsheet_id(spreadsheet_id)
     try:
@@ -182,10 +198,7 @@ def _open_spreadsheet(client, spreadsheet_id: str, credentials_path: str | None)
             raise GoogleSheetsError(
                 "Google Sheets API nie jest włączone w projekcie Google Cloud, z którego pochodzi klucz – "
                 "włącz je (APIs & Services → Enabled APIs → Enable) i uruchom ponownie") from exc
-        email = _service_account_email(credentials_path) or "konta serwisowego (pole client_email w pliku klucza)"
-        raise GoogleSheetsError(
-            f"brak dostępu do arkusza {key} – udostępnij arkusz adresowi {email} jako Edytor "
-            f"(Udostępnij → wpisz adres → Edytor)") from exc
+        raise GoogleSheetsError(_no_access_message(key, credentials_path)) from exc
     except Exception as exc:  # noqa: BLE001
         name = type(exc).__name__
         if name == "SpreadsheetNotFound":
@@ -209,8 +222,9 @@ def push_sheets(
     """Zapisuje każdą tabelę jako zakładkę (istniejąca o tej nazwie jest czyszczona).
 
     `client` – opcjonalnie gotowy klient gspread (do testów).
-    Błędy dostępu i brak wpisu formuł RAZEM zgłasza jako GoogleSheetsError; nieudane
-    formatowanie tylko ostrzega (PushResult.formatting_error).
+    Błędy dostępu (także 403 przy zapisie, gdy konto ma tylko rolę Przeglądający) i brak wpisu
+    formuł (RAZEM, linki) zgłasza jako GoogleSheetsError; nieudane formatowanie tylko ostrzega
+    (PushResult.formatting_error).
     """
     if client is None:
         import gspread  # import lokalny
@@ -227,6 +241,12 @@ def push_sheets(
     except GoogleSheetsError:
         raise
     except Exception as exc:  # noqa: BLE001
+        if _http_status(exc) == 403:
+            # odczyt się udał, zapis nie: arkusz udostępniony kontu serwisowemu tylko jako Przeglądający
+            raise GoogleSheetsError(
+                _no_access_message(extract_spreadsheet_id(spreadsheet_id), credentials_path)
+                + " – arkusz jest widoczny, ale nie do zapisu: konto ma zapewne rolę Przeglądający, zmień ją na Edytor"
+            ) from exc
         raise GoogleSheetsError(f"błąd zapisu do Google Sheets ({type(exc).__name__}): {exc}") from exc
 
 
@@ -261,19 +281,19 @@ def _push(sh, sheets: list[Sheet], reorder: bool, clear_stale: bool, now: dateti
         ordered.append(ws)
         log.info("Google Sheets: zakładka %s – %d wierszy", name, len(values))
     # formuły dopiero teraz: linki z „Wszystko” potrzebują sheetId zakładek utworzonych w tej pętli
-    tab_ids = {sheet.name.casefold(): ws.id for ws, sheet, _, _ in pending}
+    tabs = {sheet.name.casefold(): (ws.id, ws.title) for ws, sheet, _, _ in pending}
     formula_reqs: list[dict] = []
     format_reqs: list[dict] = []
     for ws, sheet, nvals, reset in pending:
-        formula_reqs += _formula_requests(ws.id, sheet, tab_ids)
+        formula_reqs += _formula_requests(ws.id, sheet, tabs)
         format_reqs += _format_requests(ws.id, sheet, nvals, reset)
     if formula_reqs:
         try:
             sh.batch_update({"requests": formula_reqs})
         except Exception as exc:  # noqa: BLE001
             raise GoogleSheetsError(
-                f"dane zapisane, ale wiersze RAZEM (formuły SUM) nie zostały wpisane – uruchom ponownie; "
-                f"szczegóły: {exc}") from exc
+                f"dane zapisane, ale formuły (wiersze RAZEM oraz linki w kolumnie „Zakładka” arkusza „Wszystko”) "
+                f"nie zostały wpisane – uruchom ponownie; szczegóły: {exc}") from exc
     if format_reqs:
         try:
             sh.batch_update({"requests": format_reqs})

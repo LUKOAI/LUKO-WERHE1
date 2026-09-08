@@ -45,7 +45,7 @@ def write_xlsx(path: str | Path, sheets: list[Sheet]) -> Path:
                     continue
                 cell = ws.cell(row=ri, column=ci)
                 if isinstance(val, Link):
-                    cell.value = Link.excel_formula(titles.get(val.tab, val.tab), val.row, val.text)
+                    cell.value = Link.excel_formula(titles.get(val.tab, val.tab), val.row, val.text, val.key)
                     cell.font = link_font
                 elif isinstance(val, Formula):
                     cell.value = str(val)
@@ -81,8 +81,12 @@ def write_xlsx(path: str | Path, sheets: list[Sheet]) -> Path:
         for ci in range(1, ncols + 1):
             width = 10
             for row in sheet.rows[sheet.header_row - 1: sheet.header_row + 40]:
-                if ci - 1 < len(row) and row[ci - 1] is not None:
-                    width = max(width, min(60, len(str(row[ci - 1])) + 2))
+                v = row[ci - 1] if ci - 1 < len(row) else None
+                if v is None:
+                    continue
+                # link mierzymy po widocznej etykiecie, formułę stałą szerokością – nie po tekście formuły
+                shown = v.text if isinstance(v, Link) else ("0000000.00" if isinstance(v, Formula) else str(v))
+                width = max(width, min(60, len(shown) + 2))
             ws.column_dimensions[get_column_letter(ci)].width = width
         filter_last = last - 1 if (sheet.rows and sheet.rows[-1][0] == "RAZEM") else last
         ws.auto_filter.ref = f"A{sheet.header_row}:{get_column_letter(max(ncols, 1))}{max(filter_last, sheet.header_row)}"

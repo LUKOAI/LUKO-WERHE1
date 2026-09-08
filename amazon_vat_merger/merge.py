@@ -258,26 +258,49 @@ class Formula(str):
 
 
 class Link(Formula):
-    """Link do komórki A{row} w zakładce `tab` (tekst `text`). Zapisywany jako formuła HYPERLINK;
-    plik xlsx dostaje postać Excela (#'Zakładka'!A5), Google Sheets postać z gid (#gid=…&range=A5)."""
+    """Link z „Wszystko” do wiersza transakcji w zakładce `tab` (tekst `text`).
+
+    Zapisywany jako formuła HYPERLINK: xlsx w postaci Excela (#'Zakładka'!A5), Google Sheets z gid
+    (#gid=…&range=A5). Gdy podano `key` (numer faktury), wiersz jest wyszukiwany formułą
+    MATCH po kolumnie A zakładki – link działa także po posortowaniu lub przefiltrowaniu zakładki;
+    `row` (wiersz z chwili generowania) zostaje jako awaryjny cel, gdy MATCH nic nie znajdzie.
+    """
 
     tab: str
     row: int
     text: str
+    key: str | None
 
-    def __new__(cls, tab: str, row: int, text: str | None = None):
+    def __new__(cls, tab: str, row: int, text: str | None = None, key: str | None = None):
         text = text if text is not None else tab
-        obj = super().__new__(cls, cls.excel_formula(tab, row, text))
-        obj.tab, obj.row, obj.text = tab, row, text
+        key = key or None
+        obj = super().__new__(cls, cls.excel_formula(tab, row, text, key))
+        obj.tab, obj.row, obj.text, obj.key = tab, row, text, key
         return obj
 
     @staticmethod
-    def excel_formula(tab: str, row: int, text: str) -> str:
-        quoted = tab.replace("'", "''")
-        return f'=HYPERLINK("#\'{quoted}\'!A{row}","{text}")'
+    def _row_expr(tab: str, row: int, key: str | None) -> str:
+        """Fragment formuły dający numer wiersza: MATCH po numerze faktury albo stała."""
+        if not key:
+            return str(row)
+        quoted_tab = tab.replace("'", "''")
+        quoted_key = key.replace('"', '""')
+        return f'IFERROR(MATCH("{quoted_key}",\'{quoted_tab}\'!A:A,0),{row})'
 
-    def gsheets_formula(self, gid: int) -> str:
-        return f'=HYPERLINK("#gid={gid}&range=A{self.row}","{self.text}")'
+    @staticmethod
+    def excel_formula(tab: str, row: int, text: str, key: str | None = None) -> str:
+        quoted = tab.replace("'", "''")
+        text_q = text.replace('"', '""')
+        if not key:
+            return f'=HYPERLINK("#\'{quoted}\'!A{row}","{text_q}")'
+        return f'=HYPERLINK("#\'{quoted}\'!A"&{Link._row_expr(tab, row, key)},"{text_q}")'
+
+    def gsheets_formula(self, gid: int, title: str | None = None) -> str:
+        """`title` – faktyczna nazwa zakładki w arkuszu Google (może różnić się wielkością liter/sufiksem)."""
+        text_q = self.text.replace('"', '""')
+        if not self.key:
+            return f'=HYPERLINK("#gid={gid}&range=A{self.row}","{text_q}")'
+        return f'=HYPERLINK("#gid={gid}&range=A"&{Link._row_expr(title or self.tab, self.row, self.key)},"{text_q}")'
 
 
 @dataclass
@@ -305,7 +328,7 @@ def _pct(v: float | None) -> float | None:
 
 MASTER_COLUMNS: list[tuple[str, Callable[[MergedRow], Any], str]] = [
     # (nagłówek, getter, typ: s=tekst, m=kwota, d=data, p=procent)
-    ("Zakładka", lambda r: Link(r.tx.tab_name, r.tab_row) if r.tab_row else r.tx.tab_name, "s"),
+    ("Zakładka", lambda r: Link(r.tx.tab_name, r.tab_row, key=r.tx.invoice_number) if r.tab_row else r.tx.tab_name, "s"),
     ("Kategoria", lambda r: r.tx.category, "s"),
     ("Numer faktury VAT", lambda r: r.tx.invoice_number, "s"),
     ("Typ dokumentu (PDF)", lambda r: DOC_TYPE_PL.get(r.invoice.doc_type, "") if r.invoice else "", "s"),
