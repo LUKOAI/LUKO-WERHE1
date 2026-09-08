@@ -16,6 +16,33 @@ instalować: wystarczy jeden plik `AmazonVAT.exe`.
 4. Przy pierwszym uruchomieniu Windows może pokazać ostrzeżenie „System Windows ochronił ten
    komputer” (program nie ma podpisu cyfrowego). Kliknij **Więcej informacji → Uruchom mimo to**.
 
+## 1a. Połączenie z arkuszem Google (robi właściciel arkusza, jednorazowo, ok. 15 minut)
+
+Program może wpisywać wyniki prosto do Waszego arkusza Google. Do tego potrzebne jest
+„konto techniczne” (konto serwisowe) założone na **Waszym** koncie Google — dzięki temu klucz,
+dane i arkusz pozostają wyłącznie w firmie. Robi to osoba zalogowana na konto Google, do
+którego należy arkusz. Bez tego kroku program działa tak samo, tylko wynik importuje się do
+Google ręcznie (patrz punkt 3, krok 8).
+
+1. Wejdź na https://console.cloud.google.com (to samo konto Google, co arkusz). Przy
+   pierwszym wejściu zaakceptuj regulamin; karta płatnicza nie jest potrzebna.
+2. U góry po lewej kliknij listę projektów → **Nowy projekt** → nazwa `AmazonVAT` → **Utwórz**
+   → **Wybierz projekt**.
+3. W wyszukiwarce u góry wpisz `Google Sheets API` → otwórz → **Włącz**. Powtórz dla
+   `Google Drive API`.
+4. Menu ☰ → **IAM i administracja** → **Konta serwisowe** → **Utwórz konto serwisowe**.
+   Nazwa `amazonvat` → **Utwórz i kontynuuj** → rolę pomiń (**Dalej**, **Gotowe**).
+5. Kliknij utworzone konto → zakładka **Klucze** → **Dodaj klucz** → **Utwórz nowy klucz**
+   → **JSON** → **Utwórz**. Pobierze się plik `.json` — zapisz go jako
+   `C:\AmazonVAT\service_account.json`. To jest hasło do arkusza: nie wysyłaj go e-mailem
+   poza firmę, nie wrzucaj do chmury.
+6. Otwórz ten plik w Notatniku i skopiuj wartość pola `client_email`
+   (wygląda jak `amazonvat@amazonvat-123456.iam.gserviceaccount.com`).
+7. Otwórz arkusz Google, do którego mają trafiać wyniki → **Udostępnij** → wklej ten adres
+   → rola **Edytor** → odznacz „Powiadom” → **Wyślij**.
+8. ID arkusza to fragment adresu strony między `/d/` a `/edit`
+   (np. `1LbgN5wfsZG_zPuU25JZ6w7gP2jjrfF9WLRJBemJYm9I`). Zapisz go — wpiszesz go w programie.
+
 ## 2. Co pobrać z Amazon Seller Central (co miesiąc)
 
 1. **Raport**: Seller Central → *Reports* → *Tax Document Library* → zakładka
@@ -38,6 +65,9 @@ instalować: wystarczy jeden plik `AmazonVAT.exe`.
 6. Kliknij **Uruchom**. W oknie pojawi się dziennik, a na końcu podsumowanie, np.
    `transakcje: 44 | PDF: 44 | dopasowane: 44 | bez PDF: 0`.
 7. Kliknij **Otwórz wynik** (plik Excel) albo otwórz arkusz Google — zakładki zostały nadpisane.
+8. Bez połączenia z Google (punkt 1a pominięty): w Google Sheets **Plik → Importuj → Prześlij**
+   → wybierz plik Excel z folderu wyników → „Zastąp arkusz kalkulacyjny” lub „Wstaw nowe
+   arkusze”. Wszystkie zakładki wchodzą 1:1.
 
 ## 4. Co sprawdzić po uruchomieniu
 

@@ -144,6 +144,10 @@ Reguła jest w jednym miejscu (`report.py: classify()` i `tab_country()`) – ł
 
 ### Google Sheets (system klienta)
 
+Konto serwisowe zakłada **właściciel arkusza (konto Google klienta)** – wtedy klucz, dane i arkusz
+pozostają w firmie klienta; opiekun narzędzia nie ma dostępu do danych (kroki dla biura:
+`INSTRUKCJA_KLIENT.md`, punkt 1a).
+
 1. Google Cloud → projekt → włącz **Google Sheets API** i **Google Drive API**.
 2. Utwórz konto serwisowe, pobierz klucz JSON (nie wrzucać do repo – `.gitignore` już to blokuje).
 3. Udostępnij docelowy arkusz adresowi e-mail konta serwisowego (Edytor).
