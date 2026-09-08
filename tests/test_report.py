@@ -96,7 +96,7 @@ def test_amounts_with_promo_and_categories(tmp_path):
     assert wdt.invoice_currency == "CZK" and wdt.invoice_exchange_rate == 5.5685
     assert wdt.quantity == 2
 
-    assert ref.category == "Marketplace" and ref.tab_name == "FR Marketplace"
+    assert ref.category == "Marketplace" and ref.tab_name == "FR Marketplace KOREKTA"
     assert ref.total.gross == -29.08 and ref.is_negative
     assert ref.transaction_type_pl == "Zwrot płatności"
 

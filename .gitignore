@@ -11,6 +11,7 @@ samples/
 *.pdf
 *.csv
 *.xlsx
+!assets/*
 # poświadczenia Google
 credentials/*
 !credentials/README.md

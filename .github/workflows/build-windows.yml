@@ -27,13 +27,13 @@ jobs:
           python -m pytest -q
       - name: Budowa LUKO-AmaFakt.exe (okienko)
         run: >
-          pyinstaller --noconfirm --clean --onefile --windowed --name LUKO-AmaFakt --paths .
+          pyinstaller --noconfirm --clean --onefile --windowed --name LUKO-AmaFakt --paths . --icon assets/icon.ico --add-data "assets/icon.ico;assets"
           --collect-all pdfplumber --collect-all pdfminer --collect-all pypdfium2 --collect-all pypdfium2_raw
           --collect-all openpyxl --collect-all gspread --collect-all google.auth --collect-all charset_normalizer
           amazon_vat_merger/gui_main.py
       - name: Budowa LUKO-AmaFakt-cli.exe (wiersz poleceń)
         run: >
-          pyinstaller --noconfirm --clean --onefile --console --name LUKO-AmaFakt-cli --paths .
+          pyinstaller --noconfirm --clean --onefile --console --name LUKO-AmaFakt-cli --paths . --icon assets/icon.ico
           --collect-all pdfplumber --collect-all pdfminer --collect-all pypdfium2 --collect-all pypdfium2_raw
           --collect-all openpyxl --collect-all gspread --collect-all google.auth --collect-all charset_normalizer
           amazon_vat_merger/cli_main.py

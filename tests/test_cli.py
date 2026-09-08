@@ -29,7 +29,8 @@ def test_cli_end_to_end(tmp_path, capsys):
     matched = sum(1 for r in range(2, ws.max_row + 1) if ws.cell(r, col_match).value == "PDF")
     assert matched == min(n_pdf, 44)
     # zakładki grup
-    assert "DE OSS" in wb.sheetnames and "CZ WDT" in wb.sheetnames and "FR Marketplace" in wb.sheetnames
+    assert "DE OSS" in wb.sheetnames and "DE OSS KOREKTA" in wb.sheetnames and "CZ WDT" in wb.sheetnames
+    assert "FR Marketplace" in wb.sheetnames and "FR Marketplace KOREKTA" in wb.sheetnames
     de = wb["DE OSS"]
     assert de["A1"].value is None and de["B1"].value == "Niemcy" and de["C1"].value == "OSS"
     assert all(c.value is None for c in de[3])           # pusty wiersz 3 jak w arkuszu klienta

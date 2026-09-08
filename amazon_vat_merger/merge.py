@@ -413,6 +413,8 @@ def build_group_sheets(result: MergeResult) -> list[Sheet]:
         rows = sorted(groups[tab], key=_sort_key)
         currencies = sorted({r.tx.currency for r in rows if r.tx.currency and r.tx.currency not in ("EUR", "PLN")})
         country, category = (tab.split(" ", 1) + [""])[:2]
+        is_correction = category.endswith(" KOREKTA")
+        base_category = category[: -len(" KOREKTA")] if is_correction else category
         Col = tuple[str, Callable[[MergedRow], Any], str]
         head: list[Col] = [
             ("Numer faktury VAT", lambda r: r.tx.invoice_number, "s"),
@@ -459,7 +461,8 @@ def build_group_sheets(result: MergeResult) -> list[Sheet]:
             ("Dopasowanie PDF", lambda r: r.match, "s"),
         ]
         columns = head + extras
-        title = ["", L.COUNTRY_PL.get(country, country), category]
+        title = ["", L.COUNTRY_PL.get(country, country), category,
+                 ("korekty: zwroty i noty kredytowe – " if is_correction else "") + CATEGORY_DESCRIPTION.get(base_category, "")]
         header = [c[0] for c in columns]
         data = [[c[1](r) for c in columns] for r in rows]
         first, last = 4, 3 + len(data)

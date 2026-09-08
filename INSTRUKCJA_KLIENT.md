@@ -71,6 +71,27 @@ Google ręcznie (patrz punkt 3, krok 8).
    → wybierz plik Excel z folderu wyników → „Zastąp arkusz kalkulacyjny” lub „Wstaw nowe
    arkusze”. Wszystkie zakładki wchodzą 1:1.
 
+## 3a. Codzienne (comiesięczne) użycie — skrót
+
+Program nie instaluje się w systemie: jest po prostu plikiem `C:\LUKO-AmaFakt\LUKO-AmaFakt.exe`
+(pomarańczowo-granatowa ikona z literą A). Żeby mieć go pod ręką: kliknij plik prawym przyciskiem →
+**Wyślij do → Pulpit (utwórz skrót)** albo **Przypnij do paska zadań**.
+
+Rutyna na koniec miesiąca (ok. 10 minut):
+
+1. Pobierz z Seller Central raport za miesiąc do `C:\LUKO-AmaFakt\raporty` i faktury do
+   `C:\LUKO-AmaFakt\faktury` (punkt 2).
+2. Uruchom program (skrót na pulpicie). Ścieżki, ID arkusza i klucz są zapamiętane z poprzedniego
+   razu — sprawdź tylko, czy w polu **Raport CSV** jest właściwy plik (przy nowym miesiącu kliknij
+   *Wybierz…* i wskaż nowy raport).
+3. Kliknij **Uruchom**. Poczekaj na komunikat `GOTOWE: transakcje: … | dopasowane: …`.
+4. Otwórz arkusz Google (zakładki nadpisane) lub kliknij **Otwórz wynik** (plik Excel z tym samym).
+5. Zajrzyj do zakładki **Diagnostyka** i dograj brakujące faktury, jeśli je wylicza; po dograniu
+   kliknij **Uruchom** jeszcze raz.
+
+Zakładki krajów: sprzedaż i korekty są rozdzielone, np. `DE OSS` (faktury) i `DE OSS KOREKTA`
+(zwroty i noty kredytowe, kwoty ujemne).
+
 ## 4. Co sprawdzić po uruchomieniu
 
 * Zakładka **Diagnostyka** — lista rzeczy do wyjaśnienia: transakcje bez faktury PDF (trzeba

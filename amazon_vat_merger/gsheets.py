@@ -7,8 +7,9 @@ Konfiguracja po stronie klienta:
   4. Uruchomić: --sheet-id <ID z URL> --credentials klucz.json
 
 Limity API (60 zapisów/min/użytkownik): na zakładkę idą 2-3 wywołania (clear, update,
-ewentualnie resize), a całe formatowanie jedzie jednym batch_update; klient gspread ma
-włączony backoff na HTTP 429.
+ewentualnie resize), a formuły RAZEM i całe formatowanie jadą jednym batch_update; klient
+gspread ma włączony backoff na HTTP 429. Wartości idą w trybie RAW: tekst zostaje tekstem
+(bez prefiksu apostrofu), daty jako numery seryjne z formatem DATE.
 """
 from __future__ import annotations
 
@@ -23,37 +24,54 @@ from .merge import Formula, Sheet
 log = logging.getLogger(__name__)
 
 
-def to_sheet_values(rows: list[list[Any]]) -> list[list[Any]]:
-    """Konwersja wartości na typy akceptowane przez Sheets API (USER_ENTERED).
+SHEETS_EPOCH = date(1899, 12, 30)
 
-    Tekst dostaje wiodący apostrof (Sheets go zjada i zapisuje komórkę jako tekst) –
-    inaczej kody pocztowe '01234', numery zamówień i SKU zamieniałyby się w liczby/daty.
-    Liczby, daty (ISO) i formuły idą bez apostrofu, żeby Sheets je zinterpretował.
+
+def to_sheet_values(rows: list[list[Any]]) -> list[list[Any]]:
+    """Konwersja wartości pod zapis w trybie RAW (bez interpretacji przez Sheets).
+
+    * tekst -> tekst 1:1 (bez prefiksu apostrofu; kody pocztowe, numery zamówień i SKU zostają
+      tekstem, bo RAW nic nie parsuje),
+    * liczby -> liczby,
+    * daty -> numer seryjny arkusza (dni od 30.12.1899); kolumny dat dostają format DATE,
+    * formuły -> pusta komórka tutaj, wpisywane osobno przez batchUpdate (patrz formula_cells).
     """
     out: list[list[Any]] = []
     for row in rows:
         conv: list[Any] = []
         for v in row:
-            if v is None:
+            if v is None or isinstance(v, Formula):
                 conv.append("")
-            elif isinstance(v, Formula):
-                conv.append(str(v))
             elif isinstance(v, date):
-                conv.append(v.isoformat())
+                conv.append((v - SHEETS_EPOCH).days)
             elif isinstance(v, bool):
-                conv.append("'TAK" if v else "'NIE")
+                conv.append("TAK" if v else "NIE")
             elif isinstance(v, (int, float)):
                 conv.append(v)
             else:
-                s = str(v)
-                conv.append("'" + s if s else "")
+                conv.append(str(v))
         out.append(conv)
     return out
+
+
+def formula_cells(rows: list[list[Any]]) -> list[tuple[int, int, str]]:
+    """(wiersz 0-based, kolumna 0-based, formuła) dla komórek typu Formula."""
+    return [(ri, ci, str(v)) for ri, row in enumerate(rows) for ci, v in enumerate(row) if isinstance(v, Formula)]
 
 
 def extract_spreadsheet_id(value: str) -> str:
     m = re.search(r"/spreadsheets/d/([A-Za-z0-9_-]+)", value or "")
     return m.group(1) if m else (value or "").strip()
+
+
+def _formula_requests(sheet_id: int, sheet: Sheet) -> list[dict]:
+    reqs: list[dict] = []
+    for ri, ci, formula in formula_cells(sheet.rows):
+        reqs.append({"updateCells": {
+            "rows": [{"values": [{"userEnteredValue": {"formulaValue": formula}}]}],
+            "fields": "userEnteredValue",
+            "start": {"sheetId": sheet_id, "rowIndex": ri, "columnIndex": ci}}})
+    return reqs
 
 
 def _format_requests(sheet_id: int, sheet: Sheet, nrows: int, reset: bool) -> list[dict]:
@@ -130,7 +148,8 @@ def push_sheets(
             ws.clear()
             if getattr(ws, "row_count", nrows) < nrows or getattr(ws, "col_count", ncols) < ncols:
                 ws.resize(rows=max(nrows, getattr(ws, "row_count", 0)), cols=max(ncols, getattr(ws, "col_count", 0)))
-        ws.update(values=values, range_name="A1", value_input_option="USER_ENTERED")
+        ws.update(values=values, range_name="A1", value_input_option="RAW")
+        requests += _formula_requests(ws.id, sheet)
         requests += _format_requests(ws.id, sheet, len(values), reset)
         written.append(name)
         ordered.append(ws)

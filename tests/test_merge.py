@@ -103,7 +103,7 @@ def test_build_sheets_structure():
     master = sheets[0]
     assert master.rows[0][0] == "Zakładka" and len(master.rows) == 3
     se = sheets[2]
-    assert se.rows[0] == ["", "Szwecja", "OSS"] and se.rows[2] == []      # wiersz 1 i pusty wiersz 3 jak u klienta
+    assert se.rows[0][:3] == ["", "Szwecja", "OSS"] and se.rows[2] == []      # wiersz 1 i pusty wiersz 3 jak u klienta
     header = se.rows[1]
     assert header[:14] == ["Numer faktury VAT", "Data zamówienia", "Data wysyłki", "Imię i nazwisko Kupującego", "Ulica",
                            "Miasto i kod pocztowy", "Kwota netto PLN", "Kwota netto EUR", "Kwota VAT EUR", "Kwota netto SEK",
@@ -219,3 +219,17 @@ def test_rows_without_invoice_number_are_grouped_per_order():
     tx = _tx(**{"VAT Invoice Number": ""})
     res = merge([tx], [_inv(number=None)], None)
     assert res.rows[0].match == "PDF (po nr zamówienia)" and res.rows[0].amount_check == "OK"
+
+
+def test_corrections_go_to_separate_tabs():
+    sale = _tx()
+    refund = _tx(**{"Transaction Type": "REFUND", "VAT Invoice Number": "PL6000000000CN",
+                    "OUR_PRICE Tax Inclusive Selling Price": "-14.99", "OUR_PRICE Tax Amount": "-2.39",
+                    "OUR_PRICE Tax Exclusive Selling Price": "-12.60"})
+    assert sale.tab_name == "DE OSS" and refund.tab_name == "DE OSS KOREKTA"
+    sheets = build_sheets(merge([sale, refund], [], None))
+    names = [s.name for s in sheets]
+    assert names == ["Wszystko", "DE OSS", "DE OSS KOREKTA", "Diagnostyka"]
+    kor = sheets[2]
+    assert kor.rows[0][1] == "Niemcy" and kor.rows[0][2] == "OSS KOREKTA" and kor.rows[0][3].startswith("korekty")
+    assert kor.rows[3][kor.rows[1].index("Kwota netto EUR")] == -12.60

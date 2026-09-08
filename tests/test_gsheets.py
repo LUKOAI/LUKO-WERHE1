@@ -59,9 +59,14 @@ class FakeClient:
         return self.sh
 
 
-def test_to_sheet_values():
+def test_to_sheet_values_raw_mode():
+    from amazon_vat_merger.gsheets import formula_cells
     rows = [[None, date(2026, 8, 1), 1.5, Formula("=SUM(A1:A2)"), "=nie formuła", True, "tekst", "", "01234"]]
-    assert to_sheet_values(rows) == [["", "2026-08-01", 1.5, "=SUM(A1:A2)", "'=nie formuła", "'TAK", "'tekst", "", "'01234"]]
+    assert to_sheet_values(rows) == [["", 46235, 1.5, "", "=nie formuła", "TAK", "tekst", "", "01234"]]
+    assert formula_cells(rows) == [(0, 3, "=SUM(A1:A2)")]
+    # 1899-12-30 + 46235 dni == 2026-08-01
+    from datetime import timedelta
+    assert date(1899, 12, 30) + timedelta(days=46235) == date(2026, 8, 1)
 
 
 def test_extract_id():
@@ -84,13 +89,16 @@ def test_push_sheets_creates_replaces_and_formats_in_one_batch():
     titles = [w.title for w in sh.worksheets()]
     assert titles == ["Arkusz1", "DE OSS", "Wszystko"]
     de = next(w for w in sh.worksheets() if w.title == "DE OSS")
-    assert de.cleared and de.values[3] == ["'RAZEM", "=SUM(B3:B3)"] and de.opt == "USER_ENTERED"
+    assert de.cleared and de.values[3] == ["RAZEM", ""] and de.opt == "RAW"
     assert de.resized is not None  # istniejąca zakładka była za mała
-    # całe formatowanie w jednym batch_update
+    # formuły i całe formatowanie w jednym batch_update
     assert len(sh.batches) == 1
     reqs = sh.batches[0]["requests"]
     kinds = [list(r)[0] for r in reqs]
     assert kinds.count("updateSheetProperties") == 2 and "repeatCell" in kinds
+    formulas = [r["updateCells"] for r in reqs if "updateCells" in r]
+    assert len(formulas) == 1 and formulas[0]["start"] == {"sheetId": de.id, "rowIndex": 3, "columnIndex": 1}
+    assert formulas[0]["rows"][0]["values"][0]["userEnteredValue"]["formulaValue"] == "=SUM(B3:B3)"
     frozen = [r["updateSheetProperties"]["properties"]["gridProperties"]["frozenRowCount"] for r in reqs if "updateSheetProperties" in r]
     assert sorted(frozen) == [1, 2]
     # reset formatów tylko dla istniejącej zakładki

@@ -69,6 +69,13 @@ def main() -> int:
     cfg = load_config()
     root = tk.Tk()
     root.title(f"{APP_TITLE}  (v{__version__})")
+    try:  # ikona: obok pliku exe (PyInstaller rozpakowuje do sys._MEIPASS) albo w repo (assets/)
+        base = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent.parent))
+        ico = base / "assets" / "icon.ico"
+        if ico.exists() and sys.platform.startswith("win"):
+            root.iconbitmap(str(ico))
+    except Exception:  # noqa: BLE001
+        pass
     root.geometry("860x640")
     root.minsize(760, 560)
 

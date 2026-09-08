@@ -9,7 +9,8 @@ Repozytorium narzędzi dla klienta WERHE / WERKON.
 
 * zakładka **Wszystko** – każda transakcja z CSV + dane z PDF (nazwisko/nazwa kupującego, ulica,
   miasto i kod, NIP, opis produktu, kwota faktury, kontrola zgodności kwot PDF/CSV);
-* zakładki **per kraj i schemat** (np. `DE OSS`, `FR Lokalna`, `CZ WDT`, `FR Marketplace`): wiersz 1
+* zakładki **per kraj i schemat**, osobno sprzedaż i korekty (np. `DE OSS` i `DE OSS KOREKTA` –
+  zwroty i noty kredytowe z kwotami ujemnymi; `FR Lokalna`, `CZ WDT`, `FR Marketplace`): wiersz 1
   (kraj, schemat), wiersz 2 nagłówki, wiersz 3 pusty i pierwsze kolumny **dokładnie jak w arkuszu
   próbnym klienta** (układ EUR: netto PLN, netto EUR, stawka, „Kwota należnego Vat'u”; układ walut
   obcych: netto PLN, netto EUR, VAT EUR, netto/VAT w walucie, stawka); dalej, na szarym tle,
@@ -154,9 +155,10 @@ pozostają w firmie klienta; opiekun narzędzia nie ma dostępu do danych (kroki
 4. `python -m amazon_vat_merger --csv … --pdf … --sheet-id <ID z URL> --credentials klucz.json`
 
 Każde uruchomienie nadpisuje zakładki o tych samych nazwach (wartości i formaty), inne zakładki
-zostają. Tekst trafia do komórek jako tekst (kody pocztowe `01234`, numery zamówień i SKU nie
-zamieniają się w liczby), daty jako daty, kwoty jako liczby z formatem `#,##0.00`. Formatowanie
-idzie jednym `batch_update`, klient ma backoff na limit 60 zapisów/min.
+zostają. Wartości idą w trybie RAW: tekst jest tekstem bez żadnego prefiksu (kody pocztowe `01234`,
+numery zamówień i SKU nie zamieniają się w liczby), daty jako numery seryjne z formatem daty,
+kwoty jako liczby z formatem `#,##0.00`, formuły RAZEM wpisywane przez `batchUpdate`. Formatowanie
+i formuły idą jednym `batch_update`, klient ma backoff na limit 60 zapisów/min.
 
 Bez konta serwisowego: otwórz Google Sheets → **Plik → Importuj → Prześlij** plik `.xlsx` –
 wszystkie zakładki, formuły `RAZEM` i formaty wchodzą 1:1.

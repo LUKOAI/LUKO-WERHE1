@@ -278,7 +278,8 @@ def transaction_from_row(raw: dict, source_file: str = "", row_number: int = 0) 
     tx.einvoice_url = g("EInvoice URL")
     tx.category = classify(tx)
     tx.tab_country = tab_country(tx)
-    tx.tab_name = f"{tx.tab_country} {tx.category}"
+    # korekty (zwroty, noty kredytowe) w osobnych zakładkach: "DE OSS" / "DE OSS KOREKTA"
+    tx.tab_name = f"{tx.tab_country} {tx.category}" + (" KOREKTA" if tx.is_negative else "")
     return tx
 
 
