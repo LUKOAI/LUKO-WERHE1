@@ -5,7 +5,7 @@ import argparse
 import logging
 import sys
 
-from . import __version__
+from . import APP_NAME, __version__
 from .job import run_job
 
 log = logging.getLogger("amazon_vat_merger")
@@ -14,7 +14,7 @@ log = logging.getLogger("amazon_vat_merger")
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="amazon_vat_merger",
-        description="Łączy raport Amazon VAT Transactions (CSV) z fakturami VCS (PDF) w jeden arkusz.",
+        description=f"{APP_NAME}: łączy raport Amazon VAT Transactions (CSV) z fakturami VCS (PDF) w jeden arkusz.",
     )
     p.add_argument("--csv", action="append", required=True, metavar="PLIK", help="raport CSV (można podać wiele razy)")
     p.add_argument("--pdf", action="append", default=[], metavar="PLIK|KATALOG", help="faktura PDF albo katalog z fakturami (rekurencyjnie)")
@@ -27,7 +27,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--rate-basis", choices=["invoice", "shipment", "order"], default="invoice",
                    help="data bazowa kursu: wcześniejsza z dat faktury (PDF) i wysyłki (domyślnie) / wysyłki / zamówienia")
     p.add_argument("-v", "--verbose", action="store_true")
-    p.add_argument("--version", action="version", version=__version__)
+    p.add_argument("--version", action="version", version=f"{APP_NAME} {__version__}")
     return p
 
 

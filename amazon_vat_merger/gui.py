@@ -1,6 +1,6 @@
-"""Okienko (tkinter, biblioteka standardowa) – dla osoby, która nie używa terminala.
+"""LUKO AmaFakt – okienko (tkinter, biblioteka standardowa) dla osoby, która nie używa terminala.
 
-Uruchomienie: python -m amazon_vat_merger.gui  (albo zbudowany AmazonVAT.exe).
+Uruchomienie: python -m amazon_vat_merger.gui  (albo zbudowany LUKO-AmaFakt.exe).
 Ustawienia (ścieżki, ID arkusza) są zapamiętywane w pliku konfiguracyjnym użytkownika.
 """
 from __future__ import annotations
@@ -15,14 +15,15 @@ import threading
 from datetime import datetime
 from pathlib import Path
 
+from . import APP_NAME, APP_SLUG, __version__
 from .job import run_job
 
-APP_TITLE = "Amazon VAT → Arkusz (WERHE)"
+APP_TITLE = f"{APP_NAME} — faktury Amazon do arkusza"
 
 
 def config_path() -> Path:
     base = Path(os.environ.get("APPDATA") or Path.home() / ".config")
-    return base / "AmazonVAT" / "config.json"
+    return base / APP_SLUG / "config.json"
 
 
 def load_config() -> dict:
@@ -67,7 +68,7 @@ def main() -> int:
 
     cfg = load_config()
     root = tk.Tk()
-    root.title(APP_TITLE)
+    root.title(f"{APP_TITLE}  (v{__version__})")
     root.geometry("860x640")
     root.minsize(760, 560)
 
@@ -75,7 +76,7 @@ def main() -> int:
         "csv": tk.StringVar(value=cfg.get("csv", "")),
         "pdf": tk.StringVar(value=cfg.get("pdf", "")),
         "rates": tk.StringVar(value=cfg.get("rates", "")),
-        "out": tk.StringVar(value=cfg.get("out", str(Path.home() / "AmazonVAT" / "wyniki"))),
+        "out": tk.StringVar(value=cfg.get("out", str(Path.home() / APP_SLUG / "wyniki"))),
         "sheet": tk.StringVar(value=cfg.get("sheet", "")),
         "cred": tk.StringVar(value=cfg.get("cred", "")),
     }

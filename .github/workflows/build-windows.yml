@@ -1,4 +1,4 @@
-name: Build AmazonVAT.exe (Windows)
+name: Build LUKO-AmaFakt.exe (Windows)
 
 on:
   push:
@@ -25,23 +25,23 @@ jobs:
         run: |
           pip install pytest
           python -m pytest -q
-      - name: Budowa AmazonVAT.exe (okienko)
+      - name: Budowa LUKO-AmaFakt.exe (okienko)
         run: >
-          pyinstaller --noconfirm --clean --onefile --windowed --name AmazonVAT --paths .
+          pyinstaller --noconfirm --clean --onefile --windowed --name LUKO-AmaFakt --paths .
           --collect-all pdfplumber --collect-all pdfminer --collect-all pypdfium2 --collect-all pypdfium2_raw
           --collect-all openpyxl --collect-all gspread --collect-all google.auth --collect-all charset_normalizer
           amazon_vat_merger/gui_main.py
-      - name: Budowa AmazonVAT-cli.exe (wiersz poleceń)
+      - name: Budowa LUKO-AmaFakt-cli.exe (wiersz poleceń)
         run: >
-          pyinstaller --noconfirm --clean --onefile --console --name AmazonVAT-cli --paths .
+          pyinstaller --noconfirm --clean --onefile --console --name LUKO-AmaFakt-cli --paths .
           --collect-all pdfplumber --collect-all pdfminer --collect-all pypdfium2 --collect-all pypdfium2_raw
           --collect-all openpyxl --collect-all gspread --collect-all google.auth --collect-all charset_normalizer
           amazon_vat_merger/cli_main.py
       - name: Test zbudowanego CLI
         run: |
-          dist\AmazonVAT-cli.exe --version
+          dist\LUKO-AmaFakt-cli.exe --version
       - uses: actions/upload-artifact@v4
         with:
-          name: AmazonVAT-windows
+          name: LUKO-AmaFakt-windows
           path: dist/*.exe
           retention-days: 90

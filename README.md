@@ -2,7 +2,7 @@
 
 Repozytorium narzędzi dla klienta WERHE / WERKON.
 
-## 1. Amazon VAT merger (`amazon_vat_merger/`)
+## 1. LUKO AmaFakt (`amazon_vat_merger/`)
 
 Łączy raport **Amazon VAT Transactions Report** (CSV z Seller Central) z **fakturami VCS w PDF**
 (te same, które Amazon generuje pod „Invoice Url") i buduje jeden arkusz ze wszystkimi danymi:
@@ -31,8 +31,8 @@ Wynik zapisywany jest do `.xlsx` i opcjonalnie wypychany do **Google Sheets**.
      „Invoice Url" raportu),
    * opcjonalnie `dane/kursy.csv` – własne kursy PLN (`waluta;data;kurs`).
 3. Uruchom:
-   * Windows bez Pythona: `AmazonVAT.exe` (okienko; plik z GitHub Actions → *Artifacts* →
-     `AmazonVAT-windows`), instrukcja dla biura: `INSTRUKCJA_KLIENT.md`
+   * Windows bez Pythona: `LUKO-AmaFakt.exe` (okienko; plik z GitHub Actions → *Artifacts* →
+     `LUKO-AmaFakt-windows`), instrukcja dla biura: `INSTRUKCJA_KLIENT.md`
    * macOS / Linux: `./demo.sh`
    * Windows z Pythonem: `demo.bat`
    * okienko z Pythona: `python -m amazon_vat_merger.gui`
@@ -182,7 +182,7 @@ nie przerywają przetwarzania – trafiają jako ostrzeżenia do `Diagnostyka` i
 
 | element | co to jest | koszt |
 |---|---|---|
-| `AmazonVAT.exe` / `python -m amazon_vat_merger` | program w Pythonie (biblioteki open source: pdfplumber – odczyt PDF, openpyxl – Excel, gspread – Google Sheets, requests – NBP) uruchamiany **lokalnie na komputerze klienta** | 0 zł |
+| `LUKO-AmaFakt.exe` / `python -m amazon_vat_merger` | program w Pythonie (biblioteki open source: pdfplumber – odczyt PDF, openpyxl – Excel, gspread – Google Sheets, requests – NBP) uruchamiany **lokalnie na komputerze klienta** | 0 zł |
 | API NBP | publiczne API kursów walut | 0 zł, bez klucza |
 | Google Sheets API + konto serwisowe | projekt w Google Cloud, konto techniczne z własnym e-mailem, któremu udostępnia się arkusz | 0 zł (limit 60 zapisów/min – narzędzie się w nim mieści) |
 | GitHub (repozytorium prywatne + Actions) | kod i automatyczna budowa `.exe` przy każdej zmianie | 0 zł w limicie darmowym (2000 min/mies.) |
@@ -200,14 +200,14 @@ Nie ma żadnego modelu AI, serwera pośredniczącego ani abonamentu. Koszt jedne
    Dane osobowe kupujących pozostają u klienta (jego komputer, jego arkusz Google).
 4. W repozytorium nie ma żadnych danych klienta (raporty, faktury, klucze są ignorowane przez git).
 
-**Utrzymanie**: zmiana w kodzie → push do GitHuba → Actions buduje nowe `AmazonVAT.exe`
-(zakładka *Actions* → ostatni przebieg → *Artifacts* → `AmazonVAT-windows`) → plik wysyła się
+**Utrzymanie**: zmiana w kodzie → push do GitHuba → Actions buduje nowe `LUKO-AmaFakt.exe`
+(zakładka *Actions* → ostatni przebieg → *Artifacts* → `LUKO-AmaFakt-windows`) → plik wysyła się
 do biura i podmienia stary.
 
 ### Dostarczanie nowych plików – warianty
 
 1. **Lokalnie u klienta (zalecane na start)** – osoba w biurze pobiera raport i faktury z Seller
-   Central, uruchamia `AmazonVAT.exe`, wynik trafia do ich arkusza Google. Zero przesyłania danych
+   Central, uruchamia `LUKO-AmaFakt.exe`, wynik trafia do ich arkusza Google. Zero przesyłania danych
    osobowych poza firmę. Instrukcja: `INSTRUKCJA_KLIENT.md`.
 2. **Wspólny folder (Google Drive / OneDrive)** – klient wrzuca raport i faktury do folderu
    udostępnionego opiekunowi narzędzia, który uruchamia program u siebie. Wymaga zgody klienta
