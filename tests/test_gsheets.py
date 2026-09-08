@@ -7,7 +7,7 @@ import pytest
 from amazon_vat_merger.gsheets import (
     GoogleSheetsError, extract_spreadsheet_id, push_sheets, to_sheet_values,
 )
-from amazon_vat_merger.merge import Formula, Sheet
+from amazon_vat_merger.merge import Formula, Link, Sheet
 
 
 class FakeWs:
@@ -201,3 +201,25 @@ def test_existing_tab_matched_case_insensitively():
     push_sheets("XYZ", [Sheet(name="DE OSS", rows=[["A"], [1]], header_row=1)], client=FakeClient(sh))
     titles = [w.title for w in sh.worksheets()]
     assert titles == ["DE oss"] and sh.worksheets()[0].cleared
+
+
+def test_master_links_get_gid_and_are_grouped_into_one_request():
+    sh = FakeSpreadsheet([])
+    master = Sheet(name="Wszystko", rows=[["Zakładka", "X"],
+                                          [Link("DE OSS", 4), 1], [Link("DE OSS", 5), 2], [Link("Nieistniejąca", 4), 3],
+                                          ["tekst", 4], [Link("de oss", 6), 5]], header_row=1)
+    de = Sheet(name="DE OSS", rows=[["Niemcy"], ["A"], [], [1], [2], [3], ["RAZEM", Formula("=SUM(A4:A6)")]], header_row=2)
+    res = push_sheets("XYZ", [master, de], client=FakeClient(sh))
+    assert res.written == ["Wszystko", "DE OSS"]
+    ws = {w.title: w for w in sh.worksheets()}
+    assert ws["Wszystko"].values[1] == ["", 1]   # link w wartościach pusty – wchodzi formułą
+    reqs = sh.batches[0]["requests"]
+    starts = [(r["updateCells"]["start"]["sheetId"], r["updateCells"]["start"]["rowIndex"], r["updateCells"]["start"]["columnIndex"], len(r["updateCells"]["rows"])) for r in reqs]
+    # wiersze 1-3 kolumny A jednym żądaniem, wiersz 5 osobno (przerwa w wierszu 4), RAZEM w DE OSS osobno
+    assert starts == [(ws["Wszystko"].id, 1, 0, 3), (ws["Wszystko"].id, 5, 0, 1), (ws["DE OSS"].id, 6, 1, 1)]
+    vals = [v["values"][0]["userEnteredValue"] for v in reqs[0]["updateCells"]["rows"]]
+    gid = ws["DE OSS"].id
+    assert vals[0] == {"formulaValue": f'=HYPERLINK("#gid={gid}&range=A4","DE OSS")'}
+    assert vals[1] == {"formulaValue": f'=HYPERLINK("#gid={gid}&range=A5","DE OSS")'}
+    assert vals[2] == {"stringValue": "Nieistniejąca"}          # brak zakładki -> zwykły tekst
+    assert reqs[1]["updateCells"]["rows"][0]["values"][0]["userEnteredValue"] == {"formulaValue": f'=HYPERLINK("#gid={gid}&range=A6","de oss")'}

@@ -173,7 +173,23 @@ komunikat z ID arkusza i adresem konta serwisowego, CLI kończy się kodem 3, ok
 status „Zakończono – błąd Google Sheets”.
 
 Bez konta serwisowego: otwórz Google Sheets → **Plik → Importuj → Prześlij** plik `.xlsx` –
-wszystkie zakładki, formuły `RAZEM` i formaty wchodzą 1:1.
+wszystkie zakładki, formuły `RAZEM` i formaty wchodzą 1:1 (linki z kolumny „Zakładka” są w postaci
+Excela `#'DE OSS'!A5` i po imporcie mogą nie działać – działają przy zapisie przez konto serwisowe).
+
+### Linki „Wszystko” → zakładka
+
+Kolumna A („Zakładka”) w `Wszystko` to `Link(tab, row)` (podklasa `Formula`): w xlsx
+`=HYPERLINK("#'DE OSS'!A5","DE OSS")`, w Google Sheets `=HYPERLINK("#gid=<sheetId>&range=A5","DE OSS")`
+– `gid` jest znany dopiero po utworzeniu zakładek, dlatego formuły idą po zapisaniu wszystkich
+wartości; kolejne wiersze tej samej kolumny jadą jednym `updateCells`. Numer wiersza (`MergedRow.tab_row`)
+nadaje `build_group_sheets`, więc `build_sheets` buduje zakładki krajów przed `Wszystko`.
+
+### Autor, wersja, kontakt
+
+`amazon_vat_merger/__init__.py`: `AUTHOR`, `SUPPORT_EMAIL` (support@netanaliza.com), `COPYRIGHT_YEAR`,
+`about_line()`. Widoczne: stopka okna (adres klikalny), pierwszy wiersz zakładki `Diagnostyka`
+(plus wiersz „Program” i „Wygenerowano”), `--version`/`--help` w CLI, właściwości plików `.exe`
+(`tools/make_version_info.py` generuje plik `--version-file` dla PyInstallera w GitHub Actions).
 
 ### Testy
 

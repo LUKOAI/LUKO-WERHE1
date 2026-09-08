@@ -40,5 +40,14 @@ def test_cli_end_to_end(tmp_path, capsys):
     ci = hdr.index("Kwota netto EUR") + 1
     assert str(de.cell(last, ci).value).startswith("=SUM(")
     assert de.cell(4, hdr.index("Stawka VAT") + 1).number_format == "0.0%"
+    # „Wszystko”: kolumna A to link do wiersza w zakładce; Diagnostyka ma wiersz tytułowy z wersją i kontaktem
+    a2 = ws.cell(2, 1).value
+    assert a2.startswith('=HYPERLINK("#\'') and a2.endswith('")') and ws.cell(2, 1).font.underline == "single"
+    tab = a2.split("'")[1]
+    row_no = int(a2.split("!A")[1].split('"')[0])
+    target = wb[tab]
+    assert target.cell(row_no, 1).value == ws.cell(2, header.index("Numer faktury VAT") + 1).value
+    diag = wb["Diagnostyka"]
+    assert diag["A1"].value.startswith("LUKO AmaFakt v") and diag["A2"].value == "Kategoria" and diag.freeze_panes == "B3"
     printed = capsys.readouterr().out
     assert f"dopasowane: {matched}" in printed

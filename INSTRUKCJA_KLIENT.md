@@ -89,6 +89,9 @@ Rutyna na koniec miesiąca (ok. 10 minut):
 5. Zajrzyj do zakładki **Diagnostyka** i dograj brakujące faktury, jeśli je wylicza; po dograniu
    kliknij **Uruchom** jeszcze raz.
 
+W zakładce **Wszystko** kolumna A („Zakładka”) jest linkiem: kliknięcie przenosi do tej samej
+transakcji w jej zakładce kraju (np. `DE OSS`, wiersz tej faktury).
+
 Zakładki krajów: sprzedaż i korekty są rozdzielone, np. `DE OSS` (faktury) i `DE OSS KOREKTA`
 (zwroty i noty kredytowe, kwoty ujemne).
 
@@ -112,6 +115,10 @@ np. „udostępnij arkusz adresowi …” (arkusz nie jest udostępniony kontu s
   wystarczy uruchomić ponownie.
 
 ## 5. Co zrobić, gdy coś nie działa
+
+**Kontakt do pomocy: support@netanaliza.com** (ten sam adres jest na dole okna programu — kliknięcie
+otwiera nowy e-mail — oraz w pierwszym wierszu zakładki *Diagnostyka* i we właściwościach pliku
+`LUKO-AmaFakt.exe`). W wiadomości podaj wersję programu z dołu okna, np. `v0.2.2`.
 
 Wyślij do opiekuna narzędzia: plik `luko-amafakt.log` z folderu wyników (pełny dziennik ze
 szczegółami technicznymi z każdego uruchomienia) oraz plik `faktury.json` z tego samego folderu

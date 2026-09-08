@@ -102,6 +102,15 @@ def test_build_sheets_structure():
     assert names == ["Wszystko", "DE OSS", "SE OSS", "Diagnostyka"]
     master = sheets[0]
     assert master.rows[0][0] == "Zakładka" and len(master.rows) == 3
+    # kolumna „Zakładka” to link do wiersza transakcji w jej zakładce (dane od wiersza 4)
+    from amazon_vat_merger.merge import Link
+    links = sorted(master.rows[1:], key=lambda r: r[0].tab)
+    assert all(isinstance(r[0], Link) for r in links)
+    assert (links[0][0].tab, links[0][0].row, links[0][0].text) == ("DE OSS", 4, "DE OSS")
+    assert str(links[1][0]) == '=HYPERLINK("#\'SE OSS\'!A4","SE OSS")'
+    diag = sheets[3]
+    assert diag.rows[0][0].startswith("LUKO AmaFakt v") and "support@netanaliza.com" in diag.rows[0][0]
+    assert diag.rows[1] == ["Kategoria", "Element", "Szczegóły"] and diag.header_row == 2
     se = sheets[2]
     assert se.rows[0][:3] == ["", "Szwecja", "OSS"] and se.rows[2] == []      # wiersz 1 i pusty wiersz 3 jak u klienta
     header = se.rows[1]

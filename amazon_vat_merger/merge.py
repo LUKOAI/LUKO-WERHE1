@@ -3,10 +3,11 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
-from datetime import date
+from datetime import datetime, date
 from decimal import ROUND_HALF_UP, Decimal
 from typing import Any, Callable
 
+from . import APP_NAME, SUPPORT_EMAIL, __version__, about_line
 from . import labels as L
 from .invoice_pdf import Invoice, InvoiceItem
 from .nbp import RateInfo, RateProvider
@@ -40,6 +41,7 @@ class MergedRow:
     vat_eur: float | None = None
     amount_check: str = ""
     rate_note: str = ""
+    tab_row: int | None = None               # 1-based wiersz tej transakcji w jej zakładce (do linku z „Wszystko”)
 
     # ---- wygodne gettery ----
     @property
@@ -255,6 +257,29 @@ class Formula(str):
     """Wartość komórki będąca formułą (=SUM(...))."""
 
 
+class Link(Formula):
+    """Link do komórki A{row} w zakładce `tab` (tekst `text`). Zapisywany jako formuła HYPERLINK;
+    plik xlsx dostaje postać Excela (#'Zakładka'!A5), Google Sheets postać z gid (#gid=…&range=A5)."""
+
+    tab: str
+    row: int
+    text: str
+
+    def __new__(cls, tab: str, row: int, text: str | None = None):
+        text = text if text is not None else tab
+        obj = super().__new__(cls, cls.excel_formula(tab, row, text))
+        obj.tab, obj.row, obj.text = tab, row, text
+        return obj
+
+    @staticmethod
+    def excel_formula(tab: str, row: int, text: str) -> str:
+        quoted = tab.replace("'", "''")
+        return f'=HYPERLINK("#\'{quoted}\'!A{row}","{text}")'
+
+    def gsheets_formula(self, gid: int) -> str:
+        return f'=HYPERLINK("#gid={gid}&range=A{self.row}","{self.text}")'
+
+
 @dataclass
 class Sheet:
     name: str
@@ -280,7 +305,7 @@ def _pct(v: float | None) -> float | None:
 
 MASTER_COLUMNS: list[tuple[str, Callable[[MergedRow], Any], str]] = [
     # (nagłówek, getter, typ: s=tekst, m=kwota, d=data, p=procent)
-    ("Zakładka", lambda r: r.tx.tab_name, "s"),
+    ("Zakładka", lambda r: Link(r.tx.tab_name, r.tab_row) if r.tab_row else r.tx.tab_name, "s"),
     ("Kategoria", lambda r: r.tx.category, "s"),
     ("Numer faktury VAT", lambda r: r.tx.invoice_number, "s"),
     ("Typ dokumentu (PDF)", lambda r: DOC_TYPE_PL.get(r.invoice.doc_type, "") if r.invoice else "", "s"),
@@ -466,6 +491,8 @@ def build_group_sheets(result: MergeResult) -> list[Sheet]:
         header = [c[0] for c in columns]
         data = [[c[1](r) for c in columns] for r in rows]
         first, last = 4, 3 + len(data)
+        for i, r in enumerate(rows):
+            r.tab_row = first + i
         total_row: list[Any] = ["RAZEM"] + [None] * (len(columns) - 1)
         for ci, c in enumerate(columns, start=1):
             if c[2] == "m" and data:
@@ -485,8 +512,13 @@ def build_group_sheets(result: MergeResult) -> list[Sheet]:
     return sheets
 
 
-def build_diagnostics_sheet(result: MergeResult, name: str = "Diagnostyka") -> Sheet:
-    rows: list[list[Any]] = [["Kategoria", "Element", "Szczegóły"]]
+def build_diagnostics_sheet(result: MergeResult, name: str = "Diagnostyka", now: datetime | None = None) -> Sheet:
+    now = now or datetime.now()
+    sources = sorted({r.tx.source_file for r in result.rows if r.tx.source_file})
+    title = about_line() + f" · wygenerowano {now:%Y-%m-%d %H:%M}" + (f" · raport: {', '.join(sources)}" if sources else "")
+    rows: list[list[Any]] = [[title], ["Kategoria", "Element", "Szczegóły"]]
+    rows.append(["Podsumowanie", "Program", f"{APP_NAME} v{__version__} ({SUPPORT_EMAIL})"])
+    rows.append(["Podsumowanie", "Wygenerowano", f"{now:%Y-%m-%d %H:%M}"])
     rows.append(["Podsumowanie", "Transakcje w CSV", len(result.rows)])
     rows.append(["Podsumowanie", "Dopasowane do PDF", result.matched])
     rows.append(["Podsumowanie", "Bez PDF", result.missing])
@@ -543,8 +575,9 @@ def build_diagnostics_sheet(result: MergeResult, name: str = "Diagnostyka") -> S
         if inv.is_credit_note and inv.original_invoice_number and inv.original_invoice_number not in known_numbers:
             rows.append(["Nota do faktury spoza raportu", inv.invoice_number or inv.file,
                          f"faktura pierwotna {inv.original_invoice_number} nie występuje w CSV (wcześniejszy okres?)"])
-    return Sheet(name=name, rows=rows, header_row=1)
+    return Sheet(name=name, rows=rows, header_row=2)
 
 
-def build_sheets(result: MergeResult) -> list[Sheet]:
-    return [build_master_sheet(result)] + build_group_sheets(result) + [build_diagnostics_sheet(result)]
+def build_sheets(result: MergeResult, now: datetime | None = None) -> list[Sheet]:
+    groups = build_group_sheets(result)   # najpierw zakładki – nadają wierszom tab_row, z którego korzystają linki w „Wszystko”
+    return [build_master_sheet(result)] + groups + [build_diagnostics_sheet(result, now=now)]

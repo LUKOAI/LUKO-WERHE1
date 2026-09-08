@@ -28,7 +28,7 @@ from typing import Any
 
 from . import APP_NAME
 from .excel import safe_sheet_name
-from .merge import Formula, Sheet
+from .merge import Formula, Link, Sheet
 
 log = logging.getLogger(__name__)
 
@@ -81,9 +81,9 @@ def to_sheet_values(rows: list[list[Any]]) -> list[list[Any]]:
     return out
 
 
-def formula_cells(rows: list[list[Any]]) -> list[tuple[int, int, str]]:
-    """(wiersz 0-based, kolumna 0-based, formuła) dla komórek typu Formula."""
-    return [(ri, ci, str(v)) for ri, row in enumerate(rows) for ci, v in enumerate(row) if isinstance(v, Formula)]
+def formula_cells(rows: list[list[Any]]) -> list[tuple[int, int, Formula]]:
+    """(wiersz 0-based, kolumna 0-based, formuła) dla komórek typu Formula (w tym Link)."""
+    return [(ri, ci, v) for ri, row in enumerate(rows) for ci, v in enumerate(row) if isinstance(v, Formula)]
 
 
 def extract_spreadsheet_id(value: str) -> str:
@@ -91,13 +91,39 @@ def extract_spreadsheet_id(value: str) -> str:
     return m.group(1) if m else (value or "").strip()
 
 
-def _formula_requests(sheet_id: int, sheet: Sheet) -> list[dict]:
+def _formula_requests(sheet_id: int, sheet: Sheet, tab_ids: dict[str, int] | None = None) -> list[dict]:
+    """updateCells dla komórek-formuł; kolejne wiersze tej samej kolumny idą jednym żądaniem
+    (kolumna „Zakładka” w „Wszystko” to jeden link na wiersz – bez grupowania byłyby tysiące żądań).
+
+    `tab_ids` – nazwa zakładki (casefold) -> sheetId, do linków HYPERLINK(#gid=…). Link do zakładki,
+    której nie ma, zostaje zwykłym tekstem.
+    """
+    tab_ids = tab_ids or {}
+    cells: list[tuple[int, int, dict]] = []
+    for ri, ci, v in formula_cells(sheet.rows):
+        if isinstance(v, Link):
+            gid = tab_ids.get(v.tab.casefold())
+            value = {"formulaValue": v.gsheets_formula(gid)} if gid is not None else {"stringValue": v.text}
+        else:
+            value = {"formulaValue": str(v)}
+        cells.append((ci, ri, value))
+    cells.sort(key=lambda c: (c[0], c[1]))
     reqs: list[dict] = []
-    for ri, ci, formula in formula_cells(sheet.rows):
-        reqs.append({"updateCells": {
-            "rows": [{"values": [{"userEnteredValue": {"formulaValue": formula}}]}],
-            "fields": "userEnteredValue",
-            "start": {"sheetId": sheet_id, "rowIndex": ri, "columnIndex": ci}}})
+    run: list[tuple[int, int, dict]] = []
+
+    def flush() -> None:
+        if run:
+            reqs.append({"updateCells": {
+                "rows": [{"values": [{"userEnteredValue": value}]} for _, _, value in run],
+                "fields": "userEnteredValue",
+                "start": {"sheetId": sheet_id, "rowIndex": run[0][1], "columnIndex": run[0][0]}}})
+            run.clear()
+
+    for cell in cells:
+        if run and (cell[0] != run[-1][0] or cell[1] != run[-1][1] + 1):
+            flush()
+        run.append(cell)
+    flush()
     return reqs
 
 
@@ -211,8 +237,7 @@ def _push(sh, sheets: list[Sheet], reorder: bool, clear_stale: bool, now: dateti
     used: set[str] = {ws.title.lower() for ws in existing.values()}
     written_keys: set[str] = set()
     ordered = []
-    formula_reqs: list[dict] = []
-    format_reqs: list[dict] = []
+    pending: list[tuple[Any, Sheet, int, bool]] = []   # (ws, sheet, liczba wierszy, reset formatów)
     for sheet in sheets:
         ws = existing.get(sheet.name.casefold())
         if ws is not None and ws.title.casefold() in written_keys:
@@ -230,12 +255,18 @@ def _push(sh, sheets: list[Sheet], reorder: bool, clear_stale: bool, now: dateti
             if getattr(ws, "row_count", nrows) < nrows or getattr(ws, "col_count", ncols) < ncols:
                 ws.resize(rows=max(nrows, getattr(ws, "row_count", 0)), cols=max(ncols, getattr(ws, "col_count", 0)))
         ws.update(values=values, range_name="A1", value_input_option="RAW")
-        formula_reqs += _formula_requests(ws.id, sheet)
-        format_reqs += _format_requests(ws.id, sheet, len(values), reset)
+        pending.append((ws, sheet, len(values), reset))
         res.written.append(name)
         written_keys.add(name.casefold())
         ordered.append(ws)
         log.info("Google Sheets: zakładka %s – %d wierszy", name, len(values))
+    # formuły dopiero teraz: linki z „Wszystko” potrzebują sheetId zakładek utworzonych w tej pętli
+    tab_ids = {sheet.name.casefold(): ws.id for ws, sheet, _, _ in pending}
+    formula_reqs: list[dict] = []
+    format_reqs: list[dict] = []
+    for ws, sheet, nvals, reset in pending:
+        formula_reqs += _formula_requests(ws.id, sheet, tab_ids)
+        format_reqs += _format_requests(ws.id, sheet, nvals, reset)
     if formula_reqs:
         try:
             sh.batch_update({"requests": formula_reqs})

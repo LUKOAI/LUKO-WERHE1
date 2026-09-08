@@ -15,7 +15,7 @@ import threading
 from datetime import datetime
 from pathlib import Path
 
-from . import APP_NAME, APP_SLUG, __version__
+from . import APP_NAME, APP_SLUG, AUTHOR, COPYRIGHT_YEAR, SUPPORT_EMAIL, __version__
 from .job import run_job
 
 APP_TITLE = f"{APP_NAME} — faktury Amazon do arkusza"
@@ -53,7 +53,8 @@ def save_config(cfg: dict) -> None:
         pass
 
 
-def open_path(path: Path) -> None:
+def open_path(path: "Path | str") -> None:
+    """Otwiera plik/folder w systemie; działa też dla adresów (mailto:, https://)."""
     try:
         if sys.platform.startswith("win"):
             os.startfile(str(path))  # type: ignore[attr-defined]
@@ -158,6 +159,15 @@ def main() -> int:
     sb = ttk.Scrollbar(frm, command=log_box.yview)
     sb.grid(row=8, column=3, sticky="ns")
     log_box.configure(yscrollcommand=sb.set)
+
+    # stopka: autor, wersja, kontakt do pomocy (adres klikalny – otwiera program pocztowy)
+    foot = ttk.Frame(frm)
+    foot.grid(row=9, column=0, columnspan=4, sticky="ew", pady=(6, 0))
+    ttk.Label(foot, text=f"{APP_NAME} v{__version__}  ·  © {COPYRIGHT_YEAR} {AUTHOR}  ·  pomoc i awarie: ",
+              foreground="#666666").pack(side="left")
+    mail = ttk.Label(foot, text=SUPPORT_EMAIL, foreground="#0563C1", cursor="hand2", font=("TkDefaultFont", 9, "underline"))
+    mail.pack(side="left")
+    mail.bind("<Button-1>", lambda _e: open_path(f"mailto:{SUPPORT_EMAIL}?subject={APP_SLUG} v{__version__}"))
 
     def append_log(text: str) -> None:
         log_box.configure(state="normal")

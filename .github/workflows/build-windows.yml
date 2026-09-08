@@ -7,6 +7,7 @@ on:
       - "amazon_vat_merger/**"
       - "requirements-merger.txt"
       - "assets/**"
+      - "tools/**"
       - ".github/workflows/build-windows.yml"
   workflow_dispatch:
 
@@ -26,15 +27,21 @@ jobs:
         run: |
           pip install pytest
           python -m pytest -q
+      - name: Właściwości plików exe (wersja, autor, kontakt)
+        run: |
+          python tools/make_version_info.py version_gui.txt LUKO-AmaFakt.exe
+          python tools/make_version_info.py version_cli.txt LUKO-AmaFakt-cli.exe "LUKO AmaFakt – wiersz poleceń"
       - name: Budowa LUKO-AmaFakt.exe (okienko)
         run: >
           pyinstaller --noconfirm --clean --onefile --windowed --name LUKO-AmaFakt --paths . --icon assets/icon.ico --add-data "assets/icon.ico;assets" --add-data "assets/icon.png;assets"
+          --version-file version_gui.txt
           --collect-all pdfplumber --collect-all pdfminer --collect-all pypdfium2 --collect-all pypdfium2_raw
           --collect-all openpyxl --collect-all gspread --collect-all google.auth --collect-all charset_normalizer
           amazon_vat_merger/gui_main.py
       - name: Budowa LUKO-AmaFakt-cli.exe (wiersz poleceń)
         run: >
           pyinstaller --noconfirm --clean --onefile --console --name LUKO-AmaFakt-cli --paths . --icon assets/icon.ico
+          --version-file version_cli.txt
           --collect-all pdfplumber --collect-all pdfminer --collect-all pypdfium2 --collect-all pypdfium2_raw
           --collect-all openpyxl --collect-all gspread --collect-all google.auth --collect-all charset_normalizer
           amazon_vat_merger/cli_main.py

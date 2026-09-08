@@ -6,7 +6,7 @@ import re
 from datetime import date
 from pathlib import Path
 
-from .merge import Formula, Sheet
+from .merge import Formula, Link, Sheet
 
 _BAD_SHEET_CHARS = re.compile(r"[\[\]:*?/\\]")
 
@@ -32,16 +32,22 @@ def write_xlsx(path: str | Path, sheets: list[Sheet]) -> Path:
     wb = Workbook()
     wb.remove(wb.active)
     used: set[str] = set()
+    # nazwy zakładek najpierw dla wszystkich – linki z „Wszystko” muszą wskazywać nazwę faktycznie użytą w pliku
+    titles = {sheet.name: safe_sheet_name(sheet.name, used) for sheet in sheets}
     bold = Font(bold=True)
+    link_font = Font(color="0563C1", underline="single")
     fill = PatternFill("solid", fgColor="DDEBF7")
     for sheet in sheets:
-        ws = wb.create_sheet(safe_sheet_name(sheet.name, used))
+        ws = wb.create_sheet(titles[sheet.name])
         for ri, row in enumerate(sheet.rows, start=1):
             for ci, val in enumerate(row, start=1):
                 if val is None:
                     continue
                 cell = ws.cell(row=ri, column=ci)
-                if isinstance(val, Formula):
+                if isinstance(val, Link):
+                    cell.value = Link.excel_formula(titles.get(val.tab, val.tab), val.row, val.text)
+                    cell.font = link_font
+                elif isinstance(val, Formula):
                     cell.value = str(val)
                 elif isinstance(val, date):
                     cell.value = val
