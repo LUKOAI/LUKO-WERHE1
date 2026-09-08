@@ -110,21 +110,22 @@ def push_sheets(
             raise ValueError("podaj ścieżkę do klucza konta serwisowego (--credentials)")
         client = gspread.service_account(filename=credentials_path, http_client=gspread.BackOffHTTPClient)
     sh = client.open_by_key(extract_spreadsheet_id(spreadsheet_id))
-    existing = {ws.title: ws for ws in sh.worksheets()}
+    # Google Sheets nie rozróżnia wielkości liter w nazwach zakładek ("DE oss" == "DE OSS")
+    existing = {ws.title.casefold(): ws for ws in sh.worksheets()}
     used: set[str] = set()
     written: list[str] = []
     ordered = []
     requests: list[dict] = []
     for sheet in sheets:
-        name = safe_sheet_name(sheet.name, used) if sheet.name not in existing else sheet.name
+        ws = existing.get(sheet.name.casefold())
+        name = ws.title if ws is not None else safe_sheet_name(sheet.name, used)
         values = to_sheet_values(sheet.rows)
         nrows = max(len(values) + 5, 20)
         ncols = max((len(r) for r in values), default=1) + 2
-        ws = existing.get(name)
         reset = ws is not None
         if ws is None:
             ws = sh.add_worksheet(title=name, rows=nrows, cols=ncols)
-            existing[name] = ws
+            existing[name.casefold()] = ws
         else:
             ws.clear()
             if getattr(ws, "row_count", nrows) < nrows or getattr(ws, "col_count", ncols) < ncols:

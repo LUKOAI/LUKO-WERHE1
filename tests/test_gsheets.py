@@ -97,3 +97,10 @@ def test_push_sheets_creates_replaces_and_formats_in_one_batch():
     resets = [r for r in reqs if "repeatCell" in r and r["repeatCell"]["fields"] == "userEnteredFormat"]
     assert len(resets) == 1 and resets[0]["repeatCell"]["range"]["sheetId"] == de.id
     assert sh.order == ["Wszystko", "DE OSS", "Arkusz1"]
+
+
+def test_existing_tab_matched_case_insensitively():
+    sh = FakeSpreadsheet(["DE oss"])
+    push_sheets("XYZ", [Sheet(name="DE OSS", rows=[["A"], [1]], header_row=1)], client=FakeClient(sh))
+    titles = [w.title for w in sh.worksheets()]
+    assert titles == ["DE oss"] and sh.worksheets()[0].cleared

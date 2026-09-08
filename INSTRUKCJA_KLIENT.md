@@ -38,8 +38,10 @@ Google ręcznie (patrz punkt 3, krok 8).
    poza firmę, nie wrzucaj do chmury.
 6. Otwórz ten plik w Notatniku i skopiuj wartość pola `client_email`
    (wygląda jak `luko-amafakt@luko-amafakt-123456.iam.gserviceaccount.com`).
-7. Otwórz arkusz Google, do którego mają trafiać wyniki → **Udostępnij** → wklej ten adres
-   → rola **Edytor** → odznacz „Powiadom” → **Wyślij**.
+7. Utwórz w Google Sheets **nowy, pusty arkusz** (np. „Amazon VAT — LUKO AmaFakt”) — program sam
+   założy w nim zakładki. Otwórz go → **Udostępnij** → wklej skopiowany adres → rola **Edytor**
+   → odznacz „Powiadom” → **Wyślij**. (Można też wskazać istniejący arkusz: program nadpisze
+   w nim zakładki o swoich nazwach, np. „DE OSS”, a inne zakładki zostawi bez zmian.)
 8. ID arkusza to fragment adresu strony między `/d/` a `/edit`
    (np. `1LbgN5wfsZG_zPuU25JZ6w7gP2jjrfF9WLRJBemJYm9I`). Zapisz go — wpiszesz go w programie.
 
