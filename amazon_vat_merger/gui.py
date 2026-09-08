@@ -19,6 +19,8 @@ from . import APP_NAME, APP_SLUG, __version__
 from .job import run_job
 
 APP_TITLE = f"{APP_NAME} — faktury Amazon do arkusza"
+LOG_NAME = "luko-amafakt.log"          # dziennik techniczny w folderze wyników (do wysłania przy problemach)
+OLD_APP_SLUGS = ("AmazonVAT",)         # wcześniejsza nazwa programu – ustawienia są przenoszone
 
 
 def config_path() -> Path:
@@ -27,10 +29,20 @@ def config_path() -> Path:
 
 
 def load_config() -> dict:
-    try:
-        return json.loads(config_path().read_text(encoding="utf-8"))
-    except Exception:  # noqa: BLE001
-        return {}
+    """Ustawienia z bieżącej lokalizacji; jeśli ich nie ma – z folderu starej nazwy programu (i przeniesienie)."""
+    current = config_path()
+    candidates = [current] + [current.parent.parent / old / "config.json" for old in OLD_APP_SLUGS]
+    for path in candidates:
+        try:
+            cfg = json.loads(path.read_text(encoding="utf-8"))
+        except Exception:  # noqa: BLE001
+            continue
+        if not isinstance(cfg, dict):
+            continue
+        if path != current:
+            save_config(cfg)
+        return cfg
+    return {}
 
 
 def save_config(cfg: dict) -> None:
@@ -71,9 +83,11 @@ def main() -> int:
     root.title(f"{APP_TITLE}  (v{__version__})")
     try:  # ikona: obok pliku exe (PyInstaller rozpakowuje do sys._MEIPASS) albo w repo (assets/)
         base = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent.parent))
-        ico = base / "assets" / "icon.ico"
-        if ico.exists() and sys.platform.startswith("win"):
-            root.iconbitmap(str(ico))
+        ico, png = base / "assets" / "icon.ico", base / "assets" / "icon.png"
+        if sys.platform.startswith("win") and ico.exists():
+            root.iconbitmap(default=str(ico))      # .ico z klatkami BMP – także dla okien dialogowych
+        elif png.exists():
+            root.iconphoto(True, tk.PhotoImage(file=str(png)))
     except Exception:  # noqa: BLE001
         pass
     root.geometry("860x640")
@@ -165,18 +179,28 @@ def main() -> int:
     def worker(params: dict) -> None:
         handler = _QueueHandler(log_q)
         handler.setFormatter(logging.Formatter("%(levelname)s %(message)s"))
+        handler.setLevel(logging.INFO)
         logger = logging.getLogger("amazon_vat_merger")
         logger.addHandler(handler)
-        logger.setLevel(logging.INFO)
+        logger.setLevel(logging.DEBUG)
+        out_dir = Path(params["out"]) if params["out"] else Path.home() / APP_SLUG / "wyniki"
+        file_handler: logging.Handler | None = None
         try:
+            out_dir.mkdir(parents=True, exist_ok=True)
+            # pełny dziennik (ze szczegółami technicznymi) do pliku w folderze wyników
+            file_handler = logging.FileHandler(out_dir / LOG_NAME, encoding="utf-8")
+            file_handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(name)s %(message)s"))
+            file_handler.setLevel(logging.DEBUG)
+            logger.addHandler(file_handler)
+            logger.info("%s v%s – start", APP_NAME, __version__)
             csvs = [p for p in params["csv"].split(";") if p.strip()]
-            stamp = datetime.now().strftime("%Y%m%d_%H%M")
-            out = Path(params["out"]) / f"amazon_vat_{stamp}.xlsx"
+            stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            out = out_dir / f"amazon_vat_{stamp}.xlsx"
             job = run_job(
                 csv_paths=csvs, pdf_sources=[params["pdf"]] if params["pdf"] else [], out_path=out,
                 rates_file=params["rates"] or None, use_nbp=params["use_nbp"],
                 sheet_id=params["sheet"].strip() or None, credentials=params["cred"] or None,
-                json_dump=Path(params["out"]) / "faktury.json",
+                json_dump=out_dir / "faktury.json",
             )
             log_q.put("GOTOWE: " + job.summary)
             log_q.put(f"Plik: {job.xlsx_path}")
@@ -184,12 +208,27 @@ def main() -> int:
             if diag:
                 log_q.put(f"Brak PDF dla {len(diag)} transakcji – lista w zakładce Diagnostyka.")
             state["last_out"] = job.xlsx_path
-            root.after(0, lambda: (open_btn.configure(state="normal"), status.configure(text="Zakończono")))
+            if job.push_error:
+                log_q.put("UWAGA: arkusz Google NIE został zaktualizowany (powód wyżej). "
+                          "Plik Excel jest gotowy – przycisk „Otwórz wynik”.")
+                final = "Zakończono – błąd Google Sheets"
+            else:
+                final = "Zakończono"
+            root.after(0, lambda: (open_btn.configure(state="normal"), status.configure(text=final)))
         except Exception as exc:  # noqa: BLE001
-            log_q.put(f"BŁĄD: {exc}")
+            msg = str(exc).strip() or type(exc).__name__
+            if not isinstance(exc, (ValueError, PermissionError, RuntimeError)):
+                msg = f"{type(exc).__name__}: {msg}"
+            log_q.put(f"BŁĄD: {msg}")
+            logger.debug("szczegóły błędu", exc_info=True)   # tylko do pliku dziennika
+            if file_handler is not None:
+                log_q.put(f"Szczegóły techniczne: {out_dir / LOG_NAME} (ten plik można wysłać do pomocy).")
             root.after(0, lambda: status.configure(text="Błąd – patrz dziennik"))
         finally:
             logger.removeHandler(handler)
+            if file_handler is not None:
+                logger.removeHandler(file_handler)
+                file_handler.close()
             state["running"] = False
             root.after(0, lambda: run_btn.configure(state="normal"))
 
@@ -216,7 +255,17 @@ def main() -> int:
 
     run_btn.configure(command=on_run)
     open_btn.configure(command=lambda: state["last_out"] and open_path(state["last_out"]))
-    root.protocol("WM_DELETE_WINDOW", lambda: (save_config(current_cfg()), root.destroy()))
+    def on_close() -> None:
+        if state["running"] and not messagebox.askyesno(
+            APP_TITLE,
+            "Przetwarzanie jeszcze trwa. Zamknąć mimo to?\n\n"
+            "Plik wynikowy może być niekompletny, a arkusz Google zaktualizowany tylko częściowo.",
+        ):
+            return
+        save_config(current_cfg())
+        root.destroy()
+
+    root.protocol("WM_DELETE_WINDOW", on_close)
     poll_log()
     root.mainloop()
     return 0

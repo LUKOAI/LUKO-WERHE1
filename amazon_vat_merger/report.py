@@ -206,14 +206,17 @@ def classify(tx: Transaction) -> str:
     return "Lokalna"
 
 
+UNKNOWN_COUNTRY = "XX"   # bez znaków zabronionych w nazwach zakładek ("?" jest zabroniony w Excelu)
+
+
 def tab_country(tx: Transaction) -> str:
     if tx.category == "OSS":
-        return tx.ship_to_country or "??"
+        return tx.ship_to_country or UNKNOWN_COUNTRY
     return (
         tx.seller_jurisdiction
         or L.JURISDICTION_TO_ISO.get((tx.jurisdiction_name or "").upper(), "")
         or tx.ship_from_country
-        or "??"
+        or UNKNOWN_COUNTRY
     )
 
 

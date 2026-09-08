@@ -1,6 +1,12 @@
-from datetime import date
+import json
+import logging
+from datetime import date, datetime
 
-from amazon_vat_merger.gsheets import extract_spreadsheet_id, push_sheets, to_sheet_values
+import pytest
+
+from amazon_vat_merger.gsheets import (
+    GoogleSheetsError, extract_spreadsheet_id, push_sheets, to_sheet_values,
+)
 from amazon_vat_merger.merge import Formula, Sheet
 
 
@@ -30,10 +36,11 @@ class FakeWs:
 
 
 class FakeSpreadsheet:
-    def __init__(self, titles):
+    def __init__(self, titles, fail_batches=()):
         self._ws = [FakeWs(t) for t in titles]
         self.order = None
         self.batches = []
+        self.fail_batches = set(fail_batches)   # numery (0-based) wywołań batch_update, które mają rzucić
 
     def worksheets(self):
         return list(self._ws)
@@ -44,7 +51,10 @@ class FakeSpreadsheet:
         return ws
 
     def batch_update(self, body):
+        idx = len(self.batches)
         self.batches.append(body)
+        if idx in self.fail_batches:
+            raise RuntimeError(f"APIError: [500]: symulowany błąd batch #{idx}")
 
     def reorder_worksheets(self, ws_list):
         self.order = [w.title for w in ws_list]
@@ -64,6 +74,8 @@ def test_to_sheet_values_raw_mode():
     rows = [[None, date(2026, 8, 1), 1.5, Formula("=SUM(A1:A2)"), "=nie formuła", True, "tekst", "", "01234"]]
     assert to_sheet_values(rows) == [["", 46235, 1.5, "", "=nie formuła", "TAK", "tekst", "", "01234"]]
     assert formula_cells(rows) == [(0, 3, "=SUM(A1:A2)")]
+    # datetime (podklasa date) też przechodzi – bez TypeError na odejmowaniu
+    assert to_sheet_values([[datetime(2026, 8, 1, 13, 45)]]) == [[46235]]
     # 1899-12-30 + 46235 dni == 2026-08-01
     from datetime import timedelta
     assert date(1899, 12, 30) + timedelta(days=46235) == date(2026, 8, 1)
@@ -75,7 +87,7 @@ def test_extract_id():
     assert extract_spreadsheet_id("abc") == "abc"
 
 
-def test_push_sheets_creates_replaces_and_formats_in_one_batch():
+def test_push_sheets_creates_replaces_formulas_then_formatting():
     sh = FakeSpreadsheet(["Arkusz1", "DE OSS"])
     small = next(w for w in sh.worksheets() if w.title == "DE OSS")
     small.row_count, small.col_count = 3, 1
@@ -84,27 +96,104 @@ def test_push_sheets_creates_replaces_and_formats_in_one_batch():
         Sheet(name="Wszystko", rows=[["A", "B"], [1, date(2026, 1, 2)]], header_row=1, money_cols=[1], date_cols=[2]),
         Sheet(name="DE OSS", rows=[["Niemcy", "OSS"], ["A", "B"], [2, None], ["RAZEM", Formula("=SUM(B3:B3)")]], header_row=2, money_cols=[2]),
     ]
-    written = push_sheets("https://docs.google.com/spreadsheets/d/XYZ/edit", sheets, client=client)
-    assert written == ["Wszystko", "DE OSS"] and client.key == "XYZ"
+    res = push_sheets("https://docs.google.com/spreadsheets/d/XYZ/edit", sheets, client=client)
+    assert res.written == ["Wszystko", "DE OSS"] and client.key == "XYZ"
+    assert res.cleared_stale == [] and res.formatting_error is None
     titles = [w.title for w in sh.worksheets()]
     assert titles == ["Arkusz1", "DE OSS", "Wszystko"]
     de = next(w for w in sh.worksheets() if w.title == "DE OSS")
     assert de.cleared and de.values[3] == ["RAZEM", ""] and de.opt == "RAW"
     assert de.resized is not None  # istniejąca zakładka była za mała
-    # formuły i całe formatowanie w jednym batch_update
-    assert len(sh.batches) == 1
-    reqs = sh.batches[0]["requests"]
+    # batch 1: tylko formuły (krytyczny), batch 2: całe formatowanie (niekrytyczny)
+    assert len(sh.batches) == 2
+    formulas = sh.batches[0]["requests"]
+    assert [list(r)[0] for r in formulas] == ["updateCells"]
+    assert formulas[0]["updateCells"]["start"] == {"sheetId": de.id, "rowIndex": 3, "columnIndex": 1}
+    assert formulas[0]["updateCells"]["rows"][0]["values"][0]["userEnteredValue"]["formulaValue"] == "=SUM(B3:B3)"
+    reqs = sh.batches[1]["requests"]
     kinds = [list(r)[0] for r in reqs]
+    assert "updateCells" not in kinds
     assert kinds.count("updateSheetProperties") == 2 and "repeatCell" in kinds
-    formulas = [r["updateCells"] for r in reqs if "updateCells" in r]
-    assert len(formulas) == 1 and formulas[0]["start"] == {"sheetId": de.id, "rowIndex": 3, "columnIndex": 1}
-    assert formulas[0]["rows"][0]["values"][0]["userEnteredValue"]["formulaValue"] == "=SUM(B3:B3)"
     frozen = [r["updateSheetProperties"]["properties"]["gridProperties"]["frozenRowCount"] for r in reqs if "updateSheetProperties" in r]
     assert sorted(frozen) == [1, 2]
     # reset formatów tylko dla istniejącej zakładki
     resets = [r for r in reqs if "repeatCell" in r and r["repeatCell"]["fields"] == "userEnteredFormat"]
     assert len(resets) == 1 and resets[0]["repeatCell"]["range"]["sheetId"] == de.id
     assert sh.order == ["Wszystko", "DE OSS", "Arkusz1"]
+
+
+def _razem_sheet(name="DE OSS"):
+    return Sheet(name=name, rows=[["Niemcy", "OSS"], ["A", "B"], [2, 1.5], ["RAZEM", Formula("=SUM(B3:B3)")]],
+                 header_row=2, money_cols=[2], pct_cols=[1])
+
+
+def test_formula_batch_failure_is_an_error():
+    sh = FakeSpreadsheet([], fail_batches=[0])
+    with pytest.raises(GoogleSheetsError) as ei:
+        push_sheets("XYZ", [_razem_sheet()], client=FakeClient(sh))
+    assert "RAZEM" in str(ei.value) and "symulowany" in str(ei.value)
+
+
+def test_formatting_batch_failure_only_warns(caplog):
+    sh = FakeSpreadsheet([], fail_batches=[1])
+    with caplog.at_level(logging.WARNING, logger="amazon_vat_merger.gsheets"):
+        res = push_sheets("XYZ", [_razem_sheet()], client=FakeClient(sh))
+    assert res.written == ["DE OSS"] and res.formatting_error and "symulowany" in res.formatting_error
+    assert "dane i sumy zapisane" in caplog.text
+    pct = [r for r in sh.batches[1]["requests"] if "repeatCell" in r
+           and r["repeatCell"]["cell"].get("userEnteredFormat", {}).get("numberFormat", {}).get("type") == "PERCENT"]
+    assert pct and pct[0]["repeatCell"]["cell"]["userEnteredFormat"]["numberFormat"]["pattern"] == "0.0%"
+
+
+def test_stale_own_tabs_are_cleared_with_note_others_untouched():
+    sh = FakeSpreadsheet(["Notatki księgowej", "DE OSS KOREKTA", "fr lokalna", "FR Lokalna KOREKTA"])
+    res = push_sheets("XYZ", [Sheet(name="Wszystko", rows=[["A"], [1]], header_row=1),
+                              Sheet(name="FR Lokalna", rows=[["A"], [1]], header_row=1)],
+                      client=FakeClient(sh), now=datetime(2026, 9, 8, 12, 0))
+    assert res.written == ["Wszystko", "fr lokalna"]
+    assert res.cleared_stale == ["DE OSS KOREKTA", "FR Lokalna KOREKTA"]
+    by = {w.title: w for w in sh.worksheets()}
+    assert by["DE OSS KOREKTA"].cleared and by["DE OSS KOREKTA"].opt == "RAW"
+    assert by["DE OSS KOREKTA"].values[0][0].startswith("Brak transakcji") and "2026-09-08 12:00" in by["DE OSS KOREKTA"].values[0][0]
+    assert not by["Notatki księgowej"].cleared and by["Notatki księgowej"].values is None
+    assert by["fr lokalna"].values == [["A"], [1]]
+
+
+def test_same_run_name_collision_gets_suffix_instead_of_overwrite():
+    sh = FakeSpreadsheet(["Arkusz1"])
+    res = push_sheets("XYZ", [Sheet(name="DE OSS", rows=[["a"]], header_row=1),
+                              Sheet(name="de OSS", rows=[["b"]], header_row=1)], client=FakeClient(sh))
+    assert res.written == ["DE OSS", "de OSS (2)"]
+    by = {w.title: w for w in sh.worksheets()}
+    assert by["DE OSS"].values == [["a"]] and by["de OSS (2)"].values == [["b"]]
+
+
+class _Raising:
+    def __init__(self, exc):
+        self.exc = exc
+
+    def open_by_key(self, key):
+        raise self.exc
+
+
+class SpreadsheetNotFound(Exception):
+    pass
+
+
+def test_open_errors_are_translated(tmp_path):
+    key = tmp_path / "klucz.json"
+    key.write_text(json.dumps({"client_email": "luko-amafakt@projekt.iam.gserviceaccount.com"}), encoding="utf-8")
+    with pytest.raises(GoogleSheetsError) as ei:
+        push_sheets("ABC123", [], credentials_path=str(key), client=_Raising(PermissionError()))
+    assert "ABC123" in str(ei.value) and "luko-amafakt@projekt.iam.gserviceaccount.com" in str(ei.value)
+    with pytest.raises(GoogleSheetsError) as ei:
+        push_sheets("ABC123", [], client=_Raising(SpreadsheetNotFound("<Response [404]>")))
+    assert "nie znaleziono arkusza" in str(ei.value) and "ABC123" in str(ei.value)
+    api_disabled = PermissionError()
+    api_disabled.__cause__ = RuntimeError("APIError: [403]: Google Sheets API has not been used in project 1 before or it is disabled")
+    with pytest.raises(GoogleSheetsError) as ei:
+        push_sheets("ABC123", [], client=_Raising(api_disabled))
+    assert "API nie jest włączone" in str(ei.value)
 
 
 def test_existing_tab_matched_case_insensitively():

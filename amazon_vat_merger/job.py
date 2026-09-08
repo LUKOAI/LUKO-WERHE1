@@ -22,6 +22,8 @@ class JobResult:
     result: MergeResult
     sheets: list[str]
     pushed_tabs: list[str] = field(default_factory=list)
+    cleared_tabs: list[str] = field(default_factory=list)   # nieaktualne zakładki wyczyszczone w Google Sheets
+    push_error: str | None = None                            # wysyłka do Google nie powiodła się (xlsx jest)
     nbp_error: str | None = None
 
     @property
@@ -31,6 +33,11 @@ class JobResult:
              f"bez PDF: {r.missing} | PDF bez CSV: {len(r.unmatched_invoices)} | zakładki: {len(self.sheets)}")
         if self.pushed_tabs:
             s += f" | Google Sheets: zapisano {len(self.pushed_tabs)} zakładek"
+            if self.cleared_tabs:
+                s += f" (wyczyszczono nieaktualne: {', '.join(self.cleared_tabs)})"
+        if self.push_error:
+            s += (f" | BŁĄD Google Sheets: {self.push_error} – plik Excel jest zapisany, "
+                  f"można go zaimportować ręcznie")
         if self.nbp_error:
             s += f" | UWAGA: API NBP niedostępne ({self.nbp_error}) – kolumny PLN bez kursu"
         return s
@@ -69,10 +76,19 @@ def run_job(
         Path(json_dump).parent.mkdir(parents=True, exist_ok=True)
         Path(json_dump).write_text(json.dumps([i.to_dict() for i in invoices], ensure_ascii=False, indent=1), encoding="utf-8")
     pushed: list[str] = []
+    cleared: list[str] = []
+    push_error: str | None = None
     if sheet_id:
         from .gsheets import push_sheets
 
-        pushed = push_sheets(sheet_id, sheets, credentials_path=str(credentials) if credentials else None)
-        log.info("Google Sheets: zapisano zakładki: %s", ", ".join(pushed))
+        try:
+            pr = push_sheets(sheet_id, sheets, credentials_path=str(credentials) if credentials else None)
+            pushed, cleared = pr.written, pr.cleared_stale
+            log.info("Google Sheets: zapisano zakładki: %s", ", ".join(pushed))
+        except Exception as exc:  # noqa: BLE001 – xlsx już jest, błąd Google zgłaszamy w wyniku
+            push_error = str(exc).strip() or type(exc).__name__
+            log.error("Google Sheets: %s", push_error)
+            log.debug("szczegóły błędu Google Sheets", exc_info=True)
     nbp_error = None if (rates.nbp_available or not use_nbp) else (rates.last_error or "błąd połączenia")
-    return JobResult(xlsx_path=out, result=result, sheets=[s.name for s in sheets], pushed_tabs=pushed, nbp_error=nbp_error)
+    return JobResult(xlsx_path=out, result=result, sheets=[s.name for s in sheets], pushed_tabs=pushed,
+                     cleared_tabs=cleared, push_error=push_error, nbp_error=nbp_error)

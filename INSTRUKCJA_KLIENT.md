@@ -92,6 +92,16 @@ Rutyna na koniec miesiąca (ok. 10 minut):
 Zakładki krajów: sprzedaż i korekty są rozdzielone, np. `DE OSS` (faktury) i `DE OSS KOREKTA`
 (zwroty i noty kredytowe, kwoty ujemne).
 
+Zakładka z poprzedniego miesiąca, dla której w tym miesiącu nie ma transakcji (np. `DE OSS KOREKTA`
+bez korekt), nie znika — program ją czyści i wpisuje w pierwszej komórce notatkę „Brak transakcji
+tego typu w ostatnim uruchomieniu …”. Dzięki temu stare dane nie udają aktualnych. Własnych
+zakładek o innych nazwach program nie rusza.
+
+Jeśli status po prawej od przycisków brzmi **„Zakończono – błąd Google Sheets”**: plik Excel jest
+gotowy (**Otwórz wynik**), ale arkusz Google nie został zaktualizowany — powód jest w dzienniku,
+np. „udostępnij arkusz adresowi …” (arkusz nie jest udostępniony kontu serwisowemu) albo
+„nie znaleziono arkusza o ID …” (błędne ID). Popraw i kliknij **Uruchom** ponownie.
+
 ## 4. Co sprawdzić po uruchomieniu
 
 * Zakładka **Diagnostyka** — lista rzeczy do wyjaśnienia: transakcje bez faktury PDF (trzeba
@@ -103,6 +113,19 @@ Zakładki krajów: sprzedaż i korekty są rozdzielone, np. `DE OSS` (faktury) i
 
 ## 5. Co zrobić, gdy coś nie działa
 
-Wyślij do opiekuna narzędzia: treść dziennika z okna programu (zaznacz → Ctrl+C) oraz plik
-`faktury.json` z folderu wyników (zawiera to, co program odczytał z PDF-ów). Nie trzeba
-wysyłać faktur.
+Wyślij do opiekuna narzędzia: plik `luko-amafakt.log` z folderu wyników (pełny dziennik ze
+szczegółami technicznymi z każdego uruchomienia) oraz plik `faktury.json` z tego samego folderu
+(zawiera to, co program odczytał z PDF-ów). Nie trzeba wysyłać faktur ani raportu.
+
+Typowe komunikaty w dzienniku:
+
+* **„udostępnij arkusz adresowi …@….iam.gserviceaccount.com jako Edytor”** — arkusz Google nie
+  jest udostępniony kontu serwisowemu (punkt 1a, krok 7).
+* **„nie znaleziono arkusza o ID …”** — w polu *ID arkusza Google* jest błędny ciąg; skopiuj go
+  z adresu arkusza (między `/d/` a `/edit`).
+* **„Google Sheets API nie jest włączone …”** — w projekcie Google Cloud trzeba włączyć Sheets API
+  (punkt 1a, krok 3).
+* **„plik jest otwarty w innym programie (Excel)?”** — zamknij poprzedni wynik w Excelu i uruchom
+  ponownie.
+* Zamknięcie okna w trakcie przetwarzania program potwierdza pytaniem — lepiej poczekać na
+  komunikat `GOTOWE`.

@@ -157,8 +157,20 @@ pozostają w firmie klienta; opiekun narzędzia nie ma dostępu do danych (kroki
 Każde uruchomienie nadpisuje zakładki o tych samych nazwach (wartości i formaty), inne zakładki
 zostają. Wartości idą w trybie RAW: tekst jest tekstem bez żadnego prefiksu (kody pocztowe `01234`,
 numery zamówień i SKU nie zamieniają się w liczby), daty jako numery seryjne z formatem daty,
-kwoty jako liczby z formatem `#,##0.00`, formuły RAZEM wpisywane przez `batchUpdate`. Formatowanie
-i formuły idą jednym `batch_update`, klient ma backoff na limit 60 zapisów/min.
+kwoty jako liczby z formatem `#,##0.00`, stawki VAT `0.0%` (5,5 % nie zaokrągla się do 6 %).
+Formuły RAZEM idą osobnym `batch_update` – jego błąd jest zgłaszany jako błąd zapisu
+(`GoogleSheetsError`); formatowanie idzie drugim, niekrytycznym `batch_update` (tylko ostrzeżenie).
+Klient ma backoff na limit 60 zapisów/min.
+
+Zakładki własnego wzoru (`DE OSS`, `FR Lokalna KOREKTA` …; kod kraju + kategoria, ewentualnie KOREKTA), które istnieją w arkuszu, a nie
+zostały zapisane w tym uruchomieniu, są czyszczone i dostają notatkę „Brak transakcji tego typu
+w ostatnim uruchomieniu …” – korekty pojawiają się nieregularnie i stara zakładka nie może
+udawać aktualnej. Zakładki o innych nazwach nie są ruszane.
+
+Błąd po stronie Google (arkusz nieudostępniony kontu serwisowemu, złe ID, wyłączone API, brak
+sieci) nie przerywa pracy: plik `.xlsx` jest już zapisany, `JobResult.push_error` niesie polski
+komunikat z ID arkusza i adresem konta serwisowego, CLI kończy się kodem 3, okienko pokazuje
+status „Zakończono – błąd Google Sheets”.
 
 Bez konta serwisowego: otwórz Google Sheets → **Plik → Importuj → Prześlij** plik `.xlsx` –
 wszystkie zakładki, formuły `RAZEM` i formaty wchodzą 1:1.

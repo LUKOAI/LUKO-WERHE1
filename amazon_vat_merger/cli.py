@@ -48,6 +48,8 @@ def main(argv: list[str] | None = None) -> int:
         print(f"json: {args.json}")
     if job.pushed_tabs:
         print(f"Google Sheets: zapisano zakładki: {', '.join(job.pushed_tabs)}")
+    if job.cleared_tabs:
+        print(f"Google Sheets: wyczyszczono nieaktualne zakładki: {', '.join(job.cleared_tabs)}")
     r = job.result
     print(
         f"transakcje: {len(r.rows)} | PDF: {len(r.invoices)} | dopasowane: {r.matched} | "
@@ -56,6 +58,9 @@ def main(argv: list[str] | None = None) -> int:
     )
     if job.nbp_error:
         print(f"UWAGA: API NBP niedostępne ({job.nbp_error}) – kolumny PLN bez kursu; użyj --rates-file")
+    if job.push_error:
+        print(f"BŁĄD Google Sheets: {job.push_error}", file=sys.stderr)
+        return 3
     return 0
 
 

@@ -294,6 +294,7 @@ COUNTRY_PL = {
     "ES": "Hiszpania", "SE": "Szwecja", "GB": "Wielka Brytania", "UK": "Wielka Brytania",
     "CH": "Szwajcaria", "NO": "Norwegia", "US": "USA", "TR": "Turcja", "MC": "Monako",
     "LI": "Liechtenstein", "IS": "Islandia",
+    "XX": "Kraj nieustalony",
 }
 
 # nazwy jurysdykcji z CSV (Jurisdiction Name) -> kod ISO

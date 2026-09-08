@@ -1,6 +1,7 @@
 """Zapis arkuszy do pliku .xlsx (openpyxl)."""
 from __future__ import annotations
 
+import os
 import re
 from datetime import date
 from pathlib import Path
@@ -53,7 +54,7 @@ def write_xlsx(path: str | Path, sheets: list[Sheet]) -> Path:
                     if ci in sheet.money_cols and isinstance(val, (int, float, Formula)):
                         cell.number_format = "#,##0.00"
                     elif ci in sheet.pct_cols and isinstance(val, (int, float)):
-                        cell.number_format = "0%"
+                        cell.number_format = "0.0%"   # stawki obniżone (5,5 %, 13,5 %) nie mogą się zaokrąglać
         # nagłówek
         fill_extra = PatternFill("solid", fgColor="EDEDED")
         for ci in range(1, len(sheet.rows[sheet.header_row - 1]) + 1 if sheet.rows else 1):
@@ -81,5 +82,16 @@ def write_xlsx(path: str | Path, sheets: list[Sheet]) -> Path:
         ws.auto_filter.ref = f"A{sheet.header_row}:{get_column_letter(max(ncols, 1))}{max(filter_last, sheet.header_row)}"
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    wb.save(str(path))
+    # zapis do pliku tymczasowego i podmiana – przerwany zapis nie zostawia uszkodzonego pliku pod docelową nazwą
+    tmp = path.with_name(path.name + ".tmp")
+    try:
+        wb.save(str(tmp))
+        os.replace(tmp, path)
+    except PermissionError as exc:
+        raise PermissionError(
+            f"nie można zapisać {path} – plik jest otwarty w innym programie (Excel)? "
+            f"Zamknij go i uruchom ponownie. ({exc})") from exc
+    finally:
+        if tmp.exists():
+            tmp.unlink(missing_ok=True)
     return path
