@@ -98,6 +98,26 @@ def open_login(site: str, config: AppConfig, on_done: Callable[[], None] | None 
         on_done()
 
 
+class BrowserDeadError(RuntimeError):
+    """Przegladarka/kontekst Playwright padla lub zostala zamknieta.
+
+    Celowo NIE jest polykana w capture()/capture_cropped()/pobieraniu faktur —
+    pipeline lapie ja, otwiera przegladarke ponownie i ponawia zamowienie.
+    """
+
+
+_DEAD_MARKERS = ("has been closed", "target closed", "browser closed", "page closed",
+                 "connection closed", "disconnected", "not open")
+
+
+def is_browser_dead(exc: BaseException) -> bool:
+    """Czy wyjatek Playwright oznacza padnieta/zamknieta przegladarke."""
+    if type(exc).__name__ == "TargetClosedError":
+        return True
+    msg = str(exc).lower()
+    return any(k in msg for k in _DEAD_MARKERS)
+
+
 def has_session(config: AppConfig, site: str) -> bool:
     """Sprawdza czy istnieje zapisany profil dla serwisu (czy logowano sie wczesniej)."""
     profile = Path(config.browser_profiles_dir) / site
@@ -119,9 +139,18 @@ class CaptureSession:
         self.headless = headless
         self._pw = None
         self._context = None
-        # True gdy serwis zazadal logowania i nikt go nie przeszedl w 5 min —
-        # kolejne zamowienia nie czekaja juz po 5 min kazde, tylko sa pomijane.
-        self.login_blocked = False
+        # Hosty (np. sellercentral-europe.amazon.com), dla ktorych serwis zazadal
+        # logowania i nikt go nie przeszedl w 5 min. Jedna sesja Amazon obsluguje
+        # panel EU i USA — wygasle USA nie moze blokowac zamowien EU (i odwrotnie).
+        self.login_blocked_hosts: set[str] = set()
+
+    @property
+    def login_blocked(self) -> bool:
+        return bool(self.login_blocked_hosts)
+
+    def is_host_blocked(self, url: str) -> bool:
+        from urllib.parse import urlparse
+        return urlparse(url).netloc.lower() in self.login_blocked_hosts
 
     def __enter__(self) -> "CaptureSession":
         profile = _profile_dir(self.config, self.site)
@@ -213,6 +242,8 @@ class CaptureSession:
             page.screenshot(path=str(output_path), full_page=True)
             return output_path
         except Exception as exc:
+            if is_browser_dead(exc):
+                raise BrowserDeadError(str(exc)) from exc  # pipeline otworzy przegladarke ponownie
             log(f"Screenshot nie powiodl sie: {str(exc)[:160]}")
             return None
         finally:
@@ -305,6 +336,8 @@ class CaptureSession:
                     pass
                 return output_path if output_path.exists() else None
         except Exception as exc:
+            if is_browser_dead(exc):
+                raise BrowserDeadError(str(exc)) from exc  # pipeline otworzy przegladarke ponownie
             log(f"Apilo: screenshot nie powiodl sie: {str(exc)[:160]}")
             return None
         finally:
@@ -335,8 +368,10 @@ class CaptureSession:
         if not looks_like_login():
             return True
 
-        if self.login_blocked:
-            log("Sesja wymaga zalogowania (nie przeszlo w 5 min) — pomijam.")
+        from urllib.parse import urlparse
+        host = urlparse(target_url).netloc.lower()
+        if host in self.login_blocked_hosts:
+            log(f"Sesja {host} wymaga zalogowania (nie przeszlo w 5 min) — pomijam.")
             return False
 
         log("UWAGA: serwis prosi o logowanie/kod 2FA. Wpisz dane w OTWARTYM oknie przegladarki...")
@@ -353,9 +388,10 @@ class CaptureSession:
                 except Exception:
                     pass
                 return True
-        self.login_blocked = True
-        log("Limit czasu logowania (5 min) minal — sesja wygasla. Kliknij 'Zaloguj do ...'"
-            " w programie, zaloguj sie i uruchom ponownie brakujace zamowienia.")
+        self.login_blocked_hosts.add(host)
+        log(f"Limit czasu logowania (5 min) minal — sesja wygasla i nie zalogowano ({host})."
+            " Kliknij 'Zaloguj do ...' w programie, zaloguj sie i uruchom ponownie"
+            " brakujace zamowienia (lista w _RAPORT_BRAKOW).")
         return False
 
     def __exit__(self, *exc) -> None:

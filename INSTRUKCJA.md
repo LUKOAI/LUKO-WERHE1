@@ -114,7 +114,9 @@ angielski** (program tego wymaga do rozpoznawania przycisków).
 6. Jeśli pojawi się komunikat `UWAGA: serwis prosi o logowanie/kod 2FA` —
    wpisz dane/kod w otwartym oknie przeglądarki; program poczeka (do 5 minut)
    i sam pojedzie dalej.
-7. Na końcu: `Gotowe. OK: X, błędy: Y` i ścieżka do wyników.
+7. Na końcu: `Gotowe. Kompletne (DO_WYDRUKU): X, niekompletne (DO_KONTROLI): Y,
+   pominiete: Z, bledy: W. Katalog: ...` — ta sama linia pojawia się w okienku
+   „Zakonczone" razem ze ścieżką do logu tego uruchomienia.
 
 Pełny miesiąc trwa zwykle **1–2 godziny** (program celowo zwalnia zapytania
 do Apilo — limit API 150/min — oraz robi przerwy między stronami Amazona).
@@ -145,6 +147,9 @@ Zasada: zamówienie ma **komplet** (wszystkie wymagane zrzuty **i** fakturę PL)
 `_NIEKOMPLETNY.pdf` + `BRAKI.txt` w `DO_KONTROLI\{numer}\`.
 
 - **DO_WYDRUKU** — zaznacz wszystkie pliki → drukuj. Nic więcej nie trzeba sprawdzać.
+  `podsumowanie.pdf/.xlsx` obejmuje **wszystkie** zamówienia obecne w DO_WYDRUKU
+  (także z poprzednich uruchomień w tym miesiącu) — powtórka dla kilku numerów
+  nie psuje podsumowania całego miesiąca.
 - **DO_KONTROLI** — otwórz `_RAPORT_BRAKOW_*.txt`: jest tam lista wszystkich
   zamówień z brakami i powód. Na końcu raportu jest gotowa linia z numerami do
   wklejenia w pole „Numery Apilo" — po naprawieniu przyczyny (np. ponowne
@@ -167,6 +172,7 @@ zamówienia z zakresu dat.
 | Typ | Dowód w PDF |
 |---|---|
 | Wysyłka własna, **dostarczona** | zrzut trackingu kuriera (UPS/DPD/Poczta) + faktura |
+| Wysyłka własna, dostarczona, ale **kurier nierozpoznany** (brak linku do śledzenia) | jak niedostarczona: zrzut Amazon + zrzut Apilo + faktura |
 | Wysyłka własna, **niedostarczona** | zrzut Amazon + zrzut Apilo + faktura |
 | **FBA** | zrzut Amazon + zrzut Apilo + faktury PL z Amazona |
 | FBA **bez faktury PL** (np. wysyłka z magazynu FR/IT) | POMINIĘTE (zgodnie z ustaleniem) |
@@ -176,11 +182,12 @@ zamówienia z zakresu dat.
 
 | Komunikat | Znaczenie / co robić |
 |---|---|
-| `Log tego uruchomienia: ...logs\run_2026-09-14_14-05.log` | tu jest pełny log tego runa — ten plik wysyłasz przy problemie |
+| `Log tego uruchomienia: ...logs\run_2026-09-14_14-05-12.log` | tu jest pełny log tego runa — ten plik wysyłasz przy problemie |
 | `Limit zapytan Apilo: 130/min` | OK — ochrona przed limitem API |
 | `Rate limit (429) — czekam ...` | OK — program sam czeka i ponawia |
 | `UWAGA: serwis prosi o logowanie/kod 2FA` | wpisz dane w otwartym oknie (masz 5 min) |
-| `sesja wygasla i nie zalogowano — pozostale zamowienia bez dowodow` | nikt nie zalogował się w 5 min; te zamówienia trafią do DO_KONTROLI — zaloguj się przyciskiem w programie i uruchom je ponownie z raportu |
+| `Limit czasu logowania (5 min) minal — sesja wygasla i nie zalogowano (...)` | nikt nie zalogował się w 5 min; zamówienia z tego panelu trafią do DO_KONTROLI — zaloguj się przyciskiem w programie i uruchom je ponownie z raportu (Amazon EU i USA to osobne panele — wygaśnięcie jednego nie blokuje drugiego) |
+| `sesja wygasla i nie zalogowano — pozostale zamowienia bez dowodow` | jw. — pozostałe zamówienia z tego panelu są pomijane bez czekania |
 | `Przegladarka ... padla/zostala zamknieta — otwieram ponownie` | OK — program sam wznawia (nie zamykaj okien przeglądarki!) |
 | `pobrano fakture ... (78 KB)` | OK — faktura ściągnięta |
 | `[D ...] OK` | komplet → DO_WYDRUKU |
@@ -217,8 +224,8 @@ jest w raporcie braków). Program czyści stare pliki tego zamówienia i robi je
 od nowa; kompletny PDF trafi do DO_WYDRUKU.
 
 **Gdzie są logi?** W folderze programu, podfolder `logs\`:
-- `run_2026-09-14_14-05.log` — osobny plik na każde uruchomienie (data_godzina
-  w nazwie) — **ten wysyłasz przy zgłoszeniu**,
+- `run_2026-09-14_14-05-12.log` — osobny plik na każde uruchomienie
+  (data_godzina-minuta-sekunda w nazwie) — **ten wysyłasz przy zgłoszeniu**,
 - `app.log` — wszystko od początku, w jednym pliku.
 
 **Coś innego** — zbierz: (1) plik `logs\run_...log` z tego uruchomienia,

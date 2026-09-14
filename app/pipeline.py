@@ -17,9 +17,10 @@ from app.tracking_capture import capture_tracking_screenshot
 from app.browser_session import CaptureSession, has_session
 from app.amazon_capture import (
     build_amazon_order_url, download_amazon_pl_invoices, NA_COUNTRIES,
-    is_amazon_order_number,
+    is_amazon_order_number, _is_valid_pdf,
 )
 from app.apilo_panel_capture import build_apilo_order_url
+from app.browser_session import BrowserDeadError, is_browser_dead
 
 
 ProgressCallback = Callable[[int, int], None]
@@ -88,11 +89,7 @@ class DocumentPipeline:
     @staticmethod
     def _browser_dead(exc: Exception) -> bool:
         """Czy wyjatek oznacza, ze przegladarka padla / zostala zamknieta."""
-        msg = str(exc).lower()
-        return any(k in msg for k in (
-            "has been closed", "browser has been closed", "target closed",
-            "connection closed", "disconnected", "not open", "closed",
-        ))
+        return isinstance(exc, BrowserDeadError) or is_browser_dead(exc)
 
     def _restart_session(self, old, site: str, log):
         """Zamyka padnieta sesje i otwiera nowa. Zwraca nowa sesje lub None."""
@@ -125,9 +122,17 @@ class DocumentPipeline:
                 continue
             fname = f"faktura_{self._safe_filename(number)}.pdf"
             out = self.client.download_document_file(doc, folder / fname, order_id=order.order_id)
-            if out:
+            if out and _is_valid_pdf(out):
                 log(f"[D {idx}/{total}] Pobrano fakture PL: {number}")
                 downloaded.append(out)
+            elif out:
+                # Apilo zwrocilo 200, ale to nie PDF (HTML/JSON bledu) — nie dolaczamy
+                bad = out.with_name(out.stem + "_INVALID.bin")
+                try:
+                    out.replace(bad)
+                except Exception:
+                    pass
+                log(f"[D {idx}/{total}] Faktura PL {number} — pobrany plik nie jest PDF (zachowano {bad.name})")
             else:
                 log(f"[D {idx}/{total}] Faktura PL {number} — brak pliku/media")
         if not downloaded:
@@ -333,13 +338,18 @@ class DocumentPipeline:
             amazon_eu = is_amazon and o.country_code.upper() not in NA_COUNTRIES
             # Plan = to, czego WYMAGAMY do kompletu. Wylaczony checkbox (capture_*)
             # oznacza, ze danego dowodu swiadomie nie zbieramy — nie moze byc brakiem.
+            # OWN dostarczone, ale BEZ linku trackingu (nierozpoznany kurier / brak
+            # numeru) -> traktujemy jak niedostarczone: dowod = Amazon + Apilo.
+            trackable = (not fba) and deliv and has_track_url
+            needs_fallback = (not fba) and not trackable
             plan[o.order_id] = {
-                "tracking": (not fba) and deliv and has_track_url,
-                "amazon": (fba or (not fba and not deliv)) and is_amazon
-                          and self.config.capture_amazon,
-                "apilo": (fba or (not fba and not deliv)) and self.config.capture_apilo_panel,
-                # faktury Amazon tylko z panelu EU (USA: faktury sa w Apilo)
+                "tracking": trackable,
+                "amazon": (fba or needs_fallback) and is_amazon and self.config.capture_amazon,
+                "apilo": (fba or needs_fallback) and self.config.capture_apilo_panel,
+                # faktury Amazon tylko z panelu EU (USA: faktury sa w Apilo);
+                # faza Amazon w ogole nie rusza bez capture_amazon
                 "amazon_invoice": (self.config.download_pl_invoices and amazon_eu
+                                   and self.config.capture_amazon
                                    and (fba or not apilo_has_pl.get(o.order_id, False))),
             }
 
@@ -381,33 +391,43 @@ class DocumentPipeline:
                         url = build_amazon_order_url(order.amazon_order_number, self.config,
                                                      country_code=order.country_code)
                         log(f"[Amazon {i}/{len(amazon_orders)}] {order.amazon_order_number} ({order.country_code})")
-                        if sess.login_blocked:
-                            log("Amazon: sesja wygasla i nie zalogowano — pozostale zamowienia "
-                                "bez dowodow z Amazona (beda w DO_KONTROLI). Kliknij 'Zaloguj do "
-                                "Amazon EU/USA', zaloguj sie i uruchom ponownie te zamowienia.")
-                            break
-                        # Blad JEDNEGO zamowienia nie moze zabic calej fazy
-                        try:
-                            if plan[order.order_id]["amazon"]:
-                                out = sess.capture(url, order_folders[order.order_id] / f"{order.order_number}_amazon.png",
-                                                   wait_ms=4000,
-                                                   wait_for_text=order.amazon_order_number,
-                                                   log_cb=log)
-                                if out:
-                                    amazon_shot_paths[order.order_id] = out
-                            if plan[order.order_id]["amazon_invoice"]:
-                                invs, has_pl = download_amazon_pl_invoices(
-                                    sess, url, order_folders[order.order_id],
-                                    order.amazon_order_number, log_cb=log)
-                                amazon_invoice_paths[order.order_id] = invs
-                                amazon_pl_found[order.order_id] = has_pl
-                        except Exception as exc:
-                            log(f"[Amazon {i}] blad: {str(exc)[:160]}")
-                            if self._browser_dead(exc):
-                                log("  Przegladarka Amazon padla/zostala zamknieta — otwieram ponownie...")
+                        # Wygasla sesja dotyczy KONKRETNEGO panelu (EU albo USA) —
+                        # pomijamy tylko zamowienia z zablokowanego hosta, reszta idzie dalej.
+                        if sess.is_host_blocked(url):
+                            log("  Amazon: sesja tego panelu wygasla i nie zalogowano — pomijam "
+                                "(zamowienie trafi do DO_KONTROLI; zaloguj sie i uruchom je ponownie).")
+                            continue
+                        # Blad JEDNEGO zamowienia nie moze zabic calej fazy;
+                        # padnieta przegladarka -> restart i jedna ponowna proba tego zamowienia.
+                        for attempt in (1, 2):
+                            try:
+                                if plan[order.order_id]["amazon"]:
+                                    out = sess.capture(url, order_folders[order.order_id] / f"{order.order_number}_amazon.png",
+                                                       wait_ms=4000,
+                                                       wait_for_text=order.amazon_order_number,
+                                                       log_cb=log)
+                                    if out:
+                                        amazon_shot_paths[order.order_id] = out
+                                if plan[order.order_id]["amazon_invoice"]:
+                                    invs, has_pl = download_amazon_pl_invoices(
+                                        sess, url, order_folders[order.order_id],
+                                        order.amazon_order_number, log_cb=log)
+                                    amazon_invoice_paths[order.order_id] = invs
+                                    amazon_pl_found[order.order_id] = has_pl
+                                break
+                            except BrowserDeadError as exc:
+                                log(f"  Przegladarka Amazon padla/zostala zamknieta ({str(exc)[:80]}) "
+                                    "— otwieram ponownie...")
                                 sess = self._restart_session(sess, "amazon", log)
-                                if sess is None:
+                                if sess is None or attempt == 2:
                                     break
+                            except Exception as exc:
+                                log(f"[Amazon {i}] blad: {str(exc)[:160]}")
+                                break
+                        if sess is None:
+                            log("Amazon: nie udalo sie wznowic przegladarki — pozostale zamowienia "
+                                "bez dowodow z Amazona (beda w DO_KONTROLI).")
+                            break
                 except Exception as exc:
                     log(f"Sesja Amazon nie powiodla sie: {exc}")
                 finally:
@@ -429,26 +449,34 @@ class DocumentPipeline:
                         url = build_apilo_order_url(order.order_id, self.config)
                         log(f"[Apilo {i}/{len(apilo_orders)}] {order.order_id}")
                         if sess.login_blocked:
-                            log("Apilo: sesja panelu wygasla i nie zalogowano — pozostale zamowienia "
-                                "bez screenshotu Apilo (beda w DO_KONTROLI). Kliknij 'Zaloguj do "
-                                "panelu Apilo' i uruchom ponownie te zamowienia.")
+                            log("Apilo: sesja wygasla i nie zalogowano — pozostale zamowienia "
+                                "bez dowodow z panelu Apilo (beda w DO_KONTROLI). Kliknij 'Zaloguj do "
+                                "panelu Apilo', zaloguj sie i uruchom ponownie te zamowienia.")
                             break
-                        try:
-                            out = sess.capture_cropped(
-                                url, order_folders[order.order_id] / f"{order.order_number}_apilo.png",
-                                bottom_text="Wiadomości i załączniki",
-                                top_text=order.order_id,
-                                wait_for_text=order.order_id,
-                                wait_ms=4000, log_cb=log)
-                            if out:
-                                apilo_shot_paths[order.order_id] = out
-                        except Exception as exc:
-                            log(f"[Apilo {i}] blad: {str(exc)[:160]}")
-                            if self._browser_dead(exc):
-                                log("  Przegladarka Apilo padla/zostala zamknieta — otwieram ponownie...")
+                        for attempt in (1, 2):
+                            try:
+                                out = sess.capture_cropped(
+                                    url, order_folders[order.order_id] / f"{order.order_number}_apilo.png",
+                                    bottom_text="Wiadomości i załączniki",
+                                    top_text=order.order_id,
+                                    wait_for_text=order.order_id,
+                                    wait_ms=4000, log_cb=log)
+                                if out:
+                                    apilo_shot_paths[order.order_id] = out
+                                break
+                            except BrowserDeadError as exc:
+                                log(f"  Przegladarka Apilo padla/zostala zamknieta ({str(exc)[:80]}) "
+                                    "— otwieram ponownie...")
                                 sess = self._restart_session(sess, "apilo", log)
-                                if sess is None:
+                                if sess is None or attempt == 2:
                                     break
+                            except Exception as exc:
+                                log(f"[Apilo {i}] blad: {str(exc)[:160]}")
+                                break
+                        if sess is None:
+                            log("Apilo: nie udalo sie wznowic przegladarki — pozostale zamowienia "
+                                "bez screenshotu panelu Apilo (beda w DO_KONTROLI).")
+                            break
                 except Exception as exc:
                     log(f"Sesja Apilo nie powiodla sie: {exc}")
                 finally:
@@ -503,6 +531,14 @@ class DocumentPipeline:
                 if fba_no_pl:
                     missing.append("FBA bez faktury PL w Amazon (Deemed supply z innym "
                                    "prefiksem, np. FR/IT/DE) — pomijane zgodnie z ustaleniem")
+                elif order.warehouse_type == "fba" and p["amazon_invoice"]:
+                    # FBA: faktura PL MUSI byc z Amazona i MUSI byc sprawdzona —
+                    # nieotwarty modal (None) nie moze uchodzic za komplet
+                    checked = amazon_pl_found.get(order.order_id)
+                    if checked is None:
+                        missing.append("nie udalo sie sprawdzic faktur w Amazon (modal 'Manage invoice')")
+                    elif checked and not amazon_invoice_paths.get(order.order_id):
+                        missing.append("faktura PL w Amazon jest, ale nie udalo sie jej pobrac")
 
                 cover = generate_order_pdf(
                     order=order,
@@ -510,11 +546,29 @@ class DocumentPipeline:
                     output_path=folder / "_cover.pdf",
                     company_name=self.config.pdf_company_name,
                 )
+                # Scalamy do pliku tymczasowego i SPRAWDZAMY, czy faktura faktycznie
+                # weszla (merge_pdfs przy uszkodzonym PDF cicho zostawia sama okladke).
+                n_cover = None
+                try:
+                    from pypdf import PdfReader
+                    n_cover = len(PdfReader(str(cover)).pages)
+                except Exception:
+                    pass
+                tmp_final = folder / "_final.pdf"
+                merged = merge_pdfs(cover, invoice_pdfs, tmp_final)
+                merged = Path(merged) if merged and Path(merged).exists() else tmp_final
+                if invoice_pdfs and n_cover is not None:
+                    try:
+                        if len(PdfReader(str(merged)).pages) <= n_cover:
+                            missing.append("faktura PL nieczytelna/uszkodzona — nie dolaczono jej do PDF")
+                    except Exception:
+                        missing.append("nie udalo sie zweryfikowac PDF z faktura")
+
                 safe = self._safe_filename(order.order_number)
                 if not missing:
-                    pdf = merge_pdfs(cover, invoice_pdfs, print_dir / f"{safe}.pdf")
+                    dest = print_dir / f"{safe}.pdf"
                 else:
-                    pdf = merge_pdfs(cover, invoice_pdfs, folder / f"{safe}_NIEKOMPLETNY.pdf")
+                    dest = folder / f"{safe}_NIEKOMPLETNY.pdf"
                     try:
                         (folder / "BRAKI.txt").write_text(
                             f"Zamowienie {order.order_number} — NIEKOMPLETNY zestaw dowodow:\n"
@@ -523,9 +577,17 @@ class DocumentPipeline:
                     except Exception:
                         pass
                 try:
-                    Path(folder / "_cover.pdf").unlink()
-                except Exception:
-                    pass
+                    if dest.exists():
+                        dest.unlink()
+                    merged.replace(dest)
+                except Exception as exc:
+                    raise RuntimeError(f"nie udalo sie zapisac {dest.name}: {exc}") from exc
+                pdf = dest
+                for leftover in (folder / "_cover.pdf", folder / "_final.pdf"):
+                    try:
+                        leftover.unlink()
+                    except Exception:
+                        pass
 
                 result.pdf_path = pdf
                 result.screenshot_path = shots[0] if shots else None
@@ -549,8 +611,52 @@ class DocumentPipeline:
             processed.append(result)
 
         ok_orders = [r.order for r in processed if r.status == "ok"]
-        own_orders = [o for o in ok_orders if o.warehouse_type != "fba"]
-        fba_orders = [o for o in ok_orders if o.warehouse_type == "fba"]
+
+        # Podsumowanie miesiaca jest KUMULATYWNE: powtorka dla kilku zamowien
+        # (numery z raportu brakow) nie moze nadpisac podsumowania calego miesiaca.
+        # Dane trzymamy w DO_WYDRUKU/_podsumowanie_dane.json (per numer zamowienia).
+        import json as _json
+        from dataclasses import asdict as _asdict
+        from datetime import datetime as _dtm
+        manifest_path = print_dir / "_podsumowanie_dane.json"
+        manifest: dict[str, dict] = {}
+        try:
+            if manifest_path.exists():
+                manifest = _json.loads(manifest_path.read_text(encoding="utf-8"))
+        except Exception:
+            manifest = {}
+        for o in filtered:  # przetworzone w tym runie — stare wpisy usuwamy
+            manifest.pop(o.order_number, None)
+        for o in ok_orders:
+            d = _asdict(o)
+            d["order_date"] = o.order_date.isoformat() if o.order_date else ""
+            manifest[o.order_number] = d
+        # wpisy bez pliku w DO_WYDRUKU (np. usuniete recznie) — precz
+        manifest = {k: v for k, v in manifest.items()
+                    if (print_dir / f"{self._safe_filename(k)}.pdf").exists()}
+        try:
+            manifest_path.write_text(_json.dumps(manifest, ensure_ascii=False, indent=1),
+                                     encoding="utf-8")
+        except Exception as exc:
+            log(f"Nie udalo sie zapisac danych podsumowania: {exc}")
+
+        def _rebuild(d: dict) -> OrderRecord:
+            d = dict(d)
+            od = d.get("order_date")
+            try:
+                d["order_date"] = _dtm.fromisoformat(od) if od else _dtm.min
+            except Exception:
+                d["order_date"] = _dtm.min
+            return OrderRecord(**d)
+
+        all_ok: list[OrderRecord] = []
+        for v in manifest.values():
+            try:
+                all_ok.append(_rebuild(v))
+            except Exception:
+                pass
+        own_orders = [o for o in all_ok if o.warehouse_type != "fba"]
+        fba_orders = [o for o in all_ok if o.warehouse_type == "fba"]
 
         summary_pdf = generate_summary_pdf(
             own_orders=own_orders,
@@ -558,7 +664,9 @@ class DocumentPipeline:
             output_path=print_dir / "podsumowanie.pdf",
             company_name=self.config.pdf_company_name,
         )
-        summary_xlsx = export_summary_xlsx(ok_orders, print_dir / "podsumowanie.xlsx")
+        summary_xlsx = export_summary_xlsx(all_ok, print_dir / "podsumowanie.xlsx")
+        log(f"Podsumowanie miesiaca: {len(all_ok)} zamowien w DO_WYDRUKU "
+            f"(w tym uruchomieniu kompletnych: {len(ok_orders)})")
 
         # Raport brakow: jedno spojrzenie na wszystko, co NIE poszlo do druku,
         # plus gotowa lista numerow do wklejenia w 'Numery Apilo' przy powtorce.
@@ -569,7 +677,7 @@ class DocumentPipeline:
         try:
             lines = [
                 f"RAPORT BRAKOW — uruchomienie {stamp}, zakres {date_from} - {date_to}",
-                f"Kompletne (DO_WYDRUKU): {len(ok_orders)}",
+                f"Kompletne w tym uruchomieniu: {len(ok_orders)}; lacznie w DO_WYDRUKU: {len(all_ok)}",
                 f"Niekompletne: {len([r for r in problems if r.status == 'niekompletne'])}",
                 f"Pominiete (FBA bez faktury PL): {len([r for r in problems if r.status == 'pominieto'])}",
                 f"Bledy: {len([r for r in problems if r.status == 'error'])}",

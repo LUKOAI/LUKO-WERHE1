@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Callable
 
 from app.config import AppConfig
+from app.browser_session import BrowserDeadError, is_browser_dead
 
 # Kraje obslugiwane przez Amazon Seller Central Ameryki Polnocnej (.com),
 # reszta (UK, EU, eksport CH/NO itd.) przez panel europejski.
@@ -622,6 +623,8 @@ def download_amazon_pl_invoices(sess, order_url: str, folder: Path,
 
         return downloaded, has_pl
     except Exception as exc:
+        if is_browser_dead(exc):
+            raise BrowserDeadError(str(exc)) from exc  # pipeline otworzy przegladarke ponownie
         log(f"  Amazon faktury: blad: {exc}")
         return downloaded, has_pl
     finally:

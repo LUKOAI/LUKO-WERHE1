@@ -263,7 +263,7 @@ class App(ctk.CTk):
             run_handler = None
             try:
                 # osobny plik logu na kazde uruchomienie (data i godzina w nazwie)
-                stamp = datetime.now().strftime("%Y-%m-%d_%H-%M")
+                stamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
                 run_handler, run_log_path = start_run_log(self.logger, Path("logs"), stamp)
                 self.logger.info(f"Log tego uruchomienia: {run_log_path.resolve()}")
 
