@@ -119,6 +119,9 @@ class CaptureSession:
         self.headless = headless
         self._pw = None
         self._context = None
+        # True gdy serwis zazadal logowania i nikt go nie przeszedl w 5 min —
+        # kolejne zamowienia nie czekaja juz po 5 min kazde, tylko sa pomijane.
+        self.login_blocked = False
 
     def __enter__(self) -> "CaptureSession":
         profile = _profile_dir(self.config, self.site)
@@ -136,9 +139,12 @@ class CaptureSession:
         return self._context.new_page()
 
     def wait_if_login(self, page, target_url: str,
-                      log: Callable[[str], None]) -> None:
-        """Publiczny dostep do obslugi ekranu logowania/2FA."""
-        self._wait_if_login(page, target_url, log)
+                      log: Callable[[str], None]) -> bool:
+        """Publiczny dostep do obslugi ekranu logowania/2FA.
+
+        True = strona uzyteczna (zalogowany), False = nadal ekran logowania.
+        """
+        return self._wait_if_login(page, target_url, log)
 
     def capture(self, url: str, output_path: Path, wait_ms: int = 5000,
                 clip_keyword: str | None = None,
@@ -157,8 +163,11 @@ class CaptureSession:
                 log_cb(m)
 
         output_path.parent.mkdir(parents=True, exist_ok=True)
-        page = self._context.new_page()
+        page = None
         try:
+            # new_page() W SRODKU try: jesli przegladarka padla/zostala zamknieta,
+            # blad ma zostac zwrocony jako None, a nie zabic cala faze w pipeline
+            page = self._context.new_page()
             try:
                 page.goto(url, wait_until="domcontentloaded", timeout=45000)
             except Exception:
@@ -166,7 +175,9 @@ class CaptureSession:
             page.wait_for_timeout(2000)
 
             # Wykrycie ekranu logowania / 2FA (kod autoryzacji)
-            self._wait_if_login(page, url, log)
+            if not self._wait_if_login(page, url, log):
+                log("Strona logowania — pomijam screenshot (wymagane ponowne zalogowanie).")
+                return None
 
             # Czekanie az tresc strony sie zaladuje (np. numer zamowienia)
             if wait_for_text:
@@ -201,11 +212,13 @@ class CaptureSession:
 
             page.screenshot(path=str(output_path), full_page=True)
             return output_path
-        except Exception:
+        except Exception as exc:
+            log(f"Screenshot nie powiodl sie: {str(exc)[:160]}")
             return None
         finally:
             try:
-                page.close()
+                if page is not None:
+                    page.close()
             except Exception:
                 pass
 
@@ -223,14 +236,17 @@ class CaptureSession:
                 log_cb(m)
 
         output_path.parent.mkdir(parents=True, exist_ok=True)
-        page = self._context.new_page()
+        page = None
         try:
+            page = self._context.new_page()
             try:
                 page.goto(url, wait_until="domcontentloaded", timeout=45000)
             except Exception:
                 page.goto(url, wait_until="commit", timeout=45000)
             page.wait_for_timeout(2000)
-            self._wait_if_login(page, url, log)
+            if not self._wait_if_login(page, url, log):
+                log("Apilo: strona logowania — pomijam screenshot (wymagane ponowne zalogowanie).")
+                return None
 
             if wait_for_text:
                 try:
@@ -288,11 +304,13 @@ class CaptureSession:
                 except Exception:
                     pass
                 return output_path if output_path.exists() else None
-        except Exception:
+        except Exception as exc:
+            log(f"Apilo: screenshot nie powiodl sie: {str(exc)[:160]}")
             return None
         finally:
             try:
-                page.close()
+                if page is not None:
+                    page.close()
             except Exception:
                 pass
 
@@ -300,8 +318,13 @@ class CaptureSession:
     _LOGIN_MARKERS = ("signin", "/ap/", "mfa", "two-step", "transition", "/login", "cvf")
 
     def _wait_if_login(self, page, target_url: str,
-                       log: Callable[[str], None]) -> None:
-        """Jesli strona to logowanie/2FA — czeka az uzytkownik je przejdzie (do 5 min)."""
+                       log: Callable[[str], None]) -> bool:
+        """Jesli strona to logowanie/2FA — czeka az uzytkownik je przejdzie (do 5 min).
+
+        Zwraca True gdy strona jest uzyteczna (zalogowany), False gdy nadal
+        jest to ekran logowania. Po jednym nieudanym oczekiwaniu ustawia
+        login_blocked — kolejne zamowienia nie czekaja juz po 5 min kazde.
+        """
         def looks_like_login() -> bool:
             try:
                 u = (page.url or "").lower()
@@ -310,7 +333,11 @@ class CaptureSession:
             return any(m in u for m in self._LOGIN_MARKERS)
 
         if not looks_like_login():
-            return
+            return True
+
+        if self.login_blocked:
+            log("Sesja wymaga zalogowania (nie przeszlo w 5 min) — pomijam.")
+            return False
 
         log("UWAGA: serwis prosi o logowanie/kod 2FA. Wpisz dane w OTWARTYM oknie przegladarki...")
         # Czekamy do 5 minut (150 x 2s) az uzytkownik przejdzie logowanie
@@ -325,8 +352,11 @@ class CaptureSession:
                         page.wait_for_timeout(3000)
                 except Exception:
                     pass
-                return
-        log("Limit czasu logowania (5 min) — pomijam to zamowienie.")
+                return True
+        self.login_blocked = True
+        log("Limit czasu logowania (5 min) minal — sesja wygasla. Kliknij 'Zaloguj do ...'"
+            " w programie, zaloguj sie i uruchom ponownie brakujace zamowienia.")
+        return False
 
     def __exit__(self, *exc) -> None:
         try:

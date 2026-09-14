@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import threading
 import tkinter.messagebox as mbox
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 
 import customtkinter as ctk
@@ -11,7 +11,7 @@ from tkcalendar import DateEntry
 from app.apilo_auth import authenticate, ApiloAuthError
 from app.browser_session import open_login, has_session
 from app.config import AppConfig, ConfigError, bootstrap_config, load_config, save_config, safe_config_preview
-from app.logging_setup import setup_logging
+from app.logging_setup import setup_logging, start_run_log, stop_run_log
 from app.pipeline import DocumentPipeline
 
 
@@ -260,7 +260,13 @@ class App(ctk.CTk):
         selected_amazon_numbers = self._parse_csv_values(self.amazon_orders_entry.get())
 
         def runner() -> None:
+            run_handler = None
             try:
+                # osobny plik logu na kazde uruchomienie (data i godzina w nazwie)
+                stamp = datetime.now().strftime("%Y-%m-%d_%H-%M")
+                run_handler, run_log_path = start_run_log(self.logger, Path("logs"), stamp)
+                self.logger.info(f"Log tego uruchomienia: {run_log_path.resolve()}")
+
                 pipeline = DocumentPipeline(self.config_obj, self.logger)
 
                 def on_progress(current: int, total: int) -> None:
@@ -278,16 +284,21 @@ class App(ctk.CTk):
                     progress_cb=on_progress,
                     log_cb=self._append_log,
                 )
-                ok_count = len([r for r in out.processed if r.status == "ok"])
-                err_count = len([r for r in out.processed if r.status == "error"])
-                self._append_log(
-                    f"Gotowe. OK: {ok_count}, bledy: {err_count}. Katalog: {out.output_dir}"
+                counts = {s: len([r for r in out.processed if r.status == s])
+                          for s in ("ok", "niekompletne", "pominieto", "error")}
+                summary = (
+                    f"Gotowe. Kompletne (DO_WYDRUKU): {counts['ok']}, "
+                    f"niekompletne (DO_KONTROLI): {counts['niekompletne']}, "
+                    f"pominiete: {counts['pominieto']}, bledy: {counts['error']}. "
+                    f"Katalog: {out.output_dir}"
                 )
-                mbox.showinfo("Zakonczone", f"Wyniki zapisane w: {out.output_dir}")
+                self.logger.info(summary)
+                mbox.showinfo("Zakonczone", summary + f"\n\nLog: {run_log_path}")
             except Exception as exc:
-                self._append_log(f"Blad krytyczny: {exc}")
+                self.logger.exception(f"Blad krytyczny: {exc}")
                 mbox.showerror("Blad krytyczny", str(exc))
             finally:
+                stop_run_log(self.logger, run_handler)
                 self._set_running(False)
 
         threading.Thread(target=runner, daemon=True).start()

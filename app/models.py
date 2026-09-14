@@ -38,5 +38,6 @@ class ProcessingResult:
     order: OrderRecord
     screenshot_path: Optional[Path] = None
     pdf_path: Optional[Path] = None
-    status: str = "pending"
+    status: str = "pending"  # ok | niekompletne | pominieto | error
     message: str = ""
+    missing: list[str] = field(default_factory=list)  # czego brakuje w komplecie dowodow

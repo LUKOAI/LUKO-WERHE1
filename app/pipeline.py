@@ -85,6 +85,30 @@ class DocumentPipeline:
             name = name.replace(ch, "_")
         return name.strip() or "faktura"
 
+    @staticmethod
+    def _browser_dead(exc: Exception) -> bool:
+        """Czy wyjatek oznacza, ze przegladarka padla / zostala zamknieta."""
+        msg = str(exc).lower()
+        return any(k in msg for k in (
+            "has been closed", "browser has been closed", "target closed",
+            "connection closed", "disconnected", "not open", "closed",
+        ))
+
+    def _restart_session(self, old, site: str, log):
+        """Zamyka padnieta sesje i otwiera nowa. Zwraca nowa sesje lub None."""
+        try:
+            old.__exit__(None, None, None)
+        except Exception:
+            pass
+        try:
+            new = CaptureSession(site, self.config, headless=False)
+            new.__enter__()
+            log(f"  Przegladarka ({site}) otwarta ponownie — kontynuuje.")
+            return new
+        except Exception as exc:
+            log(f"  Nie udalo sie ponownie otworzyc przegladarki ({site}): {str(exc)[:120]}")
+            return None
+
     def _download_pl_invoice(self, order: OrderRecord, folder: Path,
                              idx: int, total: int, log) -> Path | None:
         """Pobiera fakture(y) z prefiksem PL. Zwraca sciezke do (polaczonego) PDF faktur."""
@@ -307,10 +331,13 @@ class DocumentPipeline:
             # eBay/inne platformy tez maja idExternal — nie wolno ich slac do Amazona.
             is_amazon = is_amazon_order_number(o.amazon_order_number)
             amazon_eu = is_amazon and o.country_code.upper() not in NA_COUNTRIES
+            # Plan = to, czego WYMAGAMY do kompletu. Wylaczony checkbox (capture_*)
+            # oznacza, ze danego dowodu swiadomie nie zbieramy — nie moze byc brakiem.
             plan[o.order_id] = {
                 "tracking": (not fba) and deliv and has_track_url,
-                "amazon": (fba or (not fba and not deliv)) and is_amazon,
-                "apilo": fba or (not fba and not deliv),
+                "amazon": (fba or (not fba and not deliv)) and is_amazon
+                          and self.config.capture_amazon,
+                "apilo": (fba or (not fba and not deliv)) and self.config.capture_apilo_panel,
                 # faktury Amazon tylko z panelu EU (USA: faktury sa w Apilo)
                 "amazon_invoice": (self.config.download_pl_invoices and amazon_eu
                                    and (fba or not apilo_has_pl.get(o.order_id, False))),
@@ -344,14 +371,23 @@ class DocumentPipeline:
         if self.config.capture_amazon and amazon_orders:
             if has_session(self.config, "amazon"):
                 log(f"Amazon (screenshoty/faktury): {len(amazon_orders)} zamowien...")
+                sess = None
                 try:
-                    with CaptureSession("amazon", self.config, headless=False) as sess:
-                        for i, order in enumerate(amazon_orders, 1):
-                            if i > 1:
-                                time.sleep(2)  # lagodniejsze tempo — Amazon degraduje przy salwach
-                            url = build_amazon_order_url(order.amazon_order_number, self.config,
-                                                         country_code=order.country_code)
-                            log(f"[Amazon {i}/{len(amazon_orders)}] {order.amazon_order_number} ({order.country_code})")
+                    sess = CaptureSession("amazon", self.config, headless=False)
+                    sess.__enter__()
+                    for i, order in enumerate(amazon_orders, 1):
+                        if i > 1:
+                            time.sleep(2)  # lagodniejsze tempo — Amazon degraduje przy salwach
+                        url = build_amazon_order_url(order.amazon_order_number, self.config,
+                                                     country_code=order.country_code)
+                        log(f"[Amazon {i}/{len(amazon_orders)}] {order.amazon_order_number} ({order.country_code})")
+                        if sess.login_blocked:
+                            log("Amazon: sesja wygasla i nie zalogowano — pozostale zamowienia "
+                                "bez dowodow z Amazona (beda w DO_KONTROLI). Kliknij 'Zaloguj do "
+                                "Amazon EU/USA', zaloguj sie i uruchom ponownie te zamowienia.")
+                            break
+                        # Blad JEDNEGO zamowienia nie moze zabic calej fazy
+                        try:
                             if plan[order.order_id]["amazon"]:
                                 out = sess.capture(url, order_folders[order.order_id] / f"{order.order_number}_amazon.png",
                                                    wait_ms=4000,
@@ -365,8 +401,18 @@ class DocumentPipeline:
                                     order.amazon_order_number, log_cb=log)
                                 amazon_invoice_paths[order.order_id] = invs
                                 amazon_pl_found[order.order_id] = has_pl
+                        except Exception as exc:
+                            log(f"[Amazon {i}] blad: {str(exc)[:160]}")
+                            if self._browser_dead(exc):
+                                log("  Przegladarka Amazon padla/zostala zamknieta — otwieram ponownie...")
+                                sess = self._restart_session(sess, "amazon", log)
+                                if sess is None:
+                                    break
                 except Exception as exc:
                     log(f"Sesja Amazon nie powiodla sie: {exc}")
+                finally:
+                    if sess is not None:
+                        sess.__exit__(None, None, None)
             else:
                 log("UWAGA: brak sesji Amazon — kliknij 'Zaloguj do Amazon'.")
 
@@ -375,11 +421,19 @@ class DocumentPipeline:
         if self.config.capture_apilo_panel and apilo_orders:
             if self.config.apilo_panel_url and has_session(self.config, "apilo"):
                 log(f"Screenshoty panelu Apilo: {len(apilo_orders)} zamowien...")
+                sess = None
                 try:
-                    with CaptureSession("apilo", self.config, headless=False) as sess:
-                        for i, order in enumerate(apilo_orders, 1):
-                            url = build_apilo_order_url(order.order_id, self.config)
-                            log(f"[Apilo {i}/{len(apilo_orders)}] {order.order_id}")
+                    sess = CaptureSession("apilo", self.config, headless=False)
+                    sess.__enter__()
+                    for i, order in enumerate(apilo_orders, 1):
+                        url = build_apilo_order_url(order.order_id, self.config)
+                        log(f"[Apilo {i}/{len(apilo_orders)}] {order.order_id}")
+                        if sess.login_blocked:
+                            log("Apilo: sesja panelu wygasla i nie zalogowano — pozostale zamowienia "
+                                "bez screenshotu Apilo (beda w DO_KONTROLI). Kliknij 'Zaloguj do "
+                                "panelu Apilo' i uruchom ponownie te zamowienia.")
+                            break
+                        try:
                             out = sess.capture_cropped(
                                 url, order_folders[order.order_id] / f"{order.order_number}_apilo.png",
                                 bottom_text="Wiadomości i załączniki",
@@ -388,8 +442,18 @@ class DocumentPipeline:
                                 wait_ms=4000, log_cb=log)
                             if out:
                                 apilo_shot_paths[order.order_id] = out
+                        except Exception as exc:
+                            log(f"[Apilo {i}] blad: {str(exc)[:160]}")
+                            if self._browser_dead(exc):
+                                log("  Przegladarka Apilo padla/zostala zamknieta — otwieram ponownie...")
+                                sess = self._restart_session(sess, "apilo", log)
+                                if sess is None:
+                                    break
                 except Exception as exc:
                     log(f"Sesja Apilo nie powiodla sie: {exc}")
+                finally:
+                    if sess is not None:
+                        sess.__exit__(None, None, None)
             else:
                 log("UWAGA: brak sesji/URL panelu Apilo — pomijam screenshoty panelu.")
 
@@ -403,14 +467,9 @@ class DocumentPipeline:
             try:
                 # Filtr FBA: zamowienie kwalifikuje sie tylko z faktura PL w Amazon.
                 # Pomijamy TYLKO przy definitywnym False (modal otwarty, PL brak).
-                # None = nie udalo sie sprawdzic -> NIE pomijamy.
-                if (order.warehouse_type == "fba"
-                        and amazon_pl_found.get(order.order_id) is False):
-                    result.status = "pominieto"
-                    result.message = "Brak faktury PL w Amazon (Deemed supply)"
-                    log(f"[D {idx}/{total}] POMINIETO {order.order_number}: brak faktury PL w Amazon")
-                    processed.append(result)
-                    continue
+                # None = nie udalo sie sprawdzic -> NIE pomijamy (trafi do niekompletnych).
+                fba_no_pl = (order.warehouse_type == "fba"
+                             and amazon_pl_found.get(order.order_id) is False)
 
                 # Lista screenshotow (kolejnosc: Amazon, Apilo, tracking)
                 shots: list[Path] = []
@@ -429,14 +488,40 @@ class DocumentPipeline:
                         invoice_pdfs.append(apilo_inv)
                 invoice_pdfs.extend(amazon_invoice_paths.get(order.order_id, []))
 
+                # KOMPLET DOWODOW wg planu — tylko komplet trafia do DO_WYDRUKU.
+                # Wszystko z brakami laduje w DO_KONTROLI/{nr}/ z plikiem BRAKI.txt.
+                p = plan[order.order_id]
+                missing: list[str] = []
+                if p["tracking"] and order.order_id not in tracking_shot_paths:
+                    missing.append("brak screenshota trackingu kuriera")
+                if p["amazon"] and order.order_id not in amazon_shot_paths:
+                    missing.append("brak screenshota zamowienia w Amazon")
+                if p["apilo"] and order.order_id not in apilo_shot_paths:
+                    missing.append("brak screenshota panelu Apilo")
+                if self.config.download_pl_invoices and not invoice_pdfs:
+                    missing.append("brak faktury PL (ani z Apilo, ani z Amazon)")
+                if fba_no_pl:
+                    missing.append("FBA bez faktury PL w Amazon (Deemed supply z innym "
+                                   "prefiksem, np. FR/IT/DE) — pomijane zgodnie z ustaleniem")
+
                 cover = generate_order_pdf(
                     order=order,
                     screenshots=shots,
                     output_path=folder / "_cover.pdf",
                     company_name=self.config.pdf_company_name,
                 )
-                final_name = f"{self._safe_filename(order.order_number)}.pdf"
-                pdf = merge_pdfs(cover, invoice_pdfs, print_dir / final_name)
+                safe = self._safe_filename(order.order_number)
+                if not missing:
+                    pdf = merge_pdfs(cover, invoice_pdfs, print_dir / f"{safe}.pdf")
+                else:
+                    pdf = merge_pdfs(cover, invoice_pdfs, folder / f"{safe}_NIEKOMPLETNY.pdf")
+                    try:
+                        (folder / "BRAKI.txt").write_text(
+                            f"Zamowienie {order.order_number} — NIEKOMPLETNY zestaw dowodow:\n"
+                            + "".join(f"  - {m}\n" for m in missing),
+                            encoding="utf-8")
+                    except Exception:
+                        pass
                 try:
                     Path(folder / "_cover.pdf").unlink()
                 except Exception:
@@ -444,9 +529,19 @@ class DocumentPipeline:
 
                 result.pdf_path = pdf
                 result.screenshot_path = shots[0] if shots else None
-                result.status = "ok"
-                result.message = "OK"
-                log(f"[D {idx}/{total}] OK {order.order_number}")
+                result.missing = missing
+                if fba_no_pl:
+                    result.status = "pominieto"
+                    result.message = "Brak faktury PL w Amazon (Deemed supply)"
+                    log(f"[D {idx}/{total}] POMINIETO {order.order_number}: brak faktury PL w Amazon")
+                elif missing:
+                    result.status = "niekompletne"
+                    result.message = "; ".join(missing)
+                    log(f"[D {idx}/{total}] NIEKOMPLETNE {order.order_number}: {result.message}")
+                else:
+                    result.status = "ok"
+                    result.message = "OK"
+                    log(f"[D {idx}/{total}] OK {order.order_number}")
             except Exception as exc:
                 result.status = "error"
                 result.message = str(exc)
@@ -464,6 +559,34 @@ class DocumentPipeline:
             company_name=self.config.pdf_company_name,
         )
         summary_xlsx = export_summary_xlsx(ok_orders, print_dir / "podsumowanie.xlsx")
+
+        # Raport brakow: jedno spojrzenie na wszystko, co NIE poszlo do druku,
+        # plus gotowa lista numerow do wklejenia w 'Numery Apilo' przy powtorce.
+        from datetime import datetime as _dt
+        problems = [r for r in processed if r.status in ("niekompletne", "pominieto", "error")]
+        stamp = _dt.now().strftime("%Y-%m-%d_%H-%M")
+        report = kontrola_dir / f"_RAPORT_BRAKOW_{stamp}.txt"
+        try:
+            lines = [
+                f"RAPORT BRAKOW — uruchomienie {stamp}, zakres {date_from} - {date_to}",
+                f"Kompletne (DO_WYDRUKU): {len(ok_orders)}",
+                f"Niekompletne: {len([r for r in problems if r.status == 'niekompletne'])}",
+                f"Pominiete (FBA bez faktury PL): {len([r for r in problems if r.status == 'pominieto'])}",
+                f"Bledy: {len([r for r in problems if r.status == 'error'])}",
+                "",
+            ]
+            for r in problems:
+                lines.append(f"[{r.status.upper()}] {r.order.order_number}"
+                             f"  (Amazon: {r.order.amazon_order_number or '-'}, {r.order.country_code})")
+                for m in (r.missing or [r.message]):
+                    lines.append(f"    - {m}")
+            retry = [r.order.order_number for r in problems if r.status in ("niekompletne", "error")]
+            if retry:
+                lines += ["", "Do powtorki (wklej w pole 'Numery Apilo'):", ", ".join(retry)]
+            report.write_text("\n".join(lines) + "\n", encoding="utf-8")
+            log(f"Raport brakow: {report}")
+        except Exception as exc:
+            log(f"Nie udalo sie zapisac raportu brakow: {exc}")
 
         log(f"Zakończono. Wyniki: {output_dir}")
         return PipelineOutput(

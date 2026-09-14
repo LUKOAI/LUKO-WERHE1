@@ -496,14 +496,18 @@ def download_amazon_pl_invoices(sess, order_url: str, folder: Path,
 
     downloaded: list[Path] = []
     has_pl: bool | None = None
-    page = sess.new_page()
+    page = None
     try:
+        # new_page() w srodku try — padnieta przegladarka nie moze zabic calej fazy
+        page = sess.new_page()
         try:
             page.goto(order_url, wait_until="domcontentloaded", timeout=45000)
         except Exception:
             page.goto(order_url, wait_until="commit", timeout=45000)
         page.wait_for_timeout(5000)
-        sess.wait_if_login(page, order_url, log)
+        if not sess.wait_if_login(page, order_url, log):
+            log("  Amazon: strona logowania — nie sprawdzono faktur (wymagane ponowne zalogowanie).")
+            return [], None
 
         # czekaj na zaladowanie strony zamowienia (SPA — dlugie ladowanie)
         try:

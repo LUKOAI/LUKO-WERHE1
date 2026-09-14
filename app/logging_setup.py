@@ -38,3 +38,27 @@ def setup_logging(log_file: Path, gui_callback: Callable[[str], None] | None = N
         logger.addHandler(gh)
 
     return logger
+
+
+def start_run_log(logger: logging.Logger, logs_dir: Path, stamp: str) -> tuple[logging.Handler, Path]:
+    """Osobny plik logu dla jednego uruchomienia: logs/run_{stamp}.log.
+
+    app.log zbiera wszystko od zawsze; plik per run jest latwy do wyslania
+    przy zglaszaniu problemu ('ktore uruchomienie?' -> data i godzina w nazwie).
+    """
+    logs_dir.mkdir(parents=True, exist_ok=True)
+    path = logs_dir / f"run_{stamp}.log"
+    fh = logging.FileHandler(path, encoding="utf-8")
+    fh.setFormatter(logging.Formatter("%(asctime)s | %(levelname)s | %(message)s"))
+    logger.addHandler(fh)
+    return fh, path
+
+
+def stop_run_log(logger: logging.Logger, handler: logging.Handler | None) -> None:
+    if handler is None:
+        return
+    try:
+        logger.removeHandler(handler)
+        handler.close()
+    except Exception:
+        pass

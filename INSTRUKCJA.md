@@ -123,22 +123,34 @@ do Apilo — limit API 150/min — oraz robi przerwy między stronami Amazona).
 
 ```
 WERHE_PDFy\PDFy_2026_07\
-├── DO_WYDRUKU\          ← TO DRUKUJESZ
+├── DO_WYDRUKU\          ← TO DRUKUJESZ — tylko KOMPLETNE zestawy
 │   ├── WA260605861.pdf      (jeden plik = jedno zamówienie:
-│   ├── WB260604227.pdf       zrzuty ekranu + wszystkie faktury)
+│   ├── WB260604227.pdf       wszystkie wymagane zrzuty + faktura)
 │   ├── ...
 │   ├── podsumowanie.pdf
 │   └── podsumowanie.xlsx
-└── DO_KONTROLI\         ← materiały robocze, NIE drukować
-    ├── WA260605861\         (pojedyncze zrzuty, pojedyncze faktury)
-    ├── WA260604959\         (materiały zamówień POMINIĘTYCH,
-    │                         pliki _DEBUG_*.png i *_INVALID.bin)
+└── DO_KONTROLI\         ← wszystko, co NIE jest kompletne (do sprawdzenia)
+    ├── _RAPORT_BRAKOW_2026-08-14_08-29.txt   (lista braków + numery do powtórki)
+    ├── WA260604959\
+    │   ├── WA260604959_NIEKOMPLETNY.pdf      (to, co udało się zebrać)
+    │   ├── BRAKI.txt                          (czego brakuje i dlaczego)
+    │   └── ...zrzuty, faktury, _DEBUG_*.png
+    ├── WA260605861\         (materiały robocze zamówień kompletnych —
+    │                         pojedyncze zrzuty i faktury, bez pliku finalnego)
     └── ...
 ```
 
-- **DO_WYDRUKU** — komplet dla urzędu: zaznacz wszystkie pliki → drukuj.
-- **DO_KONTROLI** — surowe materiały każdego zamówienia (także pominiętych) —
-  do sprawdzenia w razie wątpliwości. Można archiwizować, nie kasować.
+Zasada: zamówienie ma **komplet** (wszystkie wymagane zrzuty **i** fakturę PL)
+→ gotowy PDF ląduje w `DO_WYDRUKU`. Czegokolwiek brakuje → PDF
+`_NIEKOMPLETNY.pdf` + `BRAKI.txt` w `DO_KONTROLI\{numer}\`.
+
+- **DO_WYDRUKU** — zaznacz wszystkie pliki → drukuj. Nic więcej nie trzeba sprawdzać.
+- **DO_KONTROLI** — otwórz `_RAPORT_BRAKOW_*.txt`: jest tam lista wszystkich
+  zamówień z brakami i powód. Na końcu raportu jest gotowa linia z numerami do
+  wklejenia w pole „Numery Apilo" — po naprawieniu przyczyny (np. ponowne
+  logowanie do Amazona) uruchom program tylko dla nich.
+- Zamówienia **POMINIĘTE** (FBA z fakturą FR/IT/DE zamiast PL) też są w
+  `DO_KONTROLI` ze swoimi zrzutami — to celowe, zgodnie z ustaleniem.
 
 ### 2.3. Ręczny wybór zamówień (opcjonalnie)
 
@@ -164,12 +176,18 @@ zamówienia z zakresu dat.
 
 | Komunikat | Znaczenie / co robić |
 |---|---|
+| `Log tego uruchomienia: ...logs\run_2026-09-14_14-05.log` | tu jest pełny log tego runa — ten plik wysyłasz przy problemie |
 | `Limit zapytan Apilo: 130/min` | OK — ochrona przed limitem API |
 | `Rate limit (429) — czekam ...` | OK — program sam czeka i ponawia |
-| `UWAGA: serwis prosi o logowanie/kod 2FA` | wpisz dane w otwartym oknie |
+| `UWAGA: serwis prosi o logowanie/kod 2FA` | wpisz dane w otwartym oknie (masz 5 min) |
+| `sesja wygasla i nie zalogowano — pozostale zamowienia bez dowodow` | nikt nie zalogował się w 5 min; te zamówienia trafią do DO_KONTROLI — zaloguj się przyciskiem w programie i uruchom je ponownie z raportu |
+| `Przegladarka ... padla/zostala zamknieta — otwieram ponownie` | OK — program sam wznawia (nie zamykaj okien przeglądarki!) |
 | `pobrano fakture ... (78 KB)` | OK — faktura ściągnięta |
-| `POMINIETO ... brak faktury PL` | celowe — FBA bez polskiej faktury |
-| `[diag ...]` | szczegóły techniczne — przy zgłaszaniu problemu wyślij je |
+| `[D ...] OK` | komplet → DO_WYDRUKU |
+| `[D ...] NIEKOMPLETNE ...: brak ...` | czegoś brakuje → DO_KONTROLI (powód w komunikacie i w BRAKI.txt) |
+| `[D ...] POMINIETO ... brak faktury PL` | celowe — FBA z fakturą FR/IT/DE zamiast PL → DO_KONTROLI |
+| `Raport brakow: ...` | ścieżka do `_RAPORT_BRAKOW_*.txt` |
+| `[diag ...]` | szczegóły techniczne — przy zgłaszaniu problemu wyślij log |
 | `BLAD ...` | zamówienie się nie udało — patrz 2.6 |
 
 ### 2.6. Typowe problemy
@@ -178,24 +196,51 @@ zamówienia z zakresu dat.
 wygeneruj nowy Kod autoryzacji w Apilo → wklej do `config.json` →
 „Połącz z Apilo".
 
-**Zrzuty/faktury Amazon się nie robią** — sesja wygasła: kliknij
-„Zaloguj do Amazon EU" (lub USA), zaloguj się, uruchom ponownie.
+**Dużo zamówień w DO_KONTROLI z „brak screenshota zamowienia w Amazon"
+albo „brak screenshota panelu Apilo"** — najczęściej wygasła sesja
+(Amazon/Apilo wylogowują co kilka tygodni), a nikt nie wpisał kodu 2FA w
+5 minut. W logu będzie linia „sesja wygasla i nie zalogowano". Rozwiązanie:
+kliknij „Zaloguj do Amazon EU" (i/lub USA, panel Apilo), zaloguj się,
+a potem uruchom program tylko dla zamówień z raportu (numery są na końcu
+`_RAPORT_BRAKOW_*.txt` — wklej je w „Numery Apilo").
 
-**Program bardzo wolny** — to normalne (limity Apilo i Amazona). Nie przerywaj.
+**Rada:** przed pełnym miesięcznym runem uruchom program na 1–2 zamówieniach —
+jeśli poprosi o logowanie, zrobisz to od razu, zamiast po 2 godzinach
+odkryć, że wszystko wylądowało w DO_KONTROLI.
 
-**Pojedyncze BLAD-y w długim runie** — uruchom ponownie z numerami tych
-zamówień wpisanymi w „Numery Apilo" (patrz 2.3). Program czyści stare pliki
-i robi je od nowa; nowy PDF nadpisze stary w DO_WYDRUKU.
+**Program bardzo wolny** — to normalne (limity Apilo i Amazona). Nie przerywaj
+i nie zamykaj okien przeglądarki, które program sam otwiera.
 
-**Coś innego** — zbierz: (1) pełny log z okna programu lub pliki logów,
-(2) pliki `_DEBUG_*.png` z folderu DO_KONTROLI danego zamówienia,
-(3) zrzut ekranu problemu — i wyślij do wsparcia.
+**Pojedyncze BLAD-y / NIEKOMPLETNE w długim runie** — uruchom ponownie z
+numerami tych zamówień wpisanymi w „Numery Apilo" (patrz 2.3 — gotowa linia
+jest w raporcie braków). Program czyści stare pliki tego zamówienia i robi je
+od nowa; kompletny PDF trafi do DO_WYDRUKU.
+
+**Gdzie są logi?** W folderze programu, podfolder `logs\`:
+- `run_2026-09-14_14-05.log` — osobny plik na każde uruchomienie (data_godzina
+  w nazwie) — **ten wysyłasz przy zgłoszeniu**,
+- `app.log` — wszystko od początku, w jednym pliku.
+
+**Coś innego** — zbierz: (1) plik `logs\run_...log` z tego uruchomienia,
+(2) `_RAPORT_BRAKOW_*.txt` i pliki `_DEBUG_*.png` z folderu DO_KONTROLI danego
+zamówienia, (3) zrzut ekranu problemu — i wyślij do wsparcia.
 
 ### 2.7. Aktualizacja programu
 
 Gdy dostaniesz informację o nowej wersji, w PowerShell (najpierw `cd` jak
-zawsze — patrz 1.2) wklej komendę aktualizacji, którą otrzymasz. Konfiguracja
-(`config.json`) i logowania (`browser_profiles`) zostają nietknięte.
+zawsze — patrz 1.2) wklej:
+
+```powershell
+.\.venv\Scripts\python.exe update.py
+```
+
+Skrypt pobiera **wszystkie** pliki programu z najnowszej wersji i wypisuje,
+co się zmieniło. Konfiguracja (`config.json`), logowania (`browser_profiles`),
+logi i wyniki zostają nietknięte. Po aktualizacji uruchom program ponownie.
+
+(Jeśli w folderze nie ma jeszcze pliku `update.py` — jednorazowo:
+`.\.venv\Scripts\python.exe -c "import urllib.request as u; u.urlretrieve('https://raw.githubusercontent.com/LUKOAI/LUKO-WERHE1/claude/desktop-automation-tool-PhjMR/update.py','update.py')"`
+i dopiero potem komenda powyżej.)
 
 ---
 
